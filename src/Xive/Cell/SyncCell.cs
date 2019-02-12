@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -15,18 +14,18 @@ namespace Xive.Cell
     public sealed class SyncCell : ICell
     {
         private readonly IScalar<Mutex> mtx;
-        private readonly string path;
+        private readonly string name;
         private readonly IScalar<ICell> cell;
 
         /// <summary>
         /// A cell that is system-wide exclusive for one access at a time.
         /// </summary>
-        public SyncCell(string path, Func<string, ICell> origin)
+        public SyncCell(string name, Func<string, ICell> origin)
         {
             lock (this) //make creation of mutex solid. Otherwise odd behaviour occures because creation can be left unfinished and mutex abandoned.
             {
-                this.cell = new StickyScalar<ICell>(() => origin(this.path));
-                this.path = path;
+                this.cell = new StickyScalar<ICell>(() => origin(this.name));
+                this.name = name;
                 this.mtx =
                     new SolidScalar<Mutex>(() =>
                         new Mutex(
@@ -37,7 +36,7 @@ namespace Xive.Cell
                                 new Md5DigestOf(
                                     new InputOf(
                                         new BytesOf(
-                                            new InputOf(this.path)
+                                            new InputOf(this.name)
                                         )
                                     )
                                 )
@@ -45,7 +44,6 @@ namespace Xive.Cell
                         ).AsString().Replace("/", "_").Replace("\\", "_")
                     )
                 );
-
             }
         }
 
@@ -73,15 +71,15 @@ namespace Xive.Cell
             }
             catch (AbandonedMutexException ex)
             {
-                throw new ApplicationException($"Cannot get exclusive access to {this.path}: {ex.Message}", ex);
+                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
             }
             catch (ObjectDisposedException ox)
             {
-                throw new ApplicationException($"Cannot get exclusive access to {this.path}: {ox.Message}", ox);
+                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
             }
             catch (InvalidOperationException ix)
             {
-                throw new ApplicationException($"Cannot get exclusive access to {this.path}: {ix.Message}", ix);
+                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
             }
             finally
             {
