@@ -9,17 +9,17 @@ namespace Xive.Comb
     /// <summary>
     /// A comb that is cached in memory.
     /// </summary>
-    public sealed class CachedComb : IComb
+    public sealed class CachedComb : IHoneyComb
     {
         private readonly IDictionary<string, byte[]> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
         private readonly string name;
-        private readonly IComb comb;
+        private readonly IHoneyComb comb;
 
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(string name, IComb comb, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory)
+        public CachedComb(string name, IHoneyComb comb, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory)
         {
             this.name = name;
             this.comb = comb;
