@@ -1,33 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
-using Xive;
-using Xive.Cell;
-using Xive.Comb;
 
 namespace Xive.Comb.Test
 {
     public class SyncCombTests
     {
         [Fact]
-        public void DeliversNameInParallel()
-        {
-            var comb = new SyncComb(new RamComb("my-comb"));
-            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
-            {
-                comb.Name();
-            });
-        }
-
-        [Fact]
         public void WorksInParallel()
         {
-            var comb = new SyncComb(new RamComb("my-comb"));
+            var comb = 
+                new SyncComb(
+                    new RamComb("my-comb")
+                );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 comb.Cell("syncCell").Content();

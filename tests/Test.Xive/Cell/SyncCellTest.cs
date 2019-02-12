@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
-using Xive.Cell;
 
 namespace Xive.Cell.Test
 {
@@ -13,18 +13,22 @@ namespace Xive.Cell.Test
         public void WorksInParallel()
         {
             var accesses = 0;
-            var func = new Func<byte[]>(() =>
-            {
-                accesses++;
-                Assert.Equal(1, accesses);
-                accesses--;
-                return new byte[0];
-            });
-            var cell = new SyncCell("TestCell", (path) => new FkCell(func, (content) => { func(); }));
+            var cell = 
+                new SyncCell(
+                    "TestCell", 
+                    (path) => new FkCell(
+                        (content) => { },
+                        () => {
+                            accesses++;
+                            Assert.Equal(1, accesses);
+                            accesses--;
+                            return new byte[0];
+                        }
+                    )
+                );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 cell.Content();
-                cell.Update(new DeadInput());
             });
         }
 
@@ -32,19 +36,32 @@ namespace Xive.Cell.Test
         public void WorksInParallelWithSameName()
         {
             var accesses = 0;
-            var func = new Func<byte[]>(() =>
-            {
-                accesses++;
-                Assert.Equal(1, accesses);
-                accesses--;
-                return new byte[0];
-            });
-            var cell1 = new SyncCell("testname", (path) => new FkCell(func, (content) => { }));
-            var cell2 = new SyncCell("testname", (path) => new FkCell(func, (content) => { }));
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                cell1.Content();
-                cell2.Content();
+                new SyncCell(
+                    "TestCell",
+                    (path) => new FkCell(
+                        (content) => { },
+                        () => {
+                            accesses++;
+                            Assert.Equal(1, accesses);
+                            accesses--;
+                            return new byte[0];
+                        }
+                    )
+                );
+                new SyncCell(
+                    "TestCell",
+                    (path) => new FkCell(
+                        (content) => { },
+                        () => {
+                            accesses++;
+                            Assert.Equal(1, accesses);
+                            accesses--;
+                            return new byte[0];
+                        }
+                    )
+                );
             });
         }
 
