@@ -1,18 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.List;
-using Yaapii.Atoms.Scalar;
-using Yaapii.Atoms.Text;
-using Yaapii.XHive.Comb;
-using Xive;
-using Xive.Cell;
-using Xive.Comb;
-using Xive.Hive;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 

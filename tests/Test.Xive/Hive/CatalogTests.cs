@@ -3,6 +3,7 @@ using Xunit;
 using Yaapii.Xambly;
 using Xive.Cell;
 using Xive.Comb;
+using Xive.Xocument;
 
 namespace Xive.Hive.Test
 {
@@ -19,7 +20,8 @@ namespace Xive.Hive.Test
                     "my-hive",
                     new SimpleComb(
                         "hq",
-                        cell => new RamCell(cell, memory)
+                        cell => new RamCell(cell, memory),
+                        (cellName, cell) => new CellXocument(cell, cellName)
                     )
                 );
 
@@ -41,7 +43,8 @@ namespace Xive.Hive.Test
                     "my-hive",
                     new SimpleComb(
                         "hq",
-                        cell => new RamCell(cell, memory)
+                        cell => new RamCell(cell, memory),
+                        (cellName, cell) => new CellXocument(cell, cellName)
                     )
                 );
 
@@ -63,7 +66,8 @@ namespace Xive.Hive.Test
                     "my-hive",
                     new SimpleComb(
                         "hq",
-                        cell => new RamCell(cell, memory)
+                        cell => new RamCell(cell, memory),
+                        (cellName, cell) => new CellXocument(cell, cellName)
                     )
                 );
 

@@ -1,30 +1,24 @@
 ﻿using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Xambly;
-using Xive.Cell;
+using Yaapii.Xml;
 
 namespace Xive.Xocument.Test
 {
-    public sealed class XocumentTests
+    public sealed class SimpleXocumentTests
     {
         [Theory]
         [InlineData("A")]
         [InlineData("B")]
         public void ReadsContent(string expected)
         {
-            var cell =
-                new RamCell(
-                    "my-cell",
-                    new BytesOf(
-                        new InputOf(
-                            "<root><item>A</item><item>B</item></root>"
-                        )
-                    ).AsBytes()
-                );
-
             Assert.Contains(
                 expected,
-                new XocumentOf(cell).Values("//item/text()")
+                new SimpleXocument(
+                    new XMLQuery(
+                        new InputOf("<root><item>A</item><item>B</item></root>")
+                    ).Node()
+                ).Values("//item/text()")
             );
         }
 
@@ -32,18 +26,16 @@ namespace Xive.Xocument.Test
         public void ModifiesContent()
         {
             var xoc =
-                new XocumentOf(
-                    new RamCell(
-                        "my-cell",
-                        new BytesOf(
-                            new InputOf(
-                                "<root><item>A</item><item>A</item></root>"
-                            )
-                        ).AsBytes()
-                    )
+                new SimpleXocument(
+                    new XMLQuery(
+                        new InputOf("<root><item>A</item><item>A</item></root>")
+                    ).Node()
                 );
-
-            xoc.Modify(new Directives().Xpath("//item").Set("B"));
+            xoc.Modify(
+                    new Directives()
+                        .Xpath("//item")
+                        .Set("B")
+                );
 
             Assert.Contains(
                 "B",
@@ -55,15 +47,12 @@ namespace Xive.Xocument.Test
         public void FindsNodes()
         {
             var xoc =
-                new XocumentOf(
-                    new RamCell(
-                        "my-cell",
-                        new BytesOf(
-                            new InputOf(
-                                "<root><item>A</item><item>B</item></root>"
-                            )
-                        ).AsBytes()
-                    )
+                new SimpleXocument(
+                    new XMLQuery(
+                        new InputOf(
+                            "<root><item>A</item><item>B</item></root>"
+                        )
+                    ).Node()
                 );
 
             Assert.Equal(
@@ -76,15 +65,12 @@ namespace Xive.Xocument.Test
         public void HasNodeContent()
         {
             var xoc =
-                new XocumentOf(
-                    new RamCell(
-                        "my-cell",
-                        new BytesOf(
-                            new InputOf(
-                                "<root><item>A</item></root>"
-                            )
-                        ).AsBytes()
-                    )
+                new SimpleXocument(
+                    new XMLQuery(
+                        new InputOf(
+                            "<root><item>A</item></root>"
+                        )
+                    ).Node()
                 );
 
             Assert.Equal(

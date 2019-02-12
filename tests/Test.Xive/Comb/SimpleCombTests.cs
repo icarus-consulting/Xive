@@ -1,21 +1,38 @@
-﻿using Xunit;
-using Xive;
-using Xive.Cell;
-using Xive.Comb;
+﻿using Xive.Cell;
+using Xive.Xocument;
+using Xunit;
 
-namespace Xive.Test
+namespace Xive.Comb.Test
 {
     public sealed class SimpleCombTests
     {
         [Fact]
         public void DeliversCell()
         {
-            var cell =
-                new SimpleComb("my-cell", cellName => 
-                    new RamCell(cellName)
+            var result =
+                new SimpleComb(
+                    "my-cell", 
+                    cellName => new RamCell(cellName),
+                    (cellName, cell) => new CellXocument(cell, cellName)
                 ).Cell("A non existing cell");
 
-            Assert.InRange<int>(cell.Content().Length, 0, 0);
+            Assert.InRange(result.Content().Length, 0, 0);
+        }
+
+        [Fact]
+        public void DeliversXocument()
+        {
+            var result =
+                new SimpleComb(
+                    "my-cell",
+                    cellName => new RamCell(cellName),
+                    (cellName, cell) => new CellXocument(cell, cellName)
+                ).Xocument("this-is-a-xocument");
+
+            Assert.Equal(
+                1,
+                result.Nodes("/this-is-a-xocument").Count
+            );
         }
     }
 }
