@@ -9,14 +9,11 @@ namespace Xive.Xocument
     /// A xocument which is stored in a cell.
     /// </summary>
     public sealed class CellXocument : XocumentEnvelope
-    {
-        public CellXocument(ICell cell, string name) : this(cell, name, "0.0.1")
-        { }
-
+    { 
         /// <summary>
         /// A xocument which is stored in a cell.
         /// </summary>
-        public CellXocument(ICell cell, string name, string version) : base(new ScalarOf<IXocument>(() =>
+        public CellXocument(ICell cell, string name) : base(new ScalarOf<IXocument>(() =>
             {
                 return
                     new SimpleXocument(
@@ -32,7 +29,7 @@ namespace Xive.Xocument
                                 cell.Update(
                                     new InputOf(
                                         new XDocument(
-                                            new XElement(name, new XAttribute("version", version.ToString()))
+                                            new XElement(name)
                                         ).ToString()
                                     )
                                 );

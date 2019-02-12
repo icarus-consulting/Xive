@@ -18,6 +18,10 @@ namespace Xive.Xocument
         private readonly IScalar<XNode> node;
         private readonly Action<XNode> update;
 
+        /// <summary>
+        /// A simple Xocument from a <see cref="XNode"/>
+        /// </summary>
+        /// <param name="node"></param>
         public SimpleXocument(XNode node) : this(node, update => { })
         { }
 
@@ -29,6 +33,10 @@ namespace Xive.Xocument
         public SimpleXocument(XNode node, Action<XNode> update) : this(new StickyScalar<XNode>(() => node), update)
         { }
 
+        /// <summary>
+        /// A simple Xocument.
+        /// </summary>
+        /// <param name="rootName"></param>
         public SimpleXocument(string rootName) : this(rootName, update => { })
         { }
 
@@ -37,18 +45,7 @@ namespace Xive.Xocument
         /// You can tell the Xocument what to to when it has been modified. 
         /// For example write its contents to a cell.
         /// </summary>
-        public SimpleXocument(string rootName, Action<XNode> update) : this(rootName, new Version("1.0.0.0"), update)
-        { }
-
-        public SimpleXocument(string rootName, Version version) : this(rootName, version, update => { })
-        { }
-
-        /// <summary>
-        /// A simple Xocument.
-        /// You can tell the Xocument what to to when it has been modified. 
-        /// For example write its contents to a cell.
-        /// </summary>
-        public SimpleXocument(string rootName, Version version, Action<XNode> update) : this(
+        public SimpleXocument(string rootName, Action<XNode> update) : this(
             new StickyScalar<XNode>(() =>
             {
                 if(rootName.ToLower().EndsWith(".xml"))
@@ -57,7 +54,7 @@ namespace Xive.Xocument
                 }
                 return
                     new XDocument(
-                        new XElement(rootName, new XAttribute("version", version.ToString()))
+                        new XElement(rootName)
                     );
             }),
             update
