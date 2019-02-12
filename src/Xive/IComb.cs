@@ -12,6 +12,15 @@
         string Name();
 
         /// <summary>
+        /// Get cell content as a Xocument by its unique name.
+        /// It is not needed to seperately create a cell - just acquire it, 
+        /// the Comb will build it if necessary.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        IXocument Xocument(string name);
+
+        /// <summary>
         /// Get a cell by its unique name.
         /// It is not needed to seperately create a cell - just acquire it, 
         /// the Comb will build it if necessary.
