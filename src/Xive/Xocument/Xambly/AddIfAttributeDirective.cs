@@ -10,7 +10,7 @@ using Yaapii.Xambly.Cursor;
 namespace Yaapii.Xambly
 {
     /// <summary>
-    /// ADDIFXPATH directive.
+    /// ADDIFATTRIBUTE directive.
     /// Adds a node, if child element with specified content does not exist.
     /// </summary>
     public class AddIfAttributeDirective : IDirective
@@ -99,7 +99,7 @@ namespace Yaapii.Xambly
                     {
                         matches = true;
                         break;
-                    } 
+                    }
                 }
             }
             return matches;
