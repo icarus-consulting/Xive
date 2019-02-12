@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Xive.Cell;
+using Xive.Xocument;
 
 namespace Xive.Comb
 {
@@ -32,6 +33,18 @@ namespace Xive.Comb
             lock (comb)
             {
                 return new SyncCell(comb.Name() + Path.DirectorySeparatorChar + name, (str) => comb.Cell(name));
+            }
+        }
+
+        public IXocument Xocument(string name)
+        {
+            lock(comb)
+            {
+                return 
+                    new SyncXocument(
+                        name,
+                        new CellXocument(Cell(name), name)
+                    );
             }
         }
     }
