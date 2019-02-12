@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Xml.Linq;
 using Yaapii.Atoms;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
 namespace Xive.Xocument
 {
-    public class XocEnvelope : IXocument
+    public class XocumentEnvelope : IXocument
     {
         private readonly IScalar<IXocument> origin;
 
-        public XocEnvelope(IScalar<IXocument> origin)
+        public XocumentEnvelope(IScalar<IXocument> origin)
         {
             this.origin = origin;
         }
@@ -32,6 +33,16 @@ namespace Xive.Xocument
         public IList<string> Values(string xpath)
         {
             return this.origin.Value().Values(xpath);
+        }
+
+        public XNode Node()
+        {
+            return this.origin.Value().Node();
+        }
+
+        public void Dispose()
+        {
+            this.origin.Value().Dispose();
         }
     }
 }
