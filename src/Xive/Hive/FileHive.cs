@@ -29,7 +29,7 @@ namespace Xive.Hive
                 return
                     new SimpleHive(
                         name,
-                        comb => new FileComb(comb, $"{root}"),
+                        comb => new FileComb($"{root}", comb),
                         catalog
                     );
             })
