@@ -3,7 +3,6 @@ using System.IO;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
-using Xive.Cell;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 

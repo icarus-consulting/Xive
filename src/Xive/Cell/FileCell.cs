@@ -7,9 +7,20 @@ using Yaapii.Atoms.Text;
 
 namespace Xive.Cell
 {
+    /// <summary>
+    /// A cell which exists physically as a file.
+    /// </summary>
     public sealed class FileCell : ICell
     {
         private readonly IScalar<string> path;
+
+        /// <summary>
+        /// A cell which exists physically as a file.
+        /// </summary>
+        public FileCell(string root, string name) : this(
+            new ScalarOf<string>(() => Path.Combine(root, name))
+        )
+        { }
 
         /// <summary>
         /// A cell which exists physically as a file.
@@ -22,15 +33,12 @@ namespace Xive.Cell
         /// </summary>
         private FileCell(IScalar<string> path)
         {
-            lock (this) //make path validation solid. Otherwise odd behaviour occures because creation can be left unfinished.
-            {
-                this.path =
-                    new SolidScalar<string>(() =>
-                    {
-                        Validate(new Coordinate(path.Value()).AsString());
-                        return path.Value();
-                    });
-            }
+            this.path =
+                new SolidScalar<string>(() =>
+                {
+                    Validate(new Coordinate(path.Value()).AsString());
+                    return path.Value();
+                });
         }
 
         public byte[] Content()
@@ -60,26 +68,56 @@ namespace Xive.Cell
 
         private void Validate(string path)
         {
-            bool invalid;
-            try
+            if (!Path.IsPathRooted(path))
             {
-                invalid =
-                    !Path.IsPathRooted(path)
-                    || Path.GetFileName(path) == String.Empty;
+                throw new ArgumentException($"Cannot work with path '{path}' because it is not rooted.");
             }
-            catch (Exception)
+            if (Path.GetFileName(path) == String.Empty)
             {
-                throw 
-                    new ArgumentException(
-                        new FormattedText(
-                            "The filename contains invalid characters. Not allowed characters are: {0}",
-                            Path.GetInvalidFileNameChars()
-                        ).AsString()
-                );
+                throw new ArgumentException($"Cannot work with path '{path}' because it is not a file.");
+            }
+
+            var dir = Path.GetDirectoryName(path);
+            var file = Path.GetFileName(path);
+            var invalidPathChars = Path.GetInvalidPathChars();
+            var invalid = false;
+            foreach (var c in Path.GetInvalidFileNameChars())
+            {
+                if (file.Contains(c + ""))
+                {
+                    invalid = true;
+                    break;
+                }
             }
             if (invalid)
             {
-                throw new ArgumentException("Invalid filepath");
+                throw
+                    new ArgumentException(
+                        new FormattedText(
+                            $"Cannot work with path '{path}' because file name contains invalid characters. Not allowed characters are: {0}",
+                            String.Join(", ", Path.GetInvalidFileNameChars())
+                        ).AsString()
+                    );
+            }
+
+            invalid = false;
+            foreach (var c in Path.GetInvalidPathChars())
+            {
+                if (dir.Contains(c + ""))
+                {
+                    invalid = true;
+                    break;
+                }
+            }
+            if (invalid)
+            {
+                throw
+                    new ArgumentException(
+                        new FormattedText(
+                            $"Cannot work with path '{path}' because directory name contains invalid characters. Not allowed characters are: {0}",
+                            Path.GetInvalidPathChars()
+                        ).AsString()
+                    );
             }
         }
 

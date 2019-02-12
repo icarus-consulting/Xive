@@ -16,7 +16,7 @@ namespace Xive.Comb.Test
         {
             using (var dir = new TempDirectory())
             {
-                var comb = new FileComb("my-comb", dir.Value().FullName);
+                var comb = new FileComb(dir.Value().FullName, "my-comb");
                 using (var cell = comb.Cell("Non existing"))
                 {
                     Assert.InRange<int>(cell.Content().Length, 0, 0);
@@ -55,8 +55,8 @@ namespace Xive.Comb.Test
             {
                 var comb =
                     new FileComb(
-                        "my-comb",
-                        dir.Value().FullName
+                        dir.Value().FullName,
+                        "my-comb"
                     );
                 var path = "SubDir/Interieur";
                 using (var cell = comb.Cell(path))
@@ -82,8 +82,8 @@ namespace Xive.Comb.Test
             {
                 var comb =
                     new FileComb(
-                        "my-comb",
-                        dir.Value().FullName
+                        dir.Value().FullName,
+                        "my-comb"
                     );
                 Assert.Equal("my-comb", comb.Name());
             }
@@ -96,7 +96,7 @@ namespace Xive.Comb.Test
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    using (var cell = new FileComb("my-comb", "d:/").Cell(""))
+                    using (var cell = new FileComb("d:/", "my-comb").Cell(""))
                     {
                         cell.Content();
                     }
@@ -111,13 +111,12 @@ namespace Xive.Comb.Test
             {
                 Assert.Throws<ArgumentException>(() =>
                 {
-                    using (var cell = new FileComb("dir", "").Cell("file.txt"))
+                    using (var cell = new FileComb("", "dir").Cell("file.txt"))
                     {
                         cell.Content();
                     }
                 });
             }
         }
-#pragma warning restore MaxPublicMethodCount // a public methods count maximum
     }
 }
