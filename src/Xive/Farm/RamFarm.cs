@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using Xive.Hive;
 
 namespace Xive.Farm
@@ -34,7 +35,7 @@ namespace Xive.Farm
                 {
                     memory.Add(hiveName, new Dictionary<string, byte[]>());
                 }
-                return new RamHive(hiveName, (name, hq) => new Catalog(hiveName, hq), memory[hiveName]);
+                return new RamHive(hiveName, comb => comb, (name, hq) => new Catalog(hiveName, hq), memory[hiveName]);
             },
             memory
         )
@@ -50,16 +51,16 @@ namespace Xive.Farm
                  {
                      memory.Add(hiveName, new Dictionary<string, byte[]>());
                  }
-                 return new RamHive(hiveName, catalog, memory[hiveName]);
+                 return new RamHive(hiveName, comb => comb, catalog, memory[hiveName]);
              },
             memory
         )
         { }
 
-        internal RamFarm(Func<string, IHive> hive, IDictionary<string, IDictionary<string, byte[]>> memory)
+        internal RamFarm(Func<string, IHive> hive, IDictionary<string, IDictionary<string, byte[]>> rawMemory)
         {
             this.hive = hive;
-            this.farmMemory = memory;
+            this.farmMemory = rawMemory;
         }
 
         public IHive Hive(string name)
