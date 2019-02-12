@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
 using Xive.Comb;
+using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Enumerable;
@@ -11,7 +12,7 @@ using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
-namespace Xive.Test.Comb
+namespace Xive.Comb.Test
 {
     public sealed class CachedCombTests
     {

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
-namespace Xive.Test.Cell
+namespace Xive.Cell.Test
 {
     public sealed class CachedCellTests
     {
