@@ -24,14 +24,14 @@ namespace Xive.Hive
         public Catalog(IHive hive) : this(
             new ScalarOf<string>(() => hive.Name()),
             new ScalarOf<IComb>(() => hive.HQ()),
-            cell => new XocumentOf(cell, "catalog", "0.0.1")
+            cell => new CellXocument(cell, "catalog", "0.0.1")
         )
         { }
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IComb hq) : this(itemName, hq, cell => new XocumentOf(cell, "catalog", "0.0.1"))
+        public Catalog(string itemName, IComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog", "0.0.1"))
         { }
 
         /// <summary>
