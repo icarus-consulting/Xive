@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.IO;
 
-namespace Xive.Test.Cell
+namespace Xive.Cell
 {
     /// <summary>
     /// A cell whose content is cached in memory.

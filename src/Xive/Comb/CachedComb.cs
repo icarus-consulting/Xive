@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using Xive.Test.Cell;
+using Xive.Cell;
 using Xive.Xocument;
 
 namespace Xive.Comb
