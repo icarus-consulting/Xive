@@ -124,7 +124,7 @@ namespace Xive.Cell
                 this.id = Guid.NewGuid().ToString();
                 this.name = name;
                 this.cellMemory = 
-                    new SolidScalar<IDictionary<string, byte[]>>(() =>
+                    new ScalarOf<IDictionary<string, byte[]>>(() =>
                         {
                             var memory = cellMemory.Value();
                             if (!memory.ContainsKey(name.Value()))
