@@ -8,14 +8,14 @@ namespace Xive.Comb
     /// <summary>
     /// A comb that accesses cells systemwide exclusively.
     /// </summary>
-    public sealed class SyncComb : IComb
+    public sealed class SyncComb : IHoneyComb
     {
-        private readonly IComb comb;
+        private readonly IHoneyComb comb;
 
         /// <summary>
         /// A comb that accesses cells systemwide exclusively.
         /// </summary>
-        public SyncComb(IComb comb)
+        public SyncComb(IHoneyComb comb)
         {
             this.comb = comb;
         }

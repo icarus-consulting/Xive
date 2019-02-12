@@ -4,7 +4,7 @@ using System.Xml.Linq;
 using Xive.Test;
 using Xunit;
 
-namespace Xive.Xocument
+namespace Xive.Xocument.Test
 {
     public sealed class SyncXocumentTests
     {

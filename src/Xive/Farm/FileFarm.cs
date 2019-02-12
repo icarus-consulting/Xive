@@ -27,7 +27,7 @@ namespace Xive.Farm
         /// </summary>
         /// <param name="root">The root directory for the farm.</param>
         /// <param name="hiveCatalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public FileFarm(string root, Func<string, IComb, ICatalog> hiveCatalog) : this(
+        public FileFarm(string root, Func<string, IHoneyComb, ICatalog> hiveCatalog) : this(
             root,
             name => new FileHive(name, root, hiveCatalog)
         )

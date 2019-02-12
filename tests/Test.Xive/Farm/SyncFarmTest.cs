@@ -48,7 +48,7 @@ namespace Xive.Test.Farm
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
-                var comb = new FirstOf<IComb>(
+                var comb = new FirstOf<IHoneyComb>(
                     farm.Hive("person").Combs("@id='123'")
                 ).Value();
 

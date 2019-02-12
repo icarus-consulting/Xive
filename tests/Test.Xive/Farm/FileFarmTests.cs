@@ -47,7 +47,7 @@ namespace Xive.Test.Farm
                 var farm = new FileFarm(dir.Value().FullName);
                 new Catalog(farm.Hive("person")).Create("123");
                 var person =
-                    new FirstOf<IComb>(
+                    new FirstOf<IHoneyComb>(
                         farm.Hive("person").Combs("@id='123'")
                     ).Value();
 
@@ -57,7 +57,7 @@ namespace Xive.Test.Farm
                     "the moon",
                     new TextOf(
                         new InputOf(
-                            new FirstOf<IComb>(
+                            new FirstOf<IHoneyComb>(
                                 farm.Hive("person").Combs("@id='123'")
                             ).Value().Cell("address").Content()
                         )

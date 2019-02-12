@@ -9,7 +9,7 @@ namespace Xive.Comb
     /// A simple comb that is dumb: You need to tell it,
     /// how to create items.
     /// </summary>
-    public class SimpleComb : IComb
+    public class SimpleComb : IHoneyComb
     {
         private readonly IScalar<string> name;
         private readonly Func<string, ICell> cell;

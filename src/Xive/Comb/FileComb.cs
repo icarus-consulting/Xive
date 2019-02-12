@@ -10,10 +10,10 @@ namespace Xive.Comb
     /// <summary>
     /// A comb which exists physically as files.
     /// </summary>
-    public sealed class FileComb : IComb
+    public sealed class FileComb : IHoneyComb
     {
         private readonly string name;
-        private readonly IScalar<IComb> comb;
+        private readonly IScalar<IHoneyComb> comb;
 
         /// <summary>
         /// A comb which exists physically as files.
@@ -27,7 +27,7 @@ namespace Xive.Comb
         public FileComb(string root, string name, Func<ICell, ICell> cellWrap, Func<IXocument, IXocument> xocumentWrap)
         {
             this.comb =
-                new ScalarOf<IComb>(() =>
+                new ScalarOf<IHoneyComb>(() =>
                     new SimpleComb(
                         Path.Combine(root, name),
                         path => new FileCell(path),

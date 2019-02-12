@@ -14,7 +14,7 @@ namespace Xive.Hive
     public class SimpleHive : IHive
     {
         private readonly IText name;
-        private readonly Func<string, IComb> comb;
+        private readonly Func<string, IHoneyComb> comb;
         private readonly IScalar<ICatalog> catalog;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Xive.Hive
         /// </summary>
         /// <param name="name">Unique name of the hive</param>
         /// <param name="comb">How to build a comb: (combName) => new SomeCatalog(...)</param>
-        public SimpleHive(string name, Func<string, IComb> comb) : this(
+        public SimpleHive(string name, Func<string, IHoneyComb> comb) : this(
             name,
             comb,
             (hiveName, catalogComb) => new Catalog(hiveName, catalogComb)
@@ -37,22 +37,22 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="comb">How to build a comb: (combName) => new SomeCatalog(...)</param>
         /// <param name="hiveCatalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public SimpleHive(string name, Func<string, IComb> comb, Func<string, IComb, ICatalog> catalog)
+        public SimpleHive(string name, Func<string, IHoneyComb> comb, Func<string, IHoneyComb, ICatalog> catalog)
         {
             this.name = new Coordinate(name);
             this.comb = comb;
             this.catalog = new StickyScalar<ICatalog>(() => catalog(name, HQ()));
         }
 
-        public IComb HQ()
+        public IHoneyComb HQ()
         {
             return this.comb($"{this.name.AsString()}{Path.DirectorySeparatorChar}HQ");
         }
 
-        public IEnumerable<IComb> Combs(string xpath)
+        public IEnumerable<IHoneyComb> Combs(string xpath)
         {
             return
-                new Mapped<string, IComb>(
+                new Mapped<string, IHoneyComb>(
                     comb => 
                     {
                         return this.comb($"{this.name.AsString()}{Path.DirectorySeparatorChar}{comb}");

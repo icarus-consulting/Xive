@@ -9,7 +9,7 @@ namespace Xive.Comb
     /// <summary>
     /// A comb which exists in memory.
     /// </summary>
-    public sealed class RamComb : IComb
+    public sealed class RamComb : IHoneyComb
     {
         private readonly string name;
         private readonly IDictionary<string, byte[]> cellMemory;

@@ -64,14 +64,14 @@ namespace Xive.Hive.Test
             catalog.Create("123");
             catalog.Create("456");
 
-            var comb = new FirstOf<IComb>(hive.Combs("@id='456'")).Value();
+            var comb = new FirstOf<IHoneyComb>(hive.Combs("@id='456'")).Value();
             comb.Cell("my-cell").Update(new InputOf("larva"));
 
             Assert.Equal(
                 "larva",
                 new TextOf(
                     new InputOf(
-                        new FirstOf<IComb>(
+                        new FirstOf<IHoneyComb>(
                             hive.Combs("@id='456'")
                         ).Value()
                         .Cell("my-cell")
@@ -89,7 +89,7 @@ namespace Xive.Hive.Test
             catalog.Create("123");
             catalog.Create("456");
 
-            var comb = new FirstOf<IComb>(hive.Combs("@id='456'")).Value();
+            var comb = new FirstOf<IHoneyComb>(hive.Combs("@id='456'")).Value();
             comb.Xocument("meatloaf.xml")
                 .Modify(
                     new Directives()
@@ -101,7 +101,7 @@ namespace Xive.Hive.Test
 
             Assert.Contains(
                 "But I won't do that",
-                new FirstOf<IComb>(
+                new FirstOf<IHoneyComb>(
                     hive.Combs("@id='456'")
                 ).Value().Xocument("meatloaf.xml").Values("//line/text()")
             );

@@ -14,7 +14,7 @@ namespace Xive.Hive
     /// </summary>
     public sealed class Catalog : ICatalog
     {
-        private readonly IScalar<IComb> hq;
+        private readonly IScalar<IHoneyComb> hq;
         private readonly IScalar<string> itemName;
         private readonly Func<ICell, IXocument> xocument;
 
@@ -23,7 +23,7 @@ namespace Xive.Hive
         /// </summary>
         public Catalog(IHive hive) : this(
             new ScalarOf<string>(() => hive.Name()),
-            new ScalarOf<IComb>(() => hive.HQ()),
+            new ScalarOf<IHoneyComb>(() => hive.HQ()),
             cell => new CellXocument(cell, "catalog")
         )
         { }
@@ -31,15 +31,15 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
+        public Catalog(string itemName, IHoneyComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
         { }
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IComb hq, Func<ICell, IXocument> xocument) : this(
+        public Catalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
             new ScalarOf<string>(itemName),
-            new ScalarOf<IComb>(hq),
+            new ScalarOf<IHoneyComb>(hq),
             xocument
         )
         { }
@@ -47,7 +47,7 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        internal Catalog(IScalar<string> itemName, IScalar<IComb> hq, Func<ICell, IXocument> xocument)
+        internal Catalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
         {
             this.hq = hq;
             this.itemName = itemName;

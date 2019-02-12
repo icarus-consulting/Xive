@@ -3,7 +3,7 @@
     /// <summary>
     /// A comb, containing multiple cells.
     /// </summary>
-    public interface IComb
+    public interface IHoneyComb
     {
         /// <summary>
         /// Unique name of the comb.

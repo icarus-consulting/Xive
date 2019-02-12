@@ -22,13 +22,13 @@ namespace Xive
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        IComb HQ();
+        IHoneyComb HQ();
 
         /// <summary>
         /// Find a specific comb by xpath.
         /// </summary>
         /// <param name="xpath"></param>
         /// <returns></returns>
-        IEnumerable<IComb> Combs(string xpath);
+        IEnumerable<IHoneyComb> Combs(string xpath);
     }
 }

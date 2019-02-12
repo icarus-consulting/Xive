@@ -18,12 +18,12 @@ namespace Xive.Hive
             this.hive = hive;
         }
 
-        public IEnumerable<IComb> Combs(string xpath)
+        public IEnumerable<IHoneyComb> Combs(string xpath)
         {
             return this.hive.Value().Combs(xpath);
         }
 
-        public IComb HQ()
+        public IHoneyComb HQ()
         {
             return this.hive.Value().HQ();
         }

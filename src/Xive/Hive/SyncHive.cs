@@ -21,15 +21,15 @@ namespace Xive.Hive
             this.hive = hive;
         }
 
-        public IEnumerable<IComb> Combs(string xpath)
+        public IEnumerable<IHoneyComb> Combs(string xpath)
         {
             lock (hive)
             {
-                return new Mapped<IComb, IComb>((comb) => new SyncComb(comb), hive.Combs(xpath));
+                return new Mapped<IHoneyComb, IHoneyComb>((comb) => new SyncComb(comb), hive.Combs(xpath));
             }
         }
 
-        public IComb HQ()
+        public IHoneyComb HQ()
         {
             lock (hive)
             {

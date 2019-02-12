@@ -8,14 +8,14 @@ namespace Xive.Comb
     /// <summary>
     /// Envelope for combs.
     /// </summary>
-    public abstract class CombEnvelope : IComb
+    public abstract class CombEnvelope : IHoneyComb
     {
-        private readonly IScalar<IComb> comb;
+        private readonly IScalar<IHoneyComb> comb;
 
         /// <summary>
         /// Envelope for combs.
         /// </summary>
-        public CombEnvelope(IScalar<IComb> comb)
+        public CombEnvelope(IScalar<IHoneyComb> comb)
         {
             this.comb = comb;
         }

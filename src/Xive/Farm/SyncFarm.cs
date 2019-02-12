@@ -4,7 +4,7 @@ using Xive.Hive;
 namespace Xive.Farm
 {
     /// <summary>
-    /// A farm that accesses cells systemwide exclusively.
+    /// A farm that accesses hives systemwide exclusively.
     /// </summary>
     public sealed class SyncFarm : IFarm
     {
@@ -24,7 +24,10 @@ namespace Xive.Farm
         /// <returns>The hive</returns>
         public IHive Hive(string name)
         {
-            return new SyncHive(farm.Hive(name));
+            lock (farm)
+            {
+                return new SyncHive(farm.Hive(name));
+            }
         }
     }
 }
