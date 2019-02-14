@@ -61,9 +61,9 @@ namespace Xive.Hive
                 Create(id);
             }
 
-            using (var cell = this.Cell())
+            using (var xoc = this.Xocument())
             {
-                this.xocument(cell).Modify(
+                xoc.Modify(
                     new Directives()
                         .Xpath($"/catalog/{this.itemName.Value()}[@id='{id}']")
                         .Append(content)
@@ -73,9 +73,8 @@ namespace Xive.Hive
 
         public IEnumerable<string> List(string xpath)
         {
-            using (var cell = this.Cell())
+            using (var xoc = this.Xocument())
             {
-                var xoc = this.xocument(cell);
                 return xoc.Values($"//{this.itemName.Value()}[{xpath}]/@id");
             }
         }
@@ -87,9 +86,9 @@ namespace Xive.Hive
                 new InvalidOperationException($"{this.itemName.Value()} '{id}' does not exist")
             ).Go();
 
-            using (var cell = this.Cell())
+            using (var xoc = this.Xocument())
             {
-                this.xocument(cell).Modify(
+                xoc.Modify(
                     new Directives()
                         .Xpath($"/catalog/{this.itemName.Value()}[@id='{id}']")
                         .Remove()
@@ -99,19 +98,18 @@ namespace Xive.Hive
 
         public void Create(string id)
         {
-            using (var cell = this.Cell())
+            using (var xoc = this.Xocument())
             {
-                this.xocument(cell)
-                    .Modify(
-                        new Directives()
-                            .Xpath("/catalog")
-                            .Append(
-                                new EnumerableOf<IDirective>(
-                                    new AddIfAttributeDirective(this.itemName.Value(), "id", id)
-                                )
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("/catalog")
+                        .Append(
+                            new EnumerableOf<IDirective>(
+                                new AddIfAttributeDirective(this.itemName.Value(), "id", id)
                             )
-                            .Attr("id", id)
-                    );
+                        )
+                        .Attr("id", id)
+                );
             }
         }
 
@@ -120,9 +118,9 @@ namespace Xive.Hive
             return this.List($"@id='{id}'").GetEnumerator().MoveNext();
         }
 
-        private ICell Cell()
+        private IXocument Xocument()
         {
-            return this.hq.Value().Cell("catalog.xml");
+            return this.hq.Value().Xocument("catalog.xml");
         }
     }
 }
