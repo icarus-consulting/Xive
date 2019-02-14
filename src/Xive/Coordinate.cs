@@ -36,6 +36,10 @@ namespace Xive
 
         private string Validated(string text)
         {
+            if(text.Contains(" ") || text.Contains("\r") || text.Contains("\n"))
+            {
+                throw new ArgumentException($"Text must not contain whitespaces, but it does: '{text}'");
+            }
             string regexSearch = new string(Path.GetInvalidPathChars());
             Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
 
