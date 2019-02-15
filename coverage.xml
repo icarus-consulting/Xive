@@ -188,16 +188,16 @@
       <ModuleName>System.Xml.XDocument</ModuleName>
       <Classes />
     </Module>
-    <Module skippedDueTo="Filter" hash="86-78-D9-E0-1A-D5-AC-C7-AA-3A-66-EC-7C-B3-17-1A-DF-9E-2D-E2">
-      <ModulePath>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.5\System.Security.Cryptography.Algorithms.dll</ModulePath>
-      <ModuleTime>2018-09-18T18:04:58Z</ModuleTime>
-      <ModuleName>System.Security.Cryptography.Algorithms</ModuleName>
-      <Classes />
-    </Module>
     <Module skippedDueTo="Filter" hash="11-FC-1D-68-A1-36-BB-37-7E-FE-C9-18-2D-78-00-78-F4-BB-26-61">
       <ModulePath>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.5\System.Private.Xml.Linq.dll</ModulePath>
       <ModuleTime>2018-09-18T18:04:56Z</ModuleTime>
       <ModuleName>System.Private.Xml.Linq</ModuleName>
+      <Classes />
+    </Module>
+    <Module skippedDueTo="Filter" hash="86-78-D9-E0-1A-D5-AC-C7-AA-3A-66-EC-7C-B3-17-1A-DF-9E-2D-E2">
+      <ModulePath>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.5\System.Security.Cryptography.Algorithms.dll</ModulePath>
+      <ModuleTime>2018-09-18T18:04:58Z</ModuleTime>
+      <ModuleName>System.Security.Cryptography.Algorithms</ModuleName>
       <Classes />
     </Module>
     <Module skippedDueTo="Filter" hash="4E-C8-C8-24-CF-FA-AE-20-D8-AF-CB-23-F9-10-86-78-2F-57-70-5A">
@@ -284,16 +284,16 @@
       <ModuleName>System.Reflection.Primitives</ModuleName>
       <Classes />
     </Module>
-    <Module skippedDueTo="Filter" hash="F1-04-13-53-34-18-CC-A9-C2-87-31-F8-31-9F-B4-F3-F0-BB-7D-8A">
-      <ModulePath>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.5\Microsoft.Win32.Registry.dll</ModulePath>
-      <ModuleTime>2018-09-18T18:04:54Z</ModuleTime>
-      <ModuleName>Microsoft.Win32.Registry</ModuleName>
-      <Classes />
-    </Module>
     <Module skippedDueTo="Filter" hash="46-7A-30-C1-61-8A-FE-54-B8-0E-7B-1F-2C-93-2A-51-D7-66-34-F2">
       <ModulePath>C:\Program Files\dotnet\sdk\2.1.403\Microsoft.TemplateEngine.Utils.dll</ModulePath>
       <ModuleTime>2018-09-20T12:49:46Z</ModuleTime>
       <ModuleName>Microsoft.TemplateEngine.Utils</ModuleName>
+      <Classes />
+    </Module>
+    <Module skippedDueTo="Filter" hash="F1-04-13-53-34-18-CC-A9-C2-87-31-F8-31-9F-B4-F3-F0-BB-7D-8A">
+      <ModulePath>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.5\Microsoft.Win32.Registry.dll</ModulePath>
+      <ModuleTime>2018-09-18T18:04:54Z</ModuleTime>
+      <ModuleName>Microsoft.Win32.Registry</ModuleName>
       <Classes />
     </Module>
     <Module skippedDueTo="Filter" hash="01-1C-C4-8F-1F-F1-3A-22-DE-F0-E9-52-4F-4D-F6-13-35-72-F1-26">
@@ -602,16 +602,16 @@
       <ModuleName>System.IO.FileSystem.Primitives</ModuleName>
       <Classes />
     </Module>
-    <Module skippedDueTo="Filter" hash="FF-A9-ED-AB-4A-87-37-D6-EB-28-A1-1E-2C-92-F7-EF-DF-EB-E9-5C">
-      <ModulePath>C:\Program Files\dotnet\sdk\2.1.403\Microsoft.ApplicationInsights.dll</ModulePath>
-      <ModuleTime>2018-09-20T12:49:10Z</ModuleTime>
-      <ModuleName>Microsoft.ApplicationInsights</ModuleName>
-      <Classes />
-    </Module>
     <Module skippedDueTo="Filter" hash="47-F8-FB-4C-53-2E-CA-D1-E1-37-D2-AD-7E-01-AF-70-D2-DE-90-E7">
       <ModulePath>C:\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.5\System.Text.Encoding.Extensions.dll</ModulePath>
       <ModuleTime>2018-09-18T18:04:58Z</ModuleTime>
       <ModuleName>System.Text.Encoding.Extensions</ModuleName>
+      <Classes />
+    </Module>
+    <Module skippedDueTo="Filter" hash="FF-A9-ED-AB-4A-87-37-D6-EB-28-A1-1E-2C-92-F7-EF-DF-EB-E9-5C">
+      <ModulePath>C:\Program Files\dotnet\sdk\2.1.403\Microsoft.ApplicationInsights.dll</ModulePath>
+      <ModuleTime>2018-09-20T12:49:10Z</ModuleTime>
+      <ModuleName>Microsoft.ApplicationInsights</ModuleName>
       <Classes />
     </Module>
     <Module skippedDueTo="Filter" hash="3F-BD-D0-C9-72-97-68-06-C6-A2-A4-8A-3C-0B-13-9A-58-65-B8-28">
@@ -5652,16 +5652,16 @@
               <Name>System.Void Xive.Cell.SyncCell::Dispose()</Name>
               <FileRef uid="60" />
               <SequencePoints>
-                <SequencePoint vc="3924" uspid="803" ordinal="0" offset="0" sl="117" sc="17" el="117" ec="49" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="3912" uspid="803" ordinal="0" offset="0" sl="117" sc="17" el="117" ec="49" bec="0" bev="0" fileid="60" />
                 <SequencePoint vc="2324" uspid="804" ordinal="1" offset="16" sl="118" sc="13" el="118" ec="14" bec="0" bev="0" fileid="60" />
                 <SequencePoint vc="0" uspid="805" ordinal="2" offset="18" sl="119" sc="13" el="119" ec="44" bec="0" bev="0" fileid="60" />
                 <SequencePoint vc="0" uspid="806" ordinal="3" offset="19" sl="122" sc="13" el="122" ec="14" bec="0" bev="0" fileid="60" />
-                <SequencePoint vc="1600" uspid="807" ordinal="4" offset="21" sl="123" sc="13" el="123" ec="41" bec="0" bev="0" fileid="60" />
-                <SequencePoint vc="1600" uspid="808" ordinal="5" offset="22" sl="126" sc="13" el="126" ec="14" bec="0" bev="0" fileid="60" />
-                <SequencePoint vc="3924" uspid="809" ordinal="6" offset="24" sl="127" sc="9" el="127" ec="10" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="1588" uspid="807" ordinal="4" offset="21" sl="123" sc="13" el="123" ec="41" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="1588" uspid="808" ordinal="5" offset="22" sl="126" sc="13" el="126" ec="14" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="3912" uspid="809" ordinal="6" offset="24" sl="127" sc="9" el="127" ec="10" bec="0" bev="0" fileid="60" />
               </SequencePoints>
               <BranchPoints />
-              <MethodPoint xsi:type="SequencePoint" vc="3924" uspid="803" ordinal="0" offset="0" sl="117" sc="17" el="117" ec="49" bec="0" bev="0" fileid="60" />
+              <MethodPoint xsi:type="SequencePoint" vc="3912" uspid="803" ordinal="0" offset="0" sl="117" sc="17" el="117" ec="49" bec="0" bev="0" fileid="60" />
             </Method>
             <Method visited="true" cyclomaticComplexity="1" nPathComplexity="0" sequenceCoverage="100" branchCoverage="100" crapScore="1" isConstructor="false" isStatic="false" isGetter="false" isSetter="false">
               <Summary numSequencePoints="3" visitedSequencePoints="3" numBranchPoints="1" visitedBranchPoints="1" sequenceCoverage="100" branchCoverage="100" maxCyclomaticComplexity="1" minCyclomaticComplexity="1" maxCrapScore="1" minCrapScore="1" visitedClasses="0" numClasses="0" visitedMethods="1" numMethods="1" />
@@ -5669,12 +5669,12 @@
               <Name>System.Void Xive.Cell.SyncCell::Finalize()</Name>
               <FileRef uid="60" />
               <SequencePoints>
-                <SequencePoint vc="1596" uspid="810" ordinal="0" offset="0" sl="131" sc="13" el="131" ec="23" bec="0" bev="0" fileid="60" />
-                <SequencePoint vc="1596" uspid="811" ordinal="1" offset="8" sl="132" sc="9" el="132" ec="10" bec="0" bev="0" fileid="60" />
-                <SequencePoint vc="1596" uspid="812" ordinal="2" offset="15" sl="132" sc="9" el="132" ec="10" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="1584" uspid="810" ordinal="0" offset="0" sl="131" sc="13" el="131" ec="23" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="1584" uspid="811" ordinal="1" offset="8" sl="132" sc="9" el="132" ec="10" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="1584" uspid="812" ordinal="2" offset="15" sl="132" sc="9" el="132" ec="10" bec="0" bev="0" fileid="60" />
               </SequencePoints>
               <BranchPoints />
-              <MethodPoint xsi:type="SequencePoint" vc="1596" uspid="810" ordinal="0" offset="0" sl="131" sc="13" el="131" ec="23" bec="0" bev="0" fileid="60" />
+              <MethodPoint xsi:type="SequencePoint" vc="1584" uspid="810" ordinal="0" offset="0" sl="131" sc="13" el="131" ec="23" bec="0" bev="0" fileid="60" />
             </Method>
           </Methods>
         </Class>
@@ -5707,10 +5707,10 @@
               <Name>System.Threading.Mutex Xive.Cell.SyncCell/&lt;&gt;c__DisplayClass3_0::&lt;.ctor&gt;b__1()</Name>
               <FileRef uid="60" />
               <SequencePoints>
-                <SequencePoint vc="1671" uspid="815" ordinal="0" offset="0" sl="53" sc="25" el="67" ec="22" bec="0" bev="0" fileid="60" />
+                <SequencePoint vc="1672" uspid="815" ordinal="0" offset="0" sl="53" sc="25" el="67" ec="22" bec="0" bev="0" fileid="60" />
               </SequencePoints>
               <BranchPoints />
-              <MethodPoint xsi:type="SequencePoint" vc="1671" uspid="815" ordinal="0" offset="0" sl="53" sc="25" el="67" ec="22" bec="0" bev="0" fileid="60" />
+              <MethodPoint xsi:type="SequencePoint" vc="1672" uspid="815" ordinal="0" offset="0" sl="53" sc="25" el="67" ec="22" bec="0" bev="0" fileid="60" />
             </Method>
           </Methods>
         </Class>
