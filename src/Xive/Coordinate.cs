@@ -36,16 +36,12 @@ namespace Xive
 
         private string Validated(string text)
         {
-            if(text.Contains(" ") || text.Contains("\r") || text.Contains("\n"))
-            {
-                throw new ArgumentException($"Text must not contain whitespaces, but it does: '{text}'");
-            }
             string regexSearch = new string(Path.GetInvalidPathChars());
             Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
 
             if(r.Matches(text).Count > 0)
             {
-                throw new ArgumentException($"{text} contains illegal characters.");
+                throw new ArgumentException($"'{text}' is not a valid coordinate, it contains illegal characters. Illegal characters are: $',\\r,\\n,{String.Join(",", Path.GetInvalidPathChars())}'");
             }
             return text;
         }
