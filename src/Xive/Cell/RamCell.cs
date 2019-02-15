@@ -149,7 +149,14 @@ namespace Xive.Cell
         public void Update(IInput content)
         {
             byte[] bytes = new BytesOf(content).AsBytes();
-            this.cellMemory.Value()[this.name.Value()] = bytes;
+            if (bytes.Length > 0)
+            {
+                this.cellMemory.Value()[this.name.Value()] = bytes;
+            }
+            else
+            {
+                this.cellMemory.Value().Remove(this.name.Value());
+            }
         }
 
         public void Dispose()
