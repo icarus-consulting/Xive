@@ -108,7 +108,7 @@ namespace Xive.Xocument
 
         public IList<IXML> Nodes(string xpath)
         {
-            return new XMLQuery(this.node.Value()).Nodes(xpath);
+            return new XMLCursor(this.node.Value()).Nodes(xpath);
         }
 
         public string Value(string xpath, string def)
@@ -133,7 +133,7 @@ namespace Xive.Xocument
 
         public IList<string> Values(string xpath)
         {
-            return new XMLQuery(Node()).Values(xpath);
+            return new XMLCursor(Node()).Values(xpath);
         }
 
         public void Dispose()

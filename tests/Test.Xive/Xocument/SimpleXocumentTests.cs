@@ -37,9 +37,9 @@ namespace Xive.Xocument.Test
             Assert.Contains(
                 expected,
                 new SimpleXocument(
-                    new XMLQuery(
+                    new XMLCursor(
                         new InputOf("<root><item>A</item><item>B</item></root>")
-                    ).Node()
+                    ).AsNode()
                 ).Values("//item/text()")
             );
         }
@@ -49,9 +49,9 @@ namespace Xive.Xocument.Test
         {
             var xoc =
                 new SimpleXocument(
-                    new XMLQuery(
+                    new XMLCursor(
                         new InputOf("<root><item>A</item><item>A</item></root>")
-                    ).Node()
+                    ).AsNode()
                 );
             xoc.Modify(
                     new Directives()
@@ -70,11 +70,11 @@ namespace Xive.Xocument.Test
         {
             var xoc =
                 new SimpleXocument(
-                    new XMLQuery(
+                    new XMLCursor(
                         new InputOf(
                             "<root><item>A</item><item>B</item></root>"
                         )
-                    ).Node()
+                    ).AsNode()
                 );
 
             Assert.Equal(
@@ -88,11 +88,11 @@ namespace Xive.Xocument.Test
         {
             var xoc =
                 new SimpleXocument(
-                    new XMLQuery(
+                    new XMLCursor(
                         new InputOf(
                             "<root><item>A</item></root>"
                         )
-                    ).Node()
+                    ).AsNode()
                 );
 
             Assert.Equal(

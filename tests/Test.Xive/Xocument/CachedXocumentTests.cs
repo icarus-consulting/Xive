@@ -87,7 +87,7 @@ namespace Xive.Test.Xocument
 
             Assert.Equal(
                 "10 Minutes",
-                new XMLQuery(cache["buffered.xml"]).Values("/buffered/text()")[0]
+                new XMLCursor(cache["buffered.xml"]).Values("/buffered/text()")[0]
             );
         }
     }

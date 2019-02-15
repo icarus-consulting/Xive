@@ -224,7 +224,7 @@ namespace Xive.Comb.Test
 
             Assert.Equal(
                 "new",
-                new XMLQuery(cache["my-comb\\xoc.xml"]).Values("/root/text()")[0]
+                new XMLCursor(cache["my-comb\\xoc.xml"]).Values("/root/text()")[0]
             );
         }
     }

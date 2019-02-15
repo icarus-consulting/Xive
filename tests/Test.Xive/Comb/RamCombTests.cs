@@ -65,7 +65,7 @@ namespace Xive.Comb.Test
 
             Assert.Equal(
                 "help me please",
-                new XMLQuery(
+                new XMLCursor(
                     new InputOf(
                         new RamComb("my-comb", memory)
                             .Cell("xoctor.xml")
