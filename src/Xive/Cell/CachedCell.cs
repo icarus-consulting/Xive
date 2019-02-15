@@ -12,32 +12,47 @@ namespace Xive.Cell
         private readonly ICell origin;
         private readonly string name;
         private readonly IDictionary<string, byte[]> memory;
+        private readonly int maxSize;
 
         /// <summary>
         /// A cell whose content is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, IDictionary<string, byte[]> memory)
+        public CachedCell(ICell origin, string name, IDictionary<string, byte[]> memory, int maxBytes = 10485760)
         {
             this.origin = origin;
             this.name = name;
             this.memory = memory;
+            this.maxSize = maxBytes;
         }
 
         public byte[] Content()
         {
+            byte[] result = new byte[0];
             if (!this.memory.ContainsKey(this.name))
             {
-                this.memory[this.name] = origin.Content();
+                result = this.origin.Content();
+                if (result.Length <= this.maxSize)
+                {
+                    this.memory[this.name] = result;
+                }
             }
-            return this.memory[this.name];
+            else
+            {
+                result = this.memory[this.name];
+            }
+            return result;
         }
 
         public void Update(IInput content)
         {
             this.origin.Update(content);
             var stream = content.Stream();
-            stream.Seek(0, System.IO.SeekOrigin.Begin);
-            this.memory[this.name] = new BytesOf(new InputOf(stream)).AsBytes();
+
+            if (stream.Length <= this.maxSize)
+            {
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+                this.memory[this.name] = new BytesOf(new InputOf(stream)).AsBytes();
+            }
         }
 
         public void Dispose()

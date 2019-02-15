@@ -18,7 +18,9 @@ namespace Xive.Cell
         /// A cell which exists physically as a file.
         /// </summary>
         public FileCell(string root, string name) : this(
-            new ScalarOf<string>(() => Path.Combine(root, name))
+            new StickyScalar<string>(() => 
+                Path.Combine(root, new StrictCellName(name).AsString())
+            )
         )
         { }
 

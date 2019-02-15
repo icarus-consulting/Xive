@@ -119,22 +119,26 @@ namespace Xive.Cell
         /// <param name="itemMap">map with content for many items</param>
         internal RamCell(IScalar<string> name, IScalar<IDictionary<string, byte[]>> cellMemory)
         {
-            lock (this)
-            {
+            
                 this.id = Guid.NewGuid().ToString();
-                this.name = name;
+                this.name = 
+                    new StickyScalar<string>(
+                        () => new StrictCellName(name.Value()).AsString()
+                    );
                 this.cellMemory = 
                     new ScalarOf<IDictionary<string, byte[]>>(() =>
                         {
-                            var memory = cellMemory.Value();
-                            if (!memory.ContainsKey(name.Value()))
+                            lock (cellMemory)
                             {
-                                memory[name.Value()] = new byte[0];
+                                var memory = cellMemory.Value();
+                                if (!memory.ContainsKey(name.Value()))
+                                {
+                                    memory[name.Value()] = new byte[0];
+                                }
+                                return memory;
                             }
-                            return memory;
                         }
                     );
-            }
         }
 
         public byte[] Content()

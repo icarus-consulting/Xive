@@ -14,7 +14,7 @@ namespace Xive.Comb.Test
                     "my-cell", 
                     cellName => new RamCell(cellName),
                     (cellName, cell) => new CellXocument(cell, cellName)
-                ).Cell("A non existing cell");
+                ).Cell("A-non-existing-cell");
 
             Assert.InRange(result.Content().Length, 0, 0);
         }

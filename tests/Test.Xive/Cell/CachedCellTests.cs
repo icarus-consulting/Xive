@@ -80,5 +80,48 @@ namespace Xive.Cell.Test
                 ).AsString()
             );
         }
+
+        [Fact]
+        public void ReadSkipsCacheWhenOversized()
+        {
+            var cache = new Dictionary<string, byte[]>();
+            var cell =
+                new CachedCell(
+                    new FkCell(
+                        (update) => { },
+                        () => new byte[128]
+                    ),
+                    "cached",
+                    cache,
+                    64
+                );
+            cell.Content();
+
+            Assert.DoesNotContain(
+                "cached",
+                cache.Keys
+            );
+        }
+
+        [Fact]
+        public void UpdateSkipsCacheWhenOversized()
+        {
+            var cache = new Dictionary<string, byte[]>();
+            var cell =
+                new CachedCell(
+                    new FkCell(),
+                    "cached",
+                    cache,
+                    64
+                );
+            cell.Update(
+                new InputOf(new byte[128])
+            );
+
+            Assert.DoesNotContain(
+                "cached",
+                cache.Keys
+            );
+        }
     }
 }
