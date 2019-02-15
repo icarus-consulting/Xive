@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Cake.Codecov</id>
+    <version>0.5.0</version>
+    <title>Cake.Codecov</title>
+    <authors>Larz White</authors>
+    <owners>Larz White</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://github.com/cake-contrib/Cake.Codecov</projectUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/cake-contrib/graphics@49c3b71def749b86416d773f1ead0c0da2d590ea/png/cake-contrib-medium.png</iconUrl>
+    <description>Cake addin that extends Cake with ability to use Codecov.</description>
+    <releaseNotes>See GitHub for release notes.</releaseNotes>
+    <copyright>Copyright (c) 2017-2018 Larz White</copyright>
+    <tags>Cake Script Build Codecov</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.6" />
+      <group targetFramework=".NETStandard2.0" />
+    </dependencies>
+  </metadata>
+</package>
