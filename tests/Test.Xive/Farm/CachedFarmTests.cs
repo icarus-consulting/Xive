@@ -34,13 +34,10 @@ namespace Xive.Test.Farm
                 )
                 .Value();
 
-            for(var i=0;i<1000;i++)
-            {
-                comb.Xocument("some.xml")
-                    .Modify(
-                        new Directives().Xpath("/some").Add("item")
-                    );
-            }
+            comb.Xocument("some.xml")
+                .Modify(
+                    new Directives().Xpath("/some").Add("item")
+                );
 
             for (int i = 0; i < 10000; i++)
             {
