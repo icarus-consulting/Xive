@@ -157,12 +157,6 @@ namespace Xive.Comb.Test
 
                 using (var guts = comb.Cell("_guts.xml"))
                 {
-                    var test = new TextOf(
-                               new InputOf(
-                                   guts.Content()
-                               )).AsString();
-
-
                     Assert.Equal(
                        "3",
                         new FirstOf<string>(

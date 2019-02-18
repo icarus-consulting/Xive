@@ -81,22 +81,18 @@ namespace Xive.Comb.Test
         {
             using (var dir = new TempDirectory())
             {
-                var comb = new RamComb("combName");
-                var name = "something.tmp";
+                var combName = "combName";
+                var cellName = "something.tmp";
+                var comb = new RamComb(combName);
+                
 
-                using (var cell = comb.Cell(name))
+                using (var cell = comb.Cell(cellName))
                 {
                     cell.Update(new InputOf("abc"));
                 }
 
                 using (var guts = comb.Cell("_guts.xml"))
                 {
-                    var test = new TextOf(
-                               new InputOf(
-                                   guts.Content()
-                               )).AsString();
-
-
                     Assert.Equal(
                        "3",
                         new FirstOf<string>(
@@ -104,7 +100,7 @@ namespace Xive.Comb.Test
                                 new InputOf(
                                    guts.Content()
                                 )
-                            ).Values($"/items/item[name/text()='{name}']/size/text()")
+                            ).Values($"/items/item[name/text()='{combName}\\{cellName}']/size/text()")
                         ).Value()
                     );
                 }
