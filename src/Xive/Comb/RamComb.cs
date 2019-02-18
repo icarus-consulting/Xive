@@ -129,7 +129,7 @@ namespace Xive.Comb
             }
             else
             {
-                result = this.cellWrap(new RamCell($"{this.name}{Path.DirectorySeparatorChar}{name}", cellMemory));
+                result = this.cellWrap(new RamCell($"{this.name}{Path.DirectorySeparatorChar}{cell}", cellMemory));
             }
             return result;
         }
