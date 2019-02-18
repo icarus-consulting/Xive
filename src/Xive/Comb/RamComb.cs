@@ -25,6 +25,8 @@ using System.Collections.Generic;
 using System.IO;
 using Xive.Cell;
 using Xive.Xocument;
+using Yaapii.Atoms.IO;
+using Yaapii.Xambly;
 
 namespace Xive.Comb
 {
@@ -98,9 +100,38 @@ namespace Xive.Comb
             return this.xocumentWrap(new CellXocument(Cell(name), name));
         }
 
-        public ICell Cell(string name)
+        public ICell Cell(string cell)
         {
-            return this.cellWrap(new RamCell($"{this.name}{Path.DirectorySeparatorChar}{name}", cellMemory));
+            ICell result;
+            if (cell.Equals("_guts.xml"))
+            {
+                var patch = new Directives().Add("items");
+
+                foreach (var name in this.cellMemory.Keys)
+                {
+                    patch.Add("item")
+                        .Add("name")
+                        .Set(name) //file.Substring((this.name + "/").Length))
+                        .Up()
+                        .Add("size")
+                        .Set(this.cellMemory[name].Length)
+                        .Up()
+                        .Up();
+                }
+
+                result =
+                       new RamCell(
+                           "_guts.xml",
+                           new BytesOf(
+                               new Xambler(patch).Dom().ToString()
+                           ).AsBytes()
+                       );
+            }
+            else
+            {
+                result = this.cellWrap(new RamCell($"{this.name}{Path.DirectorySeparatorChar}{name}", cellMemory));
+            }
+            return result;
         }
     }
 }
