@@ -23,9 +23,11 @@
 using System;
 using System.IO;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
+using Yaapii.Xambly;
 
 namespace Xive.Cell
 {
@@ -40,7 +42,7 @@ namespace Xive.Cell
         /// A cell which exists physically as a file.
         /// </summary>
         public FileCell(string root, string name) : this(
-            new StickyScalar<string>(() => 
+            new StickyScalar<string>(() =>
                 Path.Combine(root, new StrictCellName(name).AsString())
             )
         )
@@ -68,7 +70,33 @@ namespace Xive.Cell
         public byte[] Content()
         {
             byte[] result = new byte[0];
-            if (File.Exists(this.path.Value()))
+
+            if (this.path.Value().Equals("_guts.xml"))
+            {
+                var patch = new Directives().Add("items");
+
+
+                foreach (var file in Directory.GetFiles(
+                        Path.GetDirectoryName(this.path.Value()),
+                        "*.*",
+                        SearchOption.AllDirectories))
+                {
+                    patch.Add("item")
+                        .Add("name")
+                        .Set(file.Substring((this.path.Value() + "/").Length))
+                        .Up()
+                        .Add("size")
+                        .Set(new FileInfo(file).Length)
+                        .Up()
+                        .Up();
+                }
+
+                result = new BytesOf(
+                            new Xambler(patch).Dom().ToString()
+                        ).AsBytes();
+                    
+            }
+            else if (File.Exists(this.path.Value()))
             {
                 result =
                     new BytesOf(
