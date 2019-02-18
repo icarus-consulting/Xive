@@ -24,7 +24,9 @@ using System;
 using System.IO;
 using Xunit;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
+using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -139,5 +141,43 @@ namespace Xive.Comb.Test
                 });
             }
         }
+
+        [Fact]
+        public void ListsContentSize()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(dir.Value().FullName, "combName");
+                var name = "something.tmp";
+
+                using (var cell = comb.Cell(name))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+
+                using (var guts = comb.Cell("_guts.xml"))
+                {
+                    var test = new TextOf(
+                               new InputOf(
+                                   guts.Content()
+                               )).AsString();
+
+
+                    Assert.Equal(
+                       "3",
+                        new FirstOf<string>(
+                            new XMLCursor(
+                                new InputOf(
+                                   guts.Content()
+                                )
+                            ).Values($"/items/item[name/text()='{name}']/size/text()")
+                        ).Value()
+                    );
+                }
+
+
+            }
+        }
     }
 }
+

@@ -25,7 +25,9 @@ using System.IO;
 using Xive.Cell;
 using Xive.Xocument;
 using Yaapii.Atoms;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Xambly;
 
 namespace Xive.Comb
 {
@@ -62,7 +64,40 @@ namespace Xive.Comb
 
         public ICell Cell(string name)
         {
-            return this.comb.Value().Cell(name);
+            ICell result;
+            if (name.Equals("_guts.xml"))
+            {
+                var patch = new Directives().Add("items");
+
+                foreach (var file in Directory.GetFiles(
+                        Path.GetDirectoryName(this.comb.Value().Name()),
+                        "*.*",
+                        SearchOption.AllDirectories))
+                {
+                    patch.Add("item")
+                        .Add("name")
+                        .Set(Path.GetFileName( file)) //file.Substring((this.name + "/").Length))
+                        .Up()
+                        .Add("size")
+                        .Set(new FileInfo(file).Length)
+                        .Up()
+                        .Up();
+                }
+
+                result =
+                       new RamCell(
+                           "_guts.xml",
+                           new BytesOf(
+                               new Xambler(patch).Dom().ToString()
+                           ).AsBytes()
+                       );
+            }
+            else
+            {
+                result = this.comb.Value().Cell(name);
+            }
+
+            return result;
         }
 
         public string Name()
