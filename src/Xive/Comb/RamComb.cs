@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xive.Cell;
 using Xive.Xocument;
+using Yaapii.Atoms.Collection;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
@@ -120,9 +121,14 @@ namespace Xive.Comb
                     .Add("size")
                     .Set(this.cellMemory[key].Length)
                     .Up()
-                    .Up(), this.cellMemory.Keys).Invoke();
+                    .Up(),
+                   new Filtered<string>(
+                       (path) => path.Substring(0,this.name.Length) == this.name,
+                       this.cellMemory.Keys
+                       )
+                   ).Invoke();
 
-            
+               
 
                 result =
                        new RamCell(
