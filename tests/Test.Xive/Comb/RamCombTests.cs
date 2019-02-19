@@ -100,7 +100,7 @@ namespace Xive.Comb.Test
                                 new InputOf(
                                    guts.Content()
                                 )
-                            ).Values($"/items/item[name/text()='{combName}\\{cellName}']/size/text()")
+                            ).Values($"/items/item[name/text()='{cellName}']/size/text()")
                         ).Value()
                     );
                 }

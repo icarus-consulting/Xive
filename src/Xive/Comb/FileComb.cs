@@ -76,7 +76,7 @@ namespace Xive.Comb
                 {
                     patch.Add("item")
                         .Add("name")
-                        .Set(Path.GetFileName( file)) 
+                        .Set(Path.GetFileName(file)) 
                         .Up()
                         .Add("size")
                         .Set(new FileInfo(file).Length)

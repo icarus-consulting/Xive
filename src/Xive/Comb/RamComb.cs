@@ -26,6 +26,7 @@ using System.IO;
 using Xive.Cell;
 using Xive.Xocument;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
 
 namespace Xive.Comb
@@ -100,24 +101,28 @@ namespace Xive.Comb
             return this.xocumentWrap(new CellXocument(Cell(name), name));
         }
 
-        public ICell Cell(string cell)
+        public ICell Cell(string name)
         {
             ICell result;
-            if (cell.Equals("_guts.xml"))
+            if (name.Equals("_guts.xml"))
             {
                 var patch = new Directives().Add("items");
 
-                foreach (var name in this.cellMemory.Keys)
-                {
-                    patch.Add("item")
-                        .Add("name")
-                        .Set(name) //file.Substring((this.name + "/").Length))
-                        .Up()
-                        .Add("size")
-                        .Set(this.cellMemory[name].Length)
-                        .Up()
-                        .Up();
-                }
+                //foreach (var key in this.cellMemory.Keys)
+                //{
+
+                new Each<string>(
+                 (key) =>
+                  patch.Add("item")
+                    .Add("name")
+                    .Set(key.Substring((this.name + "/").Length))
+                    .Up()
+                    .Add("size")
+                    .Set(this.cellMemory[key].Length)
+                    .Up()
+                    .Up(), this.cellMemory.Keys).Invoke();
+
+            
 
                 result =
                        new RamCell(
@@ -129,7 +134,7 @@ namespace Xive.Comb
             }
             else
             {
-                result = this.cellWrap(new RamCell($"{this.name}{Path.DirectorySeparatorChar}{cell}", cellMemory));
+                result = this.cellWrap(new RamCell($"{this.name}{Path.DirectorySeparatorChar}{name}", cellMemory));
             }
             return result;
         }
