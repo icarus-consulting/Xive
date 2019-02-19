@@ -85,7 +85,6 @@ namespace Xive.Comb.Test
                 var cellName = "something.tmp";
                 var comb = new RamComb(combName);
                 
-
                 using (var cell = comb.Cell(cellName))
                 {
                     cell.Update(new InputOf("abc"));

@@ -109,26 +109,20 @@ namespace Xive.Comb
             {
                 var patch = new Directives().Add("items");
 
-                //foreach (var key in this.cellMemory.Keys)
-                //{
-
                 new Each<string>(
-                 (key) =>
-                  patch.Add("item")
-                    .Add("name")
-                    .Set(key.Substring((this.name + "/").Length))
-                    .Up()
-                    .Add("size")
-                    .Set(this.cellMemory[key].Length)
-                    .Up()
-                    .Up(),
-                   new Filtered<string>(
+                    (key) =>
+                        patch.Add("item")
+                        .Add("name")
+                        .Set(key.Substring((this.name + "/").Length))
+                        .Up()
+                        .Add("size")
+                        .Set(this.cellMemory[key].Length)
+                        .Up()
+                        .Up(),
+                    new Filtered<string>(
                        (path) => path.Substring(0,this.name.Length) == this.name,
                        this.cellMemory.Keys
-                       )
-                   ).Invoke();
-
-               
+                   )).Invoke();
 
                 result =
                        new RamCell(
