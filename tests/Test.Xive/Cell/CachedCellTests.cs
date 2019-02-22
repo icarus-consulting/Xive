@@ -26,6 +26,8 @@ using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
+
 namespace Xive.Cell.Test
 {
     public sealed class CachedCellTests
@@ -143,6 +145,31 @@ namespace Xive.Cell.Test
             Assert.DoesNotContain(
                 "cached",
                 cache.Keys
+            );
+        }
+
+        [Fact]
+        public void UnderMaxAndThenOverMaxWorks()
+        {
+            var cache = new Dictionary<string, byte[]>();
+            var cell =
+                new CachedCell(
+                    new RamCell(),
+                    "cached",
+                    cache,
+                    3
+                );
+            cell.Update(
+                new InputOf(new byte[0])
+            );
+
+            cell.Update(
+                new InputOf("More than 3 characters")
+            );
+
+            Assert.Equal(
+                "More than 3 characters",
+                new TextOf(cell.Content()).AsString()
             );
         }
     }

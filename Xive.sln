@@ -5,7 +5,16 @@ VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xive", "src\Xive\Xive.csproj", "{39AA222B-CC01-4C1E-9E8F-7FEC01712273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Xive", "tests\Test.Xive\Test.Xive.csproj", "{F8E0EF3C-B315-41AA-9701-C7925C803A96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Xive", "tests\Test.Xive\Test.Xive.csproj", "{F8E0EF3C-B315-41AA-9701-C7925C803A96}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{B2FC48FA-3C43-4054-85C7-461CB59B5579}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		appveyor.yml = appveyor.yml
+		build.cake = build.cake
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

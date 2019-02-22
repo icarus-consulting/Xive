@@ -26,6 +26,7 @@ using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
+using Yaapii.Xambly;
 using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
@@ -43,6 +44,70 @@ namespace Xive.Comb.Test
                 using (var cell = comb.Cell("Non existing"))
                 {
                     Assert.InRange<int>(cell.Content().Length, 0, 0);
+                }
+            }
+        }
+
+        [Fact]
+        public void DeliversXocument()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(dir.Value().FullName, "my-comb");
+                using (var xoc = comb.Xocument("some.xml"))
+                {
+                    Assert.Equal(
+                        1,
+                        xoc.Nodes("/some").Count
+                    );
+                }
+            }
+        }
+
+        [Fact]
+        public void XocumentRootSkipsSubDir()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(dir.Value().FullName, "my-comb");
+                using (var xoc = comb.Xocument("sub/some.xml"))
+                {
+                    Assert.Equal(
+                        1,
+                        xoc.Nodes("/some").Count
+                    );
+                }
+            }
+        }
+
+        [Fact]
+        public void XocumentCreatesSubDirectories()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb =
+                    new FileComb(
+                        dir.Value().FullName,
+                        "my-comb"
+                    );
+
+                using (var xoc = comb.Xocument("sub/xoc/ume/nt.xml"))
+                {
+                    xoc.Modify(
+                        new Directives()
+                            .Xpath("/nt")
+                            .Add("NotWindowsNT")
+                        );
+
+                    Assert.True(
+                        File.Exists(
+                            Path.Combine(
+                                dir.Value().FullName,
+                                "my-comb",
+                                "sub/xoc/ume/nt.xml"
+                            )
+                        )
+                    );
                 }
             }
         }

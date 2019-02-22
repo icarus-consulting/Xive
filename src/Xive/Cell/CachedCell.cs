@@ -69,11 +69,14 @@ namespace Xive.Cell
         {
             this.origin.Update(content);
             var stream = content.Stream();
-
             if (stream.Length <= this.maxSize)
             {
                 stream.Seek(0, System.IO.SeekOrigin.Begin);
                 this.memory[this.name] = new BytesOf(new InputOf(stream)).AsBytes();
+            }
+            else
+            {
+                this.memory.Remove(this.name);
             }
         }
 

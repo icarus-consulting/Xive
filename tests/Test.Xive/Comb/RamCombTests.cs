@@ -77,32 +77,48 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
-        public void ListsContentSize()
+        public void DeliversXocument()
         {
-            using (var dir = new TempDirectory())
+            var memory = new Dictionary<string, byte[]>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("some.xml"))
             {
-                var combName = "combName";
-                var cellName = "something.tmp";
-                var comb = new RamComb(combName);
-                
-                using (var cell = comb.Cell(cellName))
-                {
-                    cell.Update(new InputOf("abc"));
-                }
+                Assert.Equal(
+                    1,
+                    xoc.Nodes("/some").Count
+                );
+            }
+        }
 
-                using (var guts = comb.Cell("_guts.xml"))
-                {
-                    Assert.Equal(
-                       "3",
-                        new FirstOf<string>(
-                            new XMLCursor(
-                                new InputOf(
-                                   guts.Content()
-                                )
-                            ).Values($"/items/item[name/text()='{cellName}']/size/text()")
-                        ).Value()
-                    );
-                }
+        [Fact]
+        public void RemembersSubPathXocument()
+        {
+            var memory = new Dictionary<string, byte[]>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("sub/dir/some.xml"))
+            {
+                xoc.Modify(new Directives().Xpath("/some").Add("test"));
+            }
+            using (var xoc = comb.Xocument("sub/dir/some.xml"))
+            {
+                Assert.Equal(
+                    1,
+                    xoc.Nodes("/some/test").Count
+                );
+            }
+        }
+
+        [Fact]
+        public void XocumentRootSkipsSubDir()
+        {
+            var memory = new Dictionary<string, byte[]>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("sub/some.xml"))
+            {
+                Assert.Equal(
+                    1,
+                    xoc.Nodes("/some").Count
+                );
             }
         }
     }

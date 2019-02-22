@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.IO;
 using System.Xml.Linq;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -45,6 +46,7 @@ namespace Xive.Xocument
                             {
                                 name = name.Substring(0, name.Length - 4);
                             }
+                            name = Path.GetFileName(name);
                             byte[] content = cell.Content();
                             if(content.Length == 0)
                             {
