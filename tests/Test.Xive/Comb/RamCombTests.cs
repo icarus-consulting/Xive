@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using Xunit;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
