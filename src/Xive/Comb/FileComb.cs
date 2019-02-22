@@ -50,12 +50,17 @@ namespace Xive.Comb
         {
             this.comb =
                 new ScalarOf<IHoneyComb>(() =>
-                    new SimpleComb(
-                        Path.Combine(root, name),
-                        path => new FileCell(path),
-                        (cellName, cell) => xocumentWrap(new CellXocument(cell, cellName))
-                    )
-                );
+                    {
+                        var fullPath = Path.Combine(root, name);
+                        return
+                            new SimpleComb(
+                                Path.Combine(root, name),
+                                path => new FileCell(path),
+                                (cellName, cell) => xocumentWrap(
+                                    new CellXocument(cell, cellName)
+                                )
+                            );
+                    });
             this.name = name;
 
         }

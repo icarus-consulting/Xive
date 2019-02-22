@@ -60,8 +60,13 @@ namespace Xive.Cell
             this.path =
                 new SolidScalar<string>(() =>
                 {
-                    Validate(new Coordinate(path.Value()).AsString());
-                    return path.Value();
+                    var normalized = Path.GetFullPath(path.Value());
+                    Validate(
+                        new Coordinate(
+                            normalized
+                        ).AsString()
+                    );
+                    return normalized;
                 });
         }
 

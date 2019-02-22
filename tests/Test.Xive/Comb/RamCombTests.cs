@@ -74,5 +74,51 @@ namespace Xive.Comb.Test
                 ).Values("/xoctor/text()")[0]
             );
         }
+
+        [Fact]
+        public void DeliversXocument()
+        {
+            var memory = new Dictionary<string, byte[]>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("some.xml"))
+            {
+                Assert.Equal(
+                    1,
+                    xoc.Nodes("/some").Count
+                );
+            }
+        }
+
+        [Fact]
+        public void RemembersSubPathXocument()
+        {
+            var memory = new Dictionary<string, byte[]>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("sub/dir/some.xml"))
+            {
+                xoc.Modify(new Directives().Xpath("/some").Add("test"));
+            }
+            using (var xoc = comb.Xocument("sub/dir/some.xml"))
+            {
+                Assert.Equal(
+                    1,
+                    xoc.Nodes("/some/test").Count
+                );
+            }
+        }
+
+        [Fact]
+        public void XocumentRootSkipsSubDir()
+        {
+            var memory = new Dictionary<string, byte[]>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("sub/some.xml"))
+            {
+                Assert.Equal(
+                    1,
+                    xoc.Nodes("/some").Count
+                );
+            }
+        }
     }
 }
