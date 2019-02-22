@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using Xunit;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
@@ -73,6 +74,36 @@ namespace Xive.Comb.Test
                     )
                 ).Values("/xoctor/text()")[0]
             );
+        }
+
+        [Fact]
+        public void ListsContentSize()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var combName = "combName";
+                var cellName = "something.tmp";
+                var comb = new RamComb(combName);
+                
+                using (var cell = comb.Cell(cellName))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+
+                using (var guts = comb.Cell("_guts.xml"))
+                {
+                    Assert.Equal(
+                       "3",
+                        new FirstOf<string>(
+                            new XMLCursor(
+                                new InputOf(
+                                   guts.Content()
+                                )
+                            ).Values($"/items/item[name/text()='{cellName}']/size/text()")
+                        ).Value()
+                    );
+                }
+            }
         }
     }
 }
