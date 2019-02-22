@@ -62,6 +62,11 @@ namespace Xive.Cell
             this.path =
                 new SolidScalar<string>(() =>
                 {
+                    var pth = path.Value();
+                    if (!Path.IsPathRooted(pth))
+                    {
+                        throw new ArgumentException($"Cannot work with path '{pth}' because it is not rooted.");
+                    }
                     var normalized = Path.GetFullPath(path.Value());
                     Validate(
                         new Coordinate(
@@ -100,10 +105,6 @@ namespace Xive.Cell
 
         private void Validate(string path)
         {
-            if (!Path.IsPathRooted(path))
-            {
-                throw new ArgumentException($"Cannot work with path '{path}' because it is not rooted.");
-            }
             if (Path.GetFileName(path) == String.Empty)
             {
                 throw new ArgumentException($"Cannot work with path '{path}' because it is not a file.");
