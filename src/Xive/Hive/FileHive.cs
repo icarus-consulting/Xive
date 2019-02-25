@@ -21,8 +21,8 @@
 //SOFTWARE.
 
 using System;
-using Yaapii.Atoms.Scalar;
 using Xive.Comb;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Hive
 {
@@ -31,27 +31,40 @@ namespace Xive.Hive
     /// </summary>
     public sealed class FileHive : HiveEnvelope
     {
-        /// <summary>
-        /// A hive that exists physically as files.
-        /// </summary>
-        public FileHive(string name, string root) : this(
-            name, root, comb => comb
+        public FileHive(string root) : this(
+            "X", root
         )
         { }
 
         /// <summary>
         /// A hive that exists physically as files.
         /// </summary>
-        public FileHive(string name, string root, Func<string, IHoneyComb, ICatalog> catalog) : this(
-            name, root, comb => comb, catalog
+        public FileHive(string scope, string root) : this(
+            scope, root, comb => comb
         )
         { }
 
         /// <summary>
         /// A hive that exists physically as files.
         /// </summary>
-        public FileHive(string name, string root, Func<IHoneyComb, IHoneyComb> combWrap) : this(
-            name,
+        public FileHive(string root, Func<string, IHoneyComb, ICatalog> catalog) : this(
+            "X", root, comb => comb, catalog
+        )
+        { }
+
+        /// <summary>
+        /// A hive that exists physically as files.
+        /// </summary>
+        public FileHive(string scope, string root, Func<string, IHoneyComb, ICatalog> catalog) : this(
+            scope, root, comb => comb, catalog
+        )
+        { }
+
+        /// <summary>
+        /// A hive that exists physically as files.
+        /// </summary>
+        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap) : this(
+            scope,
             root,
             combWrap,
             (hiveName, comb) => new Catalog(hiveName, comb)
@@ -60,14 +73,26 @@ namespace Xive.Hive
 
         /// <summary>
         /// A hive that exists physically as files.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="root"></param>
+        /// <param name="combWrap"></param>
+        /// <param name="catalog"></param>
+        public FileHive(string root, Func<IHoneyComb, IHoneyComb> combWrap, Func<string, IHoneyComb, ICatalog> catalog) : this(
+            "X", root, combWrap, catalog
+        )
+        { }
+
+        /// <summary>
+        /// A hive that exists physically as files.
         /// With this ctor, you can tell the hive how to build its catalog.
         /// </summary>
-        public FileHive(string name, string root, Func<IHoneyComb, IHoneyComb> combWrap, Func<string, IHoneyComb, ICatalog> catalog) : base(
+        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap, Func<string, IHoneyComb, ICatalog> catalog) : base(
             new StickyScalar<IHive>(() =>
             {
                 return
                     new SimpleHive(
-                        name,
+                        scope,
                         comb => combWrap(new FileComb($"{root}", comb)),
                         catalog
                     );

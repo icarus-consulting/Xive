@@ -27,6 +27,8 @@ using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
+
 namespace Xive.Hive.Test
 {
     public sealed class RamHiveTests
@@ -40,6 +42,35 @@ namespace Xive.Hive.Test
             catalog.Create("123");
 
             Assert.NotEmpty(catalog.List("@id='123'"));
+        }
+
+        [Fact]
+        public void ShiftsScope()
+        {
+            var mem = new Dictionary<string, byte[]>();
+            var hive = new RamHive(mem);
+            var catalog = new Catalog(hive);
+            catalog.Create("123");
+
+            var shifted = hive.Shifted("twilight-zone");
+            var twilightCatalog = new Catalog(shifted);
+
+            Assert.Empty(twilightCatalog.List("@id='123'"));
+        }
+
+        [Fact]
+        public void DistinguishesScope()
+        {
+            var mem = new Dictionary<string, byte[]>();
+            var hive = new RamHive(mem);
+            var catalog = new Catalog(hive);
+            catalog.Create("123");
+
+            var shifted = hive.Shifted("twilight-zone");
+            var twilightCatalog = new Catalog(shifted);
+            twilightCatalog.Create("789");
+
+            Assert.Contains("twilight-zone\\HQ\\catalog.xml", mem.Keys);
         }
 
         [Fact]

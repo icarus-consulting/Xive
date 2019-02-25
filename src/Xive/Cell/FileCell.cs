@@ -23,11 +23,9 @@
 using System;
 using System.IO;
 using Yaapii.Atoms;
-using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
-using Yaapii.Xambly;
 
 namespace Xive.Cell
 {
@@ -69,7 +67,7 @@ namespace Xive.Cell
                     }
                     var normalized = Path.GetFullPath(path.Value());
                     Validate(
-                        new Coordinate(
+                        new StrictCoordinate(
                             normalized
                         ).AsString()
                     );

@@ -44,7 +44,7 @@ namespace Xive.Hive
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
         public Catalog(IHive hive) : this(
-            new ScalarOf<string>(() => hive.Name()),
+            new ScalarOf<string>(() => hive.Scope()),
             new ScalarOf<IHoneyComb>(() => hive.HQ()),
             cell => new CellXocument(cell, "catalog")
         )

@@ -55,10 +55,64 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var dxm = new FileHive("product", dir.Value().FullName);
-                new Catalog(dxm).Create("2CV");
+                var hive = new FileHive("product", dir.Value().FullName);
+                new Catalog(hive).Create("2CV");
                 Assert.NotEmpty(
-                    dxm.Combs("@id='2CV'")
+                    hive.Combs("@id='2CV'")
+                );
+            }
+        }
+
+        [Fact]
+        public void ShiftCreatesSubDir()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName);
+                hive = hive.Shifted("product");
+                new Catalog(hive).Create("2CV");
+
+                using (var cell =
+                    new FirstOf<IHoneyComb>(
+                        hive.Combs("@id='2CV'")
+                    ).Value().Cell("data")
+                )
+                {
+                    cell.Update(new InputOf("bytes over bytes here..."));
+                    Assert.True(
+                        Directory.Exists(Path.Combine(dir.Value().FullName, "product", "2CV"))
+                    );
+                }
+            }
+        }
+
+        [Fact]
+        public void ShiftCreatesHQ()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName);
+                hive = hive.Shifted("product");
+                new Catalog(hive).Create("2CV");
+                Assert.True(
+                    Directory.Exists(Path.Combine(dir.Value().FullName, "product", "HQ"))
+                );
+            }
+        }
+
+        [Fact]
+        public void ShiftsScope()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName);
+                hive.Shifted("product");
+                new Catalog(hive).Create("2CV");
+
+                hive = hive.Shifted("machine");
+                new Catalog(hive).Create("DrRobotic");
+                Assert.NotEmpty(
+                    hive.Combs("@id='DrRobotic'")
                 );
             }
         }
@@ -165,7 +219,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void HasCorrectName()
         {
-            Assert.Equal("the name", new FileHive("the name", "the root").Name());
+            Assert.Equal("the name", new FileHive("the name", "the root").Scope());
         }
     }
 }

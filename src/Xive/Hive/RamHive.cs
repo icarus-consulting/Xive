@@ -33,7 +33,7 @@ namespace Xive.Hive
     /// </summary>
     public sealed class RamHive : IHive
     {
-        private readonly string name;
+        private readonly string scope;
         private readonly Func<IHoneyComb, IHoneyComb> comb;
         private readonly Func<string, IHoneyComb, ICatalog> catalog;
         private readonly IDictionary<string, byte[]> memory;
@@ -42,10 +42,32 @@ namespace Xive.Hive
         /// A hive that lives in memory.
         /// With this ctor, this hive's contents will live only as long as this instance lives.
         /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        public RamHive(string name) : this(
-            name,
+        /// <param name="scope">Scope name of the hive</param>
+        public RamHive() : this("X")
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, this hive's contents will live only as long as this instance lives.
+        /// </summary>
+        /// <param name="scope">Scope name of the hive</param>
+        public RamHive(string scope) : this(
+            scope,
             (hiveName, comb) => new Catalog(hiveName, comb)
+        )
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, this hive's contents will live only as long as this instance lives.
+        /// </summary>
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="combWrap">Wrap the comb if needed.</param>
+        public RamHive(Func<IHoneyComb, IHoneyComb> combWrap) : this(
+            "X",
+            combWrap,
+            (hiveName, cmb) => new Catalog(hiveName, cmb),
+            new Dictionary<string, byte[]>()
         )
         { }
 
@@ -71,9 +93,40 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="memory">An external memory for the hive</param>
         /// <param name="combWrap">Wrap the comb if needed.</param>
+        public RamHive(Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, byte[]> memory) : this(
+            "X",
+            combWrap,
+            (hiveName, comb) => new Catalog(hiveName, comb),
+            memory
+        )
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, you can construct the hive multiple times with the same name and memory
+        /// and its combs will always have the same contents.
+        /// </summary>
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="memory">An external memory for the hive</param>
+        /// <param name="combWrap">Wrap the comb if needed.</param>
         public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, byte[]> memory) : this(
             name,
             combWrap,
+            (hiveName, comb) => new Catalog(hiveName, comb),
+            memory
+        )
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, you can construct the hive multiple times with the same name and memory
+        /// and its combs will always have the same contents.
+        /// </summary>
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="memory">An external memory for the hive</param>
+        public RamHive(IDictionary<string, byte[]> memory) : this(
+            "X",
+            comb => comb,
             (hiveName, comb) => new Catalog(hiveName, comb),
             memory
         )
@@ -101,11 +154,41 @@ namespace Xive.Hive
         /// </summary>
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
+        public RamHive(Func<string, IHoneyComb, ICatalog> catalog, IDictionary<string, byte[]> memory) : this(
+            "X",
+            comb => comb,
+            catalog,
+            memory
+        )
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, you can construct the hive multiple times with the same name and memory
+        /// and its combs will always have the same contents.
+        /// </summary>
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
         public RamHive(string name, Func<string, IHoneyComb, ICatalog> catalog, IDictionary<string, byte[]> memory) : this(
             name,
             comb => comb,
             catalog,
             memory
+        )
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, this hive's contents will live only as long as this instance
+        /// lives.
+        /// </summary>
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
+        public RamHive(Func<string, IHoneyComb, ICatalog> catalog) : this(
+            "X",
+            comb => comb,
+            catalog,
+            new Dictionary<string, byte[]>()
         )
         { }
 
@@ -134,7 +217,7 @@ namespace Xive.Hive
         /// <param name="memory">An external memory for the hive</param>
         public RamHive(string name, Func<IHoneyComb, IHoneyComb> comb, Func<string, IHoneyComb, ICatalog> catalog, IDictionary<string, byte[]> memory)
         {
-            this.name = name;
+            this.scope = name;
             this.comb = comb;
             this.catalog = catalog;
             this.memory = memory;
@@ -145,7 +228,7 @@ namespace Xive.Hive
             return
                 new Mapped<string, IHoneyComb>(
                     id => this.comb(new RamComb(id, this.memory)),
-                    this.catalog(this.name, HQ()).List(xpath)
+                    this.catalog(this.scope, HQ()).List(xpath)
                 );
         }
 
@@ -153,13 +236,18 @@ namespace Xive.Hive
         {
             return
                 this.comb(
-                    new RamComb($"{this.name}{Path.DirectorySeparatorChar}HQ", this.memory)
+                    new RamComb($"{this.scope}{Path.DirectorySeparatorChar}HQ", this.memory)
                 );
         }
 
-        public string Name()
+        public IHive Shifted(string scope)
         {
-            return this.name;
+            return new RamHive(scope, this.comb, this.memory);
+        }
+
+        public string Scope()
+        {
+            return this.scope;
         }
     }
 }

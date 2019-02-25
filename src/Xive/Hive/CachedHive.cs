@@ -86,9 +86,14 @@ namespace Xive.Hive
                 );
         }
 
-        public string Name()
+        public IHive Shifted(string scope)
         {
-            return this.origin.Name();
+            return this.origin.Shifted(scope);
+        }
+
+        public string Scope()
+        {
+            return this.origin.Scope();
         }
     }
 }

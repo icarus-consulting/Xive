@@ -20,47 +20,38 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 using System.Xml.Linq;
-using Xive.Hive;
+using Xive.Test;
+using Xunit;
 
-namespace Xive.Farm
+namespace Xive.Xocument.Test
 {
-    /// <summary>
-    /// A farm that is cached.
-    /// </summary>
-    public class CachedFarm : IFarm
+    public sealed class MutexXocumentTests
     {
-        private readonly IFarm origin;
-        private readonly IDictionary<string, byte[]> binMemory;
-        private readonly IDictionary<string, XNode> xmlMemory;
-
-        /// <summary>
-        /// A farm that is cached.
-        /// </summary>
-        /// <param name="origin"></param>
-        public CachedFarm(IFarm origin) : this(origin, new Dictionary<string,byte[]>(), new Dictionary<string,XNode>())
-        { }
-
-        /// <summary>
-        /// A farm that is cached.
-        /// </summary>
-        public CachedFarm(IFarm origin, IDictionary<string,byte[]> binMemory, IDictionary<string,XNode> xmlMemory)
+        [Fact]
+        public void DeliversParallel()
         {
-            this.origin = origin;
-            this.binMemory = binMemory;
-            this.xmlMemory = xmlMemory;
-        }
-
-        public IHive Hive(string name)
-        {
-            return
-                new CachedHive(
-                    new Coordinate(name).AsString(),
-                    this.origin.Hive(name),
-                    this.binMemory,
-                    this.xmlMemory
+            var accesses = 0;
+            var xoc =
+                new MutexXocument("synced",
+                    new FkXocument(() =>
+                    {
+                        accesses++;
+                        Assert.Equal(1, accesses);
+                        accesses--;
+                        return
+                            new XDocument(
+                                new XElement("synced", new XText("here"))
+                            );
+                    })
                 );
+
+            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+            {
+                xoc.Value("/synced/text()", "");
+            });
         }
     }
 }
