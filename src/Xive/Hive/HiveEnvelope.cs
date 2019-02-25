@@ -50,9 +50,14 @@ namespace Xive.Hive
             return this.hive.Value().HQ();
         }
 
-        public string Name()
+        public string Scope()
         {
-            return this.hive.Value().Name();
+            return this.hive.Value().Scope();
+        }
+
+        public IHive Shifted(string scope)
+        {
+            return this.hive.Value().Shifted(scope);
         }
     }
 }

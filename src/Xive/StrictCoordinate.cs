@@ -29,18 +29,20 @@ using Yaapii.Atoms.Func;
 namespace Xive
 {
     /// <summary>
-    /// A coordinate. A path to a cell consists of multiple coordinates.
+    /// A coordinate which disallows illegal chars in comb names. 
+    /// A path to a cell consists of one to multiple coordinates and a cellname.
     /// </summary>
-    public sealed class Coordinate : IText
+    public sealed class StrictCoordinate : IText
     {
         private readonly string text;
         private readonly IFunc<string,string> validated;
 
         /// <summary>
-        /// A coordinate. A path to a cell consists of multiple coordinates.
+        /// A coordinate which disallows illegal chars in comb names. 
+        /// A path to a cell consists of one to multiple coordinates and a cellname.
         /// </summary>
         /// <param name="text"></param>
-        public Coordinate(string text)
+        public StrictCoordinate(string text)
         {
             this.text = text;
             this.validated = new StickyFunc<string, string>(txt => Validated(txt));

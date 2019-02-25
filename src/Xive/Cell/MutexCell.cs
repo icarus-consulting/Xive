@@ -33,7 +33,7 @@ namespace Xive.Cell
     /// <summary>
     /// A cell that is system-wide exclusive for one access at a time.
     /// </summary>
-    public sealed class SyncCell : ICell
+    public sealed class MutexCell : ICell
     {
         private readonly IScalar<Mutex> mtx;
         private readonly string name;
@@ -42,7 +42,7 @@ namespace Xive.Cell
         /// <summary>
         /// A cell that is system-wide exclusive for one access at a time.
         /// </summary>
-        public SyncCell(string name, Func<string, ICell> origin)
+        public MutexCell(string name, Func<string, ICell> origin)
         {
             lock (this) //make creation of mutex solid. Otherwise odd behaviour occures because creation can be left unfinished and mutex abandoned.
             {
@@ -126,7 +126,7 @@ namespace Xive.Cell
             }
         }
 
-        ~SyncCell()
+        ~MutexCell()
         {
             Dispose();
         }

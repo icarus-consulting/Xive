@@ -20,38 +20,53 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Xive.Test;
-using Xunit;
+using System.IO;
+using Xive.Cell;
+using Xive.Xocument;
 
-namespace Xive.Xocument.Test
+namespace Xive.Comb
 {
-    public sealed class SyncXocumentTests
+    /// <summary>
+    /// A comb that accesses cells systemwide exclusively.
+    /// </summary>
+    public sealed class MutexComb : IHoneyComb
     {
-        [Fact]
-        public void DeliversParallel()
-        {
-            var accesses = 0;
-            var xoc =
-                new SyncXocument("synced",
-                    new FkXocument(() =>
-                    {
-                        accesses++;
-                        Assert.Equal(1, accesses);
-                        accesses--;
-                        return
-                            new XDocument(
-                                new XElement("synced", new XText("here"))
-                            );
-                    })
-                );
+        private readonly IHoneyComb comb;
 
-            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+        /// <summary>
+        /// A comb that accesses cells systemwide exclusively.
+        /// </summary>
+        public MutexComb(IHoneyComb comb)
+        {
+            this.comb = comb;
+        }
+
+        public string Name()
+        {
+            lock (comb)
             {
-                xoc.Value("/synced/text()", "");
-            });
+                return comb.Name();
+            }
+        }
+
+        public ICell Cell(string name)
+        {
+            lock (comb)
+            {
+                return new MutexCell(comb.Name() + Path.DirectorySeparatorChar + name, (str) => comb.Cell(name));
+            }
+        }
+
+        public IXocument Xocument(string name)
+        {
+            lock(comb)
+            {
+                return 
+                    new MutexXocument(
+                        name,
+                        new CellXocument(Cell(name), name)
+                    );
+            }
         }
     }
 }

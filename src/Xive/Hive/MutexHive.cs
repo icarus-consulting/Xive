@@ -20,22 +20,57 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-namespace Xive
+using System.Collections.Generic;
+using Xive.Comb;
+using Yaapii.Atoms.Enumerable;
+
+namespace Xive.Hive
 {
     /// <summary>
-    /// A farm, containing multiple hives.
-    /// Every hive should represent a seperate category.
-    /// For example: "Todo", "Reminder", "Appointment".
+    /// A hive that accesses cells systemwide exclusively.
     /// </summary>
-    public interface IFarm
+    public sealed class MutexHive : IHive
     {
+        private readonly IHive hive;
+
         /// <summary>
-        /// Acess a specific hive.
-        /// Example: 
-        /// Farm(maybe for: An App "Organizer") -> Hive(maybe: Calendar) -> n Comb(maybe: Appointment) -> n Cells(maybe: subscribers.xml)
+        /// A hive that accesses cells systemwide exclusively.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        IHive Hive(string name);
+        public MutexHive(IHive hive)
+        {
+            this.hive = hive;
+        }
+
+        public IEnumerable<IHoneyComb> Combs(string xpath)
+        {
+            lock (this.hive)
+            {
+                return new Mapped<IHoneyComb, IHoneyComb>((comb) => new MutexComb(comb), hive.Combs(xpath));
+            }
+        }
+
+        public IHoneyComb HQ()
+        {
+            lock (this.hive)
+            {
+                return new MutexComb(hive.HQ());
+            }
+        }
+
+        public IHive Shifted(string scope)
+        {
+            lock(this.hive)
+            {
+                return this.hive;
+            }
+        }
+
+        public string Scope()
+        {
+            lock (this.hive)
+            {
+                return this.hive.Scope();
+            }
+        }
     }
 }

@@ -29,12 +29,12 @@ using Yaapii.Atoms.IO;
 
 namespace Xive.Hive.Test
 {
-    public class SyncHiveTest
+    public class MutexHiveTest
     {
         [Fact]
         public void CreatesCatalogInParallel()
         {
-            var hive = new SyncHive(new RamHive("testRamHive"));
+            var hive = new MutexHive(new RamHive("testRamHive"));
 
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
@@ -46,7 +46,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversCombsInParallel()
         {
-            var hive = new SyncHive(new RamHive("product"));
+            var hive = new MutexHive(new RamHive("product"));
             new Catalog(hive).Create("2CV");
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
@@ -60,7 +60,7 @@ namespace Xive.Hive.Test
         public void DeliversHQInParallel()
         {
             var hive =
-                new SyncHive(
+                new MutexHive(
                     new RamHive("person")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
@@ -74,10 +74,10 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new SyncHive(new FileHive("product", dir.Value().FullName));
+                var hive = new MutexHive(new FileHive("product", dir.Value().FullName));
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
-                    hive.Name();
+                    hive.Scope();
                 });
             }
         }
@@ -87,17 +87,16 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new SyncHive(new FileHive("product", dir.Value().FullName));
+                var hive = new MutexHive(new FileHive("product", dir.Value().FullName));
                 var catalog = new Catalog(hive);
                 catalog.Create("2CV");
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
                     hive.Combs("@id='2CV'");
-                    hive.Name();
+                    hive.Scope();
                     hive.HQ();
                 });
             }
         }
     }
 }
-

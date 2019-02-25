@@ -28,13 +28,13 @@ using Yaapii.Atoms.Text;
 
 namespace Xive.Comb.Test
 {
-    public class SyncCombTests
+    public class MutexCombTests
     {
         [Fact]
         public void WorksInParallel()
         {
             var comb = 
-                new SyncComb(
+                new MutexComb(
                     new RamComb("my-comb")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
@@ -55,8 +55,8 @@ namespace Xive.Comb.Test
                 accesses--;
                 return new byte[0];
             });
-            var comb1 = new SyncComb(new RamComb("my-comb"));
-            var comb2 = new SyncComb(new RamComb("my-comb"));
+            var comb1 = new MutexComb(new RamComb("my-comb"));
+            var comb2 = new MutexComb(new RamComb("my-comb"));
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 comb1.Cell("syncCell").Content();
@@ -72,7 +72,7 @@ namespace Xive.Comb.Test
             using (var file = new TempDirectory())
             {
                 var comb = 
-                    new SyncComb(
+                    new MutexComb(
                         new FileComb(
                             "myFileComb", 
                             file.Value().FullName
@@ -94,7 +94,7 @@ namespace Xive.Comb.Test
         public void WorksWithRamCell()
         {
             var comb = 
-                new SyncComb(
+                new MutexComb(
                     new RamComb("myRamComb")
                 );
 

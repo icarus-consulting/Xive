@@ -37,7 +37,7 @@ namespace Xive.Xocument
     /// <summary>
     /// A Xocument which is accessed exclusively.
     /// </summary>
-    public sealed class SyncXocument : IXocument
+    public sealed class MutexXocument : IXocument
     {
         private readonly string name;
         private readonly IXocument origin;
@@ -46,7 +46,7 @@ namespace Xive.Xocument
         /// <summary>
         /// A Xocument which is accessed exclusively.
         /// </summary>
-        public SyncXocument(string name, IXocument origin) : base()
+        public MutexXocument(string name, IXocument origin) : base()
         {
             this.name = name;
             this.origin = origin;

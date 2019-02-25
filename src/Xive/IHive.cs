@@ -30,10 +30,19 @@ namespace Xive
     public interface IHive
     {
         /// <summary>
-        /// Name of the hive.
+        /// Current scope of the hive.
+        /// A basic hive starts at scope called "X".
         /// </summary>
         /// <returns></returns>
-        string Name();
+        string Scope();
+
+        /// <summary>
+        /// Shift the hive to another scope.
+        /// All combs and the hq will 
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <returns></returns>
+        IHive Shifted(string scope);
 
         /// <summary>
         /// The headquarter of the hive.

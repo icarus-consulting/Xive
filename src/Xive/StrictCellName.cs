@@ -22,37 +22,48 @@
 
 using System;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Func;
 
 namespace Xive
 {
     /// <summary>
-    /// A root which does reject invalid chars.
+    /// A cell name which does reject invalid chars.
     /// </summary>
     public sealed class StrictCellName : IText
     {
         private readonly string text;
+        private readonly IFunc<string, string> validated;
 
+        /// <summary>
+        /// A cell name which does reject invalid chars.
+        /// </summary>
         public StrictCellName(string name)
         {
             this.text = name;
+            this.validated = new StickyFunc<string, string>(txt => Validated(txt));
         }
 
         public string AsString()
         {
-            if (this.text.Contains(" ") || this.text.Contains("\r") || this.text.Contains("\n"))
-            {
-                throw new ArgumentException($"Can't use '{text}' as name because it contains whitespaces");
-            }
-            if (this.text.Contains("&") || this.text.Contains("<") || this.text.Contains(">"))
-            {
-                throw new ArgumentException($"Can't use '{ text }' as name because it contains illegal chars (&,< or >)");
-            }
-            return text;
+            return this.validated.Invoke(this.text);
         }
 
         public bool Equals(IText other)
         {
             return this.text.Equals(other.AsString());
+        }
+
+        private string Validated(string text)
+        {
+            if (text.Contains(" ") || text.Contains("\r") || text.Contains("\n"))
+            {
+                throw new ArgumentException($"Can't use '{text}' as name because it contains whitespaces");
+            }
+            if (text.Contains("&") || text.Contains("<") || text.Contains(">"))
+            {
+                throw new ArgumentException($"Can't use '{ text }' as name because it contains illegal chars (&,< or >)");
+            }
+            return text;
         }
     }
 }

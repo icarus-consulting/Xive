@@ -29,14 +29,14 @@ using Yaapii.Atoms.Text;
 
 namespace Xive.Cell.Test
 {
-    public class SyncCellTest
+    public class MutexCellTest
     {
         [Fact]
         public void WorksInParallel()
         {
             var accesses = 0;
             var cell = 
-                new SyncCell(
+                new MutexCell(
                     "TestCell", 
                     (path) => new FkCell(
                         (content) => { },
@@ -60,7 +60,7 @@ namespace Xive.Cell.Test
             var accesses = 0;
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                new SyncCell(
+                new MutexCell(
                     "TestCell",
                     (path) => new FkCell(
                         (content) => { },
@@ -72,7 +72,7 @@ namespace Xive.Cell.Test
                         }
                     )
                 );
-                new SyncCell(
+                new MutexCell(
                     "TestCell",
                     (path) => new FkCell(
                         (content) => { },
@@ -91,7 +91,7 @@ namespace Xive.Cell.Test
         public void WorksWithRamCell()
         {
             using (var cell = 
-                new SyncCell("my-cell", (name) => 
+                new MutexCell("my-cell", (name) => 
                     new RamCell(name)))
             {
                 cell.Update(new InputOf("its so hot outside"));
@@ -107,7 +107,7 @@ namespace Xive.Cell.Test
         {
             using(var file = new TempFile())
             using (var cell = 
-                new SyncCell(file.Value(), (path) => 
+                new MutexCell(file.Value(), (path) => 
                     new FileCell(path)))
             {
                 cell.Update(new InputOf("Ram cell Input"));
