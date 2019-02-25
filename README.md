@@ -12,16 +12,21 @@ Xive is designed to solve everyday persistence tasks with a best-practice approa
 It follows all the rules suggested in the two "[Elegant Objects](https://www.amazon.de/Elegant-Objects-Yegor-Bugayenko/dp/1519166915)" books.
 
 Some of them:
-- No null (never)
-- No statics (never)
-- No getters or setters
+- [no null](http://www.yegor256.com/2014/05/13/why-null-is-bad.html),
+- [no getters or setters](http://www.yegor256.com/2014/09/16/getters-and-setters-are-evil.html)
+- [no code execution in ctors](http://www.yegor256.com/2015/05/07/ctors-must-be-code-free.html)
+- [no mutable objects](http://www.yegor256.com/2014/06/09/objects-should-be-immutable.html),
+- [no static methods](http://www.yegor256.com/2014/05/05/oop-alternative-to-utility-classes.html),
+- [no type casting](http://www.yegor256.com/2015/04/02/class-casting-is-anti-pattern.html),
+- [implementation inheritance](http://www.yegor256.com/2016/09/13/inheritance-is-procedural.html),
+- [no DTO](http://www.yegor256.com/2016/07/06/data-transfer-object.html),
 - Four member variables maximum
 - Five public methods maximum
-- All classes are immutable
 - Strict method naming
 - Every type is an interface
 - No code execution in constructors
 - No class inheritance, except for design pattern "Envelopes"
+- [and more](http://www.yegor256.com/2014/09/10/anti-patterns-in-oop.html)
 
 ## What Xive can do
 - Save data in files
