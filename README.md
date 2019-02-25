@@ -75,7 +75,7 @@ foreach(var apt in appointments.Between(DateTime.Now, DateTime.Now + new TimeSpa
 {
     Console.WriteLine(appointments.Title(apt));
 	//Add subscribers using another "XML speaking" "Smart class"
-    new Subscribers(apt).Add("bob@internet.org");
+    new Subscribers(xive, apt).Add("bob@internet.org");
 }
 
 //Unit testing made simple by Xive:
