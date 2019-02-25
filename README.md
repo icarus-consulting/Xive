@@ -21,6 +21,7 @@ Some of them:
 - Strict method naming
 - Every type is an interface
 - No code execution in constructors
+- No class inheritance, except for design pattern "Envelopes"
 
 ## What Xive can do
 - Save data in files
@@ -39,7 +40,7 @@ Xive helps you to practice a design which uses Elegant Objects. One of the main 
 
 So instead of having something like
 ```csharp
-MyClass
+class MyClass
 {
     void AddReminder(ReminderDTO data);
     TodoDTO GetTodo(string dataId);
@@ -47,26 +48,40 @@ MyClass
     TodoExists(string todoId);
     ...//100 more to come
 }
+
+class ReminderDTO
+{
+	string ID;
+	DateTime Time;
+	string description;
+}
 ```
 
 You build it like this:
 
 ```csharp
+//Data root
 var xive = new FileXive("c://my-organizer-app");
+
+//Create todo using a "Smart class". The following line stores a new todo in the data root completely inside itself.
 new Todos(xive).Add("work", "Get new laptop", DateTime.Now + new TimeSpan(1,0,0));
 
+//Create an appointment using a "XML speaking" "Smart class", same as above.
 var appointments = new Appointments(xive);
 appointments.Add("private", "Lunch with Bob", "2019-10-15");
 
+//Iterate through existing appointments
 foreach(var apt in appointments.Between(DateTime.Now, DateTime.Now + new TimeSpan(14,0,0)))
 {
     Console.WriteLine(appointments.Title(apt));
+	//Add subscribers using another "XML speaking" "Smart class"
     new Subscribers(apt).Add("bob@internet.org");
 }
 
 //Unit testing made simple by Xive:
 public TestMethod()
 {
+    //for testing, use the RamHive which exists only in memory.
     var memory = new RamHive();
     Assert.Equal(new Todos(memory).ExpectedStuff());
 }
