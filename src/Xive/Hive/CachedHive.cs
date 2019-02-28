@@ -36,44 +36,29 @@ namespace Xive.Hive
     {
         private readonly IDictionary<string, byte[]> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
-        private readonly string name;
         private readonly IHive origin;
+        private readonly int maxBytes;
 
         /// <summary>
         /// A cached hive.
         /// By using this ctor, the contents of the hive will live as long as this instance lives.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin) : this("X", origin)
+        public CachedHive(IHive origin, int maxBytes = 10485760) : this(origin, new Dictionary<string, byte[]>(), new Dictionary<string, XNode>(), maxBytes)
         { }
 
-        /// <summary>
-        /// A cached hive.
-        /// By using this ctor, the contents of the hive will live as long as this instance lives.
-        /// </summary>
-        /// <param name="origin"></param>
-        internal CachedHive(string name, IHive origin) : this(name, origin, new Dictionary<string, byte[]>(), new Dictionary<string, XNode>())
-        { }
 
         /// <summary>
         /// A cached hive.
         /// By using this ctor, the contents of the hive will live in the injected memories.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory) : this("X", origin, binMemory, xmlMemory)
-        { }
-
-        /// <summary>
-        /// A cached hive.
-        /// By using this ctor, the contents of the hive will live in the injected memories.
-        /// </summary>
-        /// <param name="origin"></param>
-        internal CachedHive(string name, IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory)
+        public CachedHive(IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
         {
             this.binMemory = binMemory;
             this.xmlMemory = xmlMemory;
             this.origin = origin;
-            this.name = name;
+            this.maxBytes = maxBytes;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -82,7 +67,6 @@ namespace Xive.Hive
                 new Mapped<IHoneyComb, IHoneyComb>(
                     comb =>
                         new CachedComb(
-                            $"{this.name}{Path.DirectorySeparatorChar}{comb.Name()}",
                             comb,
                             this.binMemory,
                             this.xmlMemory
@@ -95,7 +79,6 @@ namespace Xive.Hive
         {
             return
                 new CachedComb(
-                    this.origin.HQ().Name(),
                     this.origin.HQ(),
                     this.binMemory,
                     this.xmlMemory
@@ -106,8 +89,7 @@ namespace Xive.Hive
         {
             return 
                 new CachedHive(
-                    scope, 
-                    this.origin.Shifted(scope), 
+                    this.origin.Shifted(scope),
                     this.binMemory, 
                     this.xmlMemory
                 );

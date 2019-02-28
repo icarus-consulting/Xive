@@ -35,27 +35,28 @@ namespace Xive.Comb
     {
         private readonly IDictionary<string, byte[]> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
-        private readonly string name;
         private readonly IHoneyComb comb;
+        private readonly int maxBytes;
 
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(string name, IHoneyComb comb, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory)
+        public CachedComb(IHoneyComb comb, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
         {
-            this.name = name;
             this.comb = comb;
             this.binMemory = binMemory;
             this.xmlMemory = xmlMemory;
+            this.maxBytes = maxBytes;
         }
 
         public ICell Cell(string name)
         {
             return 
                 new CachedCell(
-                    this.comb.Cell(name), 
-                    $"{this.name}{Path.DirectorySeparatorChar}{name}",
-                    this.binMemory
+                    this.comb.Cell(name),
+                    $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
+                    this.binMemory,
+                    this.maxBytes
                 );
         }
 
@@ -68,7 +69,7 @@ namespace Xive.Comb
         {
             return
                 new CachedXocument(
-                    $"{this.name}{Path.DirectorySeparatorChar}{name}",
+                    $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
                     this.comb.Xocument(name),
                     this.xmlMemory
                 );

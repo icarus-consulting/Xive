@@ -44,7 +44,6 @@ namespace Xive.Comb.Test
             int reads = 0;
             var comb =
                 new CachedComb(
-                    "my-comb",
                     new SimpleComb(
                         "my-comb",
                         cellname =>
@@ -75,7 +74,6 @@ namespace Xive.Comb.Test
             int reads = 0;
             var comb =
                 new CachedComb(
-                    "my-comb",
                     new SimpleComb(
                         "my-comb",
                         cellname => new FkCell(),
@@ -103,7 +101,6 @@ namespace Xive.Comb.Test
             int reads = 0;
             var comb =
                 new CachedComb(
-                    "my-comb",
                     new SimpleComb(
                         "my-comb",
                         cellname =>
@@ -137,7 +134,6 @@ namespace Xive.Comb.Test
             var xmlCache = new Dictionary<string, XNode>();
             var comb =
                 new CachedComb(
-                    "my-comb",
                     new SimpleComb(
                         "my-comb",
                         cellname => new FkCell(),
@@ -166,7 +162,6 @@ namespace Xive.Comb.Test
             int reads = 0;
             var comb =
                 new CachedComb(
-                    "my-comb",
                     new SimpleComb(
                         "my-comb",
                         cellname =>
@@ -203,7 +198,6 @@ namespace Xive.Comb.Test
             var index = 0;
             var comb =
                 new CachedComb(
-                    "my-comb",
                     new SimpleComb(
                         "my-comb",
                         cellname => new FkCell(),
