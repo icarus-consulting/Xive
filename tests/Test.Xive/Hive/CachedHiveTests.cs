@@ -40,7 +40,6 @@ namespace Xive.Hive.Test
             int reads = 0;
             var hive =
                 new CachedHive(
-                    "phonebook",
                     new SimpleHive("phonebook",
                         combName =>
                         new SimpleComb(
@@ -74,6 +73,25 @@ namespace Xive.Hive.Test
             cell.Content();
 
             Assert.Equal(1, reads);
+        }
+
+        [Fact]
+        public void ShiftIncludesCache()
+        {
+            var binCache = new Dictionary<string, byte[]>();
+            var xmlMemory = new Dictionary<string, XNode>();
+
+            var hive =
+                new CachedHive(
+                    new RamHive(),
+                    binCache,
+                    xmlMemory
+                );
+
+            new Catalog(hive.Shifted("A")).Create("something");
+            new Catalog(hive.Shifted("B")).Create("another thing");
+
+            Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
         }
     }
 }
