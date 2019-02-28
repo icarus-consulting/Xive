@@ -53,7 +53,7 @@ namespace Xive.Comb
         {
             lock (comb)
             {
-                return new MutexCell(comb.Name() + Path.DirectorySeparatorChar + name, (str) => comb.Cell(name));
+                return new MutexCell(comb.Name() + Path.DirectorySeparatorChar + name, comb.Cell(name));
             }
         }
 

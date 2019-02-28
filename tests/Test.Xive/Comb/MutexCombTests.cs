@@ -39,8 +39,11 @@ namespace Xive.Comb.Test
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                comb.Cell("syncCell").Content();
-                comb.Cell("syncCell").Update(new DeadInput());
+                using (var cell = comb.Cell("syncCell"))
+                {
+                    cell.Content();
+                    cell.Update(new DeadInput());
+                }
             });
         }
 
@@ -59,10 +62,14 @@ namespace Xive.Comb.Test
             var comb2 = new MutexComb(new RamComb("my-comb"));
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                comb1.Cell("syncCell").Content();
-                comb2.Cell("syncCell").Content();
-                comb1.Cell("syncCell").Update(new DeadInput());
-                comb2.Cell("syncCell").Update(new DeadInput());
+                using (var cell2 = comb2.Cell("syncCell"))
+                using (var cell1 = comb1.Cell("syncCell"))
+                {
+                    cell1.Content();
+                    cell1.Update(new DeadInput());
+                    cell2.Content();
+                    cell2.Update(new DeadInput());
+                }
             });
         }
 

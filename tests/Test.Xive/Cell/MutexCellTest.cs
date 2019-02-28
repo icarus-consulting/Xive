@@ -22,6 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
+using Test.Yaapii.Xive;
+using Xive.Hive;
 using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -38,7 +40,7 @@ namespace Xive.Cell.Test
             var cell = 
                 new MutexCell(
                     "TestCell", 
-                    (path) => new FkCell(
+                    new FkCell(
                         (content) => { },
                         () => {
                             accesses++;
@@ -62,7 +64,7 @@ namespace Xive.Cell.Test
             {
                 new MutexCell(
                     "TestCell",
-                    (path) => new FkCell(
+                    new FkCell(
                         (content) => { },
                         () => {
                             accesses++;
@@ -74,7 +76,7 @@ namespace Xive.Cell.Test
                 );
                 new MutexCell(
                     "TestCell",
-                    (path) => new FkCell(
+                    new FkCell(
                         (content) => { },
                         () => {
                             accesses++;
@@ -88,11 +90,27 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
+        public void WorksParallel()
+        {
+            var cell = new RamCell();
+            new ParallelFunc(() =>
+            {
+                var id = "Item_" + new Random().Next(1, 5);
+                var content = Guid.NewGuid().ToString();
+
+                using (var mutexed = new MutexCell("cell", cell))
+                {
+                    mutexed.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(mutexed.Content()).AsString());
+                }
+                return true;
+            }).Invoke();
+        }
+
+        [Fact]
         public void WorksWithRamCell()
         {
-            using (var cell = 
-                new MutexCell("my-cell", (name) => 
-                    new RamCell(name)))
+            using (var cell = new MutexCell("my-cell", new RamCell()))
             {
                 cell.Update(new InputOf("its so hot outside"));
                 Assert.Equal(
@@ -106,9 +124,7 @@ namespace Xive.Cell.Test
         public void WorksWithFileCell()
         {
             using(var file = new TempFile())
-            using (var cell = 
-                new MutexCell(file.Value(), (path) => 
-                    new FileCell(path)))
+            using (var cell = new MutexCell(file.Value(), new FileCell(file.Value())))
             {
                 cell.Update(new InputOf("Ram cell Input"));
                 Assert.Equal("Ram cell Input", new TextOf(cell.Content()).AsString());

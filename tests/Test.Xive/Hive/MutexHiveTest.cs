@@ -22,8 +22,11 @@
 
 using System;
 using System.Threading.Tasks;
+using Test.Yaapii.Xive;
 using Xunit;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -131,6 +134,31 @@ namespace Xive.Hive.Test
                     hive.HQ();
                 });
             }
+        }
+
+        [Fact]
+        public void WorksParallel()
+        {
+            var hive = new MutexHive(new RamHive());
+            var comb = "Dr.Robotic";
+            new ParallelFunc(() =>
+            {
+                var id = "Item_" + new Random().Next(1, 5);
+                var content = Guid.NewGuid().ToString();
+
+                new Catalog(hive).Create("Dr.Robotic");
+
+                using (var item =
+                    new FirstOf<IHoneyComb>(
+                        hive.Combs($"@id='{comb}'")
+                    ).Value().Cell(id)
+                )
+                {
+                    item.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(item.Content()).AsString());
+                }
+                return true;
+            }, 100, 10000).Invoke();
         }
     }
 }
