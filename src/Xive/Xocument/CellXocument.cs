@@ -50,16 +50,18 @@ namespace Xive.Xocument
                             byte[] content = cell.Content();
                             if(content.Length == 0)
                             {
-                                cell.Update(
-                                    new InputOf(
-                                        new XDocument(
-                                            new XElement(name)
-                                        ).ToString()
-                                    )
-                                );
-                                content = cell.Content();
+                                using (cell)
+                                {
+                                    cell.Update(
+                                        new InputOf(
+                                            new XDocument(
+                                                new XElement(name)
+                                            ).ToString()
+                                        )
+                                    );
+                                    content = cell.Content();
+                                }
                             }
-
                             return
                                 XDocument.Parse(
                                     new TextOf(
@@ -69,7 +71,10 @@ namespace Xive.Xocument
                         }),
                         xnode =>
                         {
-                            cell.Update(new InputOf(xnode.ToString()));
+                            using (cell)
+                            {
+                                cell.Update(new InputOf(xnode.ToString()));
+                            }
                         }
                     );
             })

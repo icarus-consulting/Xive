@@ -21,6 +21,8 @@
 //SOFTWARE.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -35,77 +37,53 @@ namespace Xive.Cell
     /// </summary>
     public sealed class MutexCell : ICell
     {
-        private readonly IScalar<Mutex> mtx;
+        private readonly IList<Mutex> mtx;
         private readonly string name;
-        private readonly IScalar<ICell> cell;
+        private readonly ICell cell;
 
         /// <summary>
         /// A cell that is system-wide exclusive for one access at a time.
         /// </summary>
-        public MutexCell(string name, Func<string, ICell> origin)
+        public MutexCell(string name, ICell origin)
         {
-            lock (this) //make creation of mutex solid. Otherwise odd behaviour occures because creation can be left unfinished and mutex abandoned.
-            {
-                this.cell = new StickyScalar<ICell>(() => origin(this.name));
-                this.name = name;
-                this.mtx =
-                    new SolidScalar<Mutex>(() =>
-                        new Mutex(
-                        false,
-                        $"Global/" +
-                        new TextOf(
-                            new BytesBase64(
-                                new Md5DigestOf(
-                                    new InputOf(
-                                        new BytesOf(
-                                            new InputOf(this.name)
-                                        )
-                                    )
-                                )
-                            ).AsBytes()
-                        ).AsString().Replace("/", "_").Replace("\\", "_")
-                    )
-                );
-            }
+            this.cell = origin;
+            this.mtx = new List<Mutex>();
+            this.name = name;
         }
 
         public byte[] Content()
         {
-            byte[] result = new byte[0];
-            try
+            lock (this.mtx)
             {
-                this.mtx.Value().WaitOne();
-                result = cell.Value().Content();
+                byte[] result = new byte[0];
+                Block();
+                result = this.cell.Content();
+                return result;
             }
-            finally
-            {
-                Dispose();
-            }
-            return result;
         }
 
         public void Update(IInput content)
         {
-            try
+            lock (this.mtx)
             {
-                this.mtx.Value().WaitOne();
-                this.cell.Value().Update(content);
-            }
-            catch (AbandonedMutexException ex)
-            {
-                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
-            }
-            catch (ObjectDisposedException ox)
-            {
-                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
-            }
-            catch (InvalidOperationException ix)
-            {
-                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
-            }
-            finally
-            {
-                Dispose();
+                try
+                {
+                    Block();
+                    Debug.WriteLine("STARTED " + this.name);
+                    this.cell.Update(content);
+                }
+                catch (AbandonedMutexException ex)
+                {
+                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
+                }
+                catch (ObjectDisposedException ox)
+                {
+                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
+                }
+                catch (InvalidOperationException ix)
+                {
+                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
+                }
             }
 
         }
@@ -114,15 +92,58 @@ namespace Xive.Cell
         {
             try
             {
-                this.mtx.Value().ReleaseMutex();
+                lock (this.mtx)
+                {
+                    if (this.mtx.Count == 1)
+                    {
+                        this.mtx[0].ReleaseMutex();
+                        Debug.WriteLine("Released " + this.name);
+                    }
+                    else if (this.mtx.Count > 1)
+                    {
+                        throw new ApplicationException("Duplicate mutex found for " + name);
+                    }
+                }
             }
             catch (ObjectDisposedException)
             {
                 //Do nothing.
             }
-            catch (ApplicationException)
+            catch (ApplicationException ex)
             {
                 //Do nothing.
+            }
+        }
+
+        private void Block()
+        {
+            lock (this.mtx)
+            {
+                if (this.mtx.Count == 0)
+                {
+                    this.mtx.Add(
+                        new Mutex(
+                            false,
+                            $"Global/" +
+                            new TextOf(
+                                new BytesBase64(
+                                    new Md5DigestOf(
+                                        new InputOf(
+                                            new BytesOf(
+                                                new InputOf(this.name)
+                                            )
+                                        )
+                                    )
+                                ).AsBytes()
+                            ).AsString().Replace("/", "_").Replace("\\", "_")
+                        )
+                    );
+                    this.mtx[0].WaitOne();
+                }
+                if (this.mtx.Count > 1)
+                {
+                    throw new ApplicationException("Duplicate mutex found for " + name);
+                }
             }
         }
 

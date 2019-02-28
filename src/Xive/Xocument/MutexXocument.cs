@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Xml.Linq;
 using Yaapii.Atoms;
@@ -41,7 +42,7 @@ namespace Xive.Xocument
     {
         private readonly string name;
         private readonly IXocument origin;
-        private readonly IScalar<Mutex> mtx;
+        private readonly IList<Mutex> mtx;
 
         /// <summary>
         /// A Xocument which is accessed exclusively.
@@ -50,94 +51,76 @@ namespace Xive.Xocument
         {
             this.name = name;
             this.origin = origin;
-            this.mtx =
-                    new SolidScalar<Mutex>(() =>
-                        new Mutex(
-                        false,
-                        $"Global/" +
-                        new TextOf(
-                            new BytesBase64(
-                                new Md5DigestOf(
-                                    new InputOf(
-                                        new BytesOf(
-                                            new InputOf(this.name)
-                                        )
-                                    )
-                                )
-                            ).AsBytes()
-                        ).AsString().Replace("/", "_").Replace("\\", "_")
-                    )
-                );
+            this.mtx = new List<Mutex>();
         }
 
         public void Modify(IEnumerable<IDirective> dirs)
         {
-            try
+            lock (this.mtx)
             {
-                this.mtx.Value().WaitOne();
+                Block();
                 this.origin.Modify(dirs);
-            }
-            finally
-            {
-                Dispose();
             }
         }
 
         public XNode Node()
         {
-            return this.origin.Node();
+            lock (this.mtx)
+            {
+                Block();
+                return this.origin.Node();
+            }
         }
 
         public IList<IXML> Nodes(string xpath)
         {
-            IList<IXML> result;
-            try
+            lock (this.mtx)
             {
-                this.mtx.Value().WaitOne();
+                IList<IXML> result;
+                Block();
                 result = this.origin.Nodes(xpath);
+                return result;
             }
-            finally
-            {
-                Dispose();
-            }
-            return result;
         }
 
         public string Value(string xpath, string def)
         {
-            string result = String.Empty;
-            try
+            lock (this.mtx)
             {
-                this.mtx.Value().WaitOne();
+                string result = String.Empty;
+                Block();
                 result = this.origin.Value(xpath, def);
+                return result;
             }
-            finally
-            {
-                Dispose();
-            }
-            return result;
         }
 
         public IList<string> Values(string xpath)
         {
-            IList<string> result;
-            try
+            lock (this.mtx)
             {
-                this.mtx.Value().WaitOne();
+                IList<string> result;
+                Block();
                 result = this.origin.Values(xpath);
+                return result;
             }
-            finally
-            {
-                Dispose();
-            }
-            return result;
         }
 
         public void Dispose()
         {
             try
             {
-                this.mtx.Value().ReleaseMutex();
+                lock (this.mtx)
+                {
+                    if (this.mtx.Count == 1)
+                    {
+                        this.mtx[0].ReleaseMutex();
+                        Debug.WriteLine("Released " + this.name);
+                    }
+                    else if (this.mtx.Count > 1)
+                    {
+                        throw new ApplicationException("Duplicate mutex found for " + name);
+                    }
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -148,6 +131,38 @@ namespace Xive.Xocument
                 //Do nothing.
             }
             this.origin.Dispose();
+        }
+
+        private void Block()
+        {
+            lock (this.mtx)
+            {
+                if (this.mtx.Count == 0)
+                {
+                    this.mtx.Add(
+                        new Mutex(
+                            false,
+                            $"Global/" +
+                            new TextOf(
+                                new BytesBase64(
+                                    new Md5DigestOf(
+                                        new InputOf(
+                                            new BytesOf(
+                                                new InputOf(this.name + "XOC")
+                                            )
+                                        )
+                                    )
+                                ).AsBytes()
+                            ).AsString().Replace("/", "_").Replace("\\", "_")
+                        )
+                    );
+                    this.mtx[0].WaitOne();
+                }
+                if (this.mtx.Count > 1)
+                {
+                    throw new ApplicationException("Duplicate mutex found for " + name);
+                }
+            }
         }
     }
 }
