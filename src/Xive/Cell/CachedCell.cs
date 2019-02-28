@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.IO;
 using Yaapii.Atoms;
 using Yaapii.Atoms.IO;
 
@@ -67,17 +68,20 @@ namespace Xive.Cell
 
         public void Update(IInput content)
         {
-            this.origin.Update(content);
             var stream = content.Stream();
-            if (stream.Length <= this.maxSize)
+            if(stream.Length <= this.maxSize)
             {
-                stream.Seek(0, System.IO.SeekOrigin.Begin);
-                this.memory[this.name] = new BytesOf(new InputOf(stream)).AsBytes();
+                var copy = new MemoryStream();
+                stream.CopyTo(copy);
+                stream.Seek(0, SeekOrigin.Begin);
+                copy.Seek(0, SeekOrigin.Begin);
+                this.memory[this.name] = new BytesOf(new InputOf(copy)).AsBytes();
             }
             else
             {
                 this.memory.Remove(this.name);
             }
+            this.origin.Update(content);
         }
 
         public void Dispose()
