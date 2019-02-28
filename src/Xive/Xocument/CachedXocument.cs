@@ -74,11 +74,17 @@ namespace Xive.Xocument
 
         public XNode Node()
         {
+            XNode result;
             if (!this.xmlMemory.ContainsKey(this.name))
             {
-                this.xmlMemory.Add(this.name, this.origin.Node());
+                result = this.origin.Node();
+                this.xmlMemory.Add(this.name, result);
             }
-            return this.xmlMemory[this.name];
+            else
+            {
+                result = this.xmlMemory[this.name];
+            }
+            return result;
         }
 
         public void Dispose()
