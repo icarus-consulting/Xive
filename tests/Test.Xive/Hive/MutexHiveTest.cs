@@ -57,6 +57,40 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
+        public void Shifts()
+        {
+            var hive =
+                new MutexHive(
+                    new RamHive("person")
+                );
+
+            Assert.Equal(
+                "left",
+                hive.Shifted("left").Scope()
+            );
+        }
+
+        [Fact]
+        public void DeliversHQInParallelAfterShift()
+        {
+            var hive =
+                new MutexHive(
+                    new RamHive("person")
+                ).Shifted("still-parallel");
+
+            var first = true;
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                if(!first)
+                {
+                    new Catalog(hive).Remove("X");
+                    first = false;
+                }
+                new Catalog(hive).Create("X");
+            });
+        }
+
+        [Fact]
         public void DeliversHQInParallel()
         {
             var hive =

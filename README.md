@@ -263,11 +263,11 @@ IEnumerable<IHoneyComb> workTodos = hive.Combs("@id='work'");
 You can mutex all layers of the hive:
 
 ```csharp
-var syncedCell = new SyncCell(new RamCell());
+var mutexedCell = new MutexCell(new RamCell());
 
-var syncedComb = new SyncComb(new RamComb());
+var mutexedComb = new MutexComb(new RamComb());
 
-var syncedHive = new SyncHive(new RamHive());
+var mutexedHive = new MutexHive(new RamHive());
 ```
 
 # Cached hive

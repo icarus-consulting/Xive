@@ -44,7 +44,15 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live as long as this instance lives.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(string name, IHive origin) : this(name, origin, new Dictionary<string,byte[]>(), new Dictionary<string, XNode>())
+        public CachedHive(IHive origin) : this("X", origin)
+        { }
+
+        /// <summary>
+        /// A cached hive.
+        /// By using this ctor, the contents of the hive will live as long as this instance lives.
+        /// </summary>
+        /// <param name="origin"></param>
+        internal CachedHive(string name, IHive origin) : this(name, origin, new Dictionary<string, byte[]>(), new Dictionary<string, XNode>())
         { }
 
         /// <summary>
@@ -52,7 +60,15 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live in the injected memories.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(string name, IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory)
+        public CachedHive(IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory) : this("X", origin, binMemory, xmlMemory)
+        { }
+
+        /// <summary>
+        /// A cached hive.
+        /// By using this ctor, the contents of the hive will live in the injected memories.
+        /// </summary>
+        /// <param name="origin"></param>
+        internal CachedHive(string name, IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory)
         {
             this.binMemory = binMemory;
             this.xmlMemory = xmlMemory;
@@ -64,11 +80,11 @@ namespace Xive.Hive
         {
             return
                 new Mapped<IHoneyComb, IHoneyComb>(
-                    comb => 
+                    comb =>
                         new CachedComb(
-                            $"{this.name}{Path.DirectorySeparatorChar}{comb.Name()}", 
-                            comb, 
-                            this.binMemory, 
+                            $"{this.name}{Path.DirectorySeparatorChar}{comb.Name()}",
+                            comb,
+                            this.binMemory,
                             this.xmlMemory
                         ),
                     this.origin.Combs(xpath)
@@ -77,18 +93,24 @@ namespace Xive.Hive
 
         public IHoneyComb HQ()
         {
-            return 
+            return
                 new CachedComb(
-                    this.origin.HQ().Name(), 
-                    this.origin.HQ(), 
-                    this.binMemory, 
+                    this.origin.HQ().Name(),
+                    this.origin.HQ(),
+                    this.binMemory,
                     this.xmlMemory
                 );
         }
 
         public IHive Shifted(string scope)
         {
-            return this.origin.Shifted(scope);
+            return 
+                new CachedHive(
+                    scope, 
+                    this.origin.Shifted(scope), 
+                    this.binMemory, 
+                    this.xmlMemory
+                );
         }
 
         public string Scope()
