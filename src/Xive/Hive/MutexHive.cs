@@ -61,7 +61,7 @@ namespace Xive.Hive
         {
             lock(this.hive)
             {
-                return this.hive;
+                return new MutexHive(this.hive.Shifted(scope));
             }
         }
 
