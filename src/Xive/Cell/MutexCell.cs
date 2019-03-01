@@ -37,25 +37,23 @@ namespace Xive.Cell
     public sealed class MutexCell : ICell
     {
         private readonly IList<Mutex> mtx;
-        private readonly string name;
         private readonly ICell cell;
 
         /// <summary>
         /// A cell that is system-wide exclusive for one access at a time.
         /// </summary>
-        public MutexCell(string name, ICell origin)
+        public MutexCell(ICell origin)
         {
             lock (this)
             {
                 this.cell = origin;
                 this.mtx = new List<Mutex>();
-                this.name = name;
             }
         }
 
         public string Name()
         {
-            return this.name;
+            return this.cell.Name();
         }
 
         public byte[] Content()
@@ -76,15 +74,15 @@ namespace Xive.Cell
             }
             catch (AbandonedMutexException ex)
             {
-                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
+                throw new ApplicationException($"Cannot get exclusive access to {this.cell.Name()}: {ex.Message}", ex);
             }
             catch (ObjectDisposedException ox)
             {
-                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
+                throw new ApplicationException($"Cannot get exclusive access to {this.cell.Name()}: {ox.Message}", ox);
             }
             catch (InvalidOperationException ix)
             {
-                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
+                throw new ApplicationException($"Cannot get exclusive access to {this.cell.Name()}: {ix.Message}", ix);
             }
         }
 
@@ -109,14 +107,16 @@ namespace Xive.Cell
             }
             else if (this.mtx.Count > 1)
             {
-                throw new ApplicationException("Duplicate mutex found for " + name);
+                throw new ApplicationException("Duplicate mutex found for " + this.cell.Name());
             }
+            this.cell.Dispose();
         }
 
         private void Block()
         {
             lock (this)
             {
+                var name = this.cell.Name();
                 if (this.mtx.Count == 0)
                 {
                     var hash =
@@ -126,13 +126,14 @@ namespace Xive.Cell
                                     new Md5DigestOf(
                                         new InputOf(
                                             new BytesOf(
-                                                new InputOf(this.name)
+                                                new InputOf(name)
                                             )
                                         )
                                     )
                                 ).AsBytes()
                             ).AsString().Replace("/", "_").Replace("\\", "_");
 
+                    Debug.WriteLine("Blocked" + hash);
                     this.mtx.Add(new Mutex(false, hash));
                     if (this.mtx.Count > 1)
                     {
@@ -153,7 +154,7 @@ namespace Xive.Cell
             {
                 if (this.mtx.Count > 0)
                 {
-                    throw new AbandonedMutexException(this.name);
+                    throw new AbandonedMutexException(this.cell.Name());
                 }
                 Dispose();
             }
