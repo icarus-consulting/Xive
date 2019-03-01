@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -102,12 +101,12 @@ namespace Xive.Cell
                 }
                 catch (ApplicationException ex)
                 {
-                    throw ex;
+                    throw new ApplicationException($"Cannot release mutex for cell '{this.cell.Name()}'. Did you try to dispose the cell in another thread in which you called .Content() or Update()?", ex);
                 }
             }
             else if (this.mtx.Count > 1)
             {
-                throw new ApplicationException("Duplicate mutex found for " + this.cell.Name());
+                throw new ApplicationException("Internal error: Duplicate mutex found for " + this.cell.Name());
             }
             this.cell.Dispose();
         }
@@ -133,17 +132,12 @@ namespace Xive.Cell
                                 ).AsBytes()
                             ).AsString().Replace("/", "_").Replace("\\", "_");
 
-                    Debug.WriteLine("Blocked" + hash);
                     this.mtx.Add(new Mutex(false, hash));
-                    if (this.mtx.Count > 1)
-                    {
-                        throw new ApplicationException("Duplicate mutex found for " + name);
-                    }
                     this.mtx[0].WaitOne();
                 }
                 if (this.mtx.Count > 1)
                 {
-                    throw new ApplicationException("Duplicate mutex found for " + name);
+                    throw new ApplicationException("Internal error: Duplicate mutex found for " + name);
                 }
             }
         }
@@ -154,7 +148,7 @@ namespace Xive.Cell
             {
                 if (this.mtx.Count > 0)
                 {
-                    throw new AbandonedMutexException(this.cell.Name());
+                    throw new AbandonedMutexException($"A mutex has not been released for cell named '{this.cell.Name()}'. Did you forget to put it into a using block before calling Content() or Update()?");
                 }
                 Dispose();
             }

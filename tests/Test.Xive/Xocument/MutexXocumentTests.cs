@@ -62,7 +62,7 @@ namespace Xive.Xocument.Test
             var cell = new RamCell();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
-                var content = "CONTENT " + Guid.NewGuid().ToString();
+                var content = Guid.NewGuid().ToString();
                 using (var mutexed = new MutexXocument(cell.Name(), new CellXocument(cell, "xoc")))
                 {
                     mutexed.Modify(new Directives().Xpath("/xoc").Set(content));
