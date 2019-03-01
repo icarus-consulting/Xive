@@ -22,5 +22,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xive\Xive.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TEMP\" />
+  </ItemGroup>
   
 </Project>
