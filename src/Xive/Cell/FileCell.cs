@@ -40,7 +40,7 @@ namespace Xive.Cell
         /// A cell which exists physically as a file.
         /// </summary>
         public FileCell(string root, string name) : this(
-            new StickyScalar<string>(() =>
+            new SolidScalar<string>(() =>
                 Path.Combine(root, new StrictCellName(name).AsString())
             )
         )
@@ -57,7 +57,7 @@ namespace Xive.Cell
         /// </summary>
         private FileCell(IScalar<string> path)
         {
-            this.path =
+            this.path = 
                 new SolidScalar<string>(() =>
                 {
                     var pth = path.Value();
@@ -65,19 +65,16 @@ namespace Xive.Cell
                     {
                         throw new ArgumentException($"Cannot work with path '{pth}' because it is not rooted.");
                     }
-                    var normalized = Path.GetFullPath(path.Value());
-                    Validate(
-                        new StrictCoordinate(
-                            normalized
-                        ).AsString()
-                    );
-                    return normalized;
+                    var full = Path.GetFullPath(pth);
+                    Validate(full);
+
+                    return full;
                 });
         }
 
         public string Name()
         {
-            return this.Name();
+            return this.path.Value();
         }
 
         public byte[] Content()
@@ -108,53 +105,13 @@ namespace Xive.Cell
 
         private void Validate(string path)
         {
-            if (Path.GetFileName(path) == String.Empty)
+            if ((Path.GetFileName(path) + String.Empty).Length == 0)
             {
                 throw new ArgumentException($"Cannot work with path '{path}' because it is not a file.");
             }
 
-            var dir = Path.GetDirectoryName(path);
-            var file = Path.GetFileName(path);
-            var invalidPathChars = Path.GetInvalidPathChars();
-            var invalid = false;
-            foreach (var c in Path.GetInvalidFileNameChars())
-            {
-                if (file.Contains(c + ""))
-                {
-                    invalid = true;
-                    break;
-                }
-            }
-            if (invalid)
-            {
-                throw
-                    new ArgumentException(
-                        new FormattedText(
-                            $"Cannot work with path '{path}' because file name contains invalid characters. Not allowed characters are: {0}",
-                            String.Join(", ", Path.GetInvalidFileNameChars())
-                        ).AsString()
-                    );
-            }
-
-            invalid = false;
-            foreach (var c in Path.GetInvalidPathChars())
-            {
-                if (dir.Contains(c + ""))
-                {
-                    invalid = true;
-                    break;
-                }
-            }
-            if (invalid)
-            {
-                throw
-                    new ArgumentException(
-                        new FormattedText(
-                            $"Cannot work with path '{path}' because directory name contains invalid characters. Not allowed characters are: {0}",
-                            Path.GetInvalidPathChars()
-                        ).AsString()
-                    );
-            }
+            var dir = new StrictCoordinate(Path.GetDirectoryName(path)).AsString();
+            var file = new StrictCellName(Path.GetFileName(path)).AsString();
         }
 
         private void Write(IInput content)
