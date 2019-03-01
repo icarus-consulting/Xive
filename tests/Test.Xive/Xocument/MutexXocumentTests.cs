@@ -23,8 +23,10 @@
 using System;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Xive.Cell;
 using Xive.Test;
 using Xunit;
+using Yaapii.Xambly;
 
 namespace Xive.Xocument.Test
 {
@@ -51,6 +53,21 @@ namespace Xive.Xocument.Test
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 xoc.Value("/synced/text()", "");
+            });
+        }
+
+        [Fact]
+        public void WorksParallel()
+        {
+            var cell = new RamCell();
+            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
+            {
+                var content = Guid.NewGuid().ToString();
+                using (var mutexed = new MutexXocument(cell.Name(), new CellXocument(cell, "xoc")))
+                {
+                    mutexed.Modify(new Directives().Xpath("/xoc").Set(content));
+                    Assert.Equal(content, mutexed.Value("/xoc/text()", ""));
+                }
             });
         }
     }

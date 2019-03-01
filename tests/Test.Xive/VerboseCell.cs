@@ -58,6 +58,11 @@ namespace Xive.Test
             this.origin.Dispose();
         }
 
+        public string Name()
+        {
+            return this.origin.Name();
+        }
+
         public void Update(IInput content)
         {
             this.reportUpdate();

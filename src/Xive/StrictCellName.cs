@@ -23,6 +23,7 @@
 using System;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Func;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive
 {
@@ -32,7 +33,7 @@ namespace Xive
     public sealed class StrictCellName : IText
     {
         private readonly string text;
-        private readonly IFunc<string, string> validated;
+        private readonly IScalar<string> validated;
 
         /// <summary>
         /// A cell name which does reject invalid chars.
@@ -40,30 +41,30 @@ namespace Xive
         public StrictCellName(string name)
         {
             this.text = name;
-            this.validated = new StickyFunc<string, string>(txt => Validated(txt));
+            this.validated =
+                new ScalarOf<string>(() =>
+                    {
+                        if (text.Contains(" ") || text.Contains("\r") || text.Contains("\n"))
+                        {
+                            throw new ArgumentException($"Can't use '{text}' as name because it contains whitespaces");
+                        }
+                        if (text.Contains("&") || text.Contains("<") || text.Contains(">"))
+                        {
+                            throw new ArgumentException($"Can't use '{ text }' as name because it contains illegal chars (&,< or >)");
+                        }
+                        return text;
+                    }
+                );
         }
 
         public string AsString()
         {
-            return this.validated.Invoke(this.text);
+            return this.validated.Value();
         }
 
         public bool Equals(IText other)
         {
             return this.text.Equals(other.AsString());
-        }
-
-        private string Validated(string text)
-        {
-            if (text.Contains(" ") || text.Contains("\r") || text.Contains("\n"))
-            {
-                throw new ArgumentException($"Can't use '{text}' as name because it contains whitespaces");
-            }
-            if (text.Contains("&") || text.Contains("<") || text.Contains(">"))
-            {
-                throw new ArgumentException($"Can't use '{ text }' as name because it contains illegal chars (&,< or >)");
-            }
-            return text;
         }
     }
 }

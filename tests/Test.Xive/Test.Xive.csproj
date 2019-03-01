@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TEMP\**" />
+    <EmbeddedResource Remove="TEMP\**" />
+    <None Remove="TEMP\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CodeDesign.Analyzers.StayObjects" Version="1.0.6508.10017">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

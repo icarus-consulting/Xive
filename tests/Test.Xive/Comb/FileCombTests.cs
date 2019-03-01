@@ -41,7 +41,7 @@ namespace Xive.Comb.Test
             using (var dir = new TempDirectory())
             {
                 var comb = new FileComb(dir.Value().FullName, "my-comb");
-                using (var cell = comb.Cell("Non existing"))
+                using (var cell = comb.Cell("Non-existing"))
                 {
                     Assert.InRange<int>(cell.Content().Length, 0, 0);
                 }

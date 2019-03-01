@@ -62,7 +62,7 @@ namespace Xive.Comb
 
         public string Name()
         {
-            return this.Name();
+            return this.comb.Name();
         }
 
         public IXocument Xocument(string name)

@@ -21,28 +21,78 @@
 //SOFTWARE.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
+using Yaapii.Xambly;
+
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
 namespace Xive.Comb.Test
 {
     public class MutexCombTests
     {
         [Fact]
-        public void WorksInParallel()
+        public void WorksInParallelWithCell()
         {
-            var comb = 
+            var comb =
                 new MutexComb(
                     new RamComb("my-comb")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
+                var content = Guid.NewGuid().ToString();
                 using (var cell = comb.Cell("syncCell"))
                 {
-                    cell.Content();
-                    cell.Update(new DeadInput());
+                    cell.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                }
+            });
+        }
+
+        [Fact]
+        public void WorksInParallelWithXocument()
+        {
+            var comb =
+                new MutexComb(
+                    new RamComb("my-comb")
+                );
+            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+            {
+                var content = Guid.NewGuid().ToString();
+                using (var xoc = comb.Xocument("synced"))
+                {
+                    xoc.Node();
+                    xoc.Modify(new Directives().Xpath("/synced").Set(content));
+                    Assert.Equal(content, xoc.Value("/synced/text()", ""));
+                }
+            });
+        }
+
+        [Fact]
+        public void XocumentAndCellDoNotConflict()
+        {
+            var comb =
+                new MutexComb(
+                    new RamComb("my-comb")
+                );
+            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+            {
+                var content = Guid.NewGuid().ToString();
+                using (var xoc = comb.Xocument("synced"))
+                {
+                    xoc.Node();
+                    xoc.Modify(new Directives().Xpath("/synced").Set(content));
+                    Assert.Equal(content, xoc.Value("/synced/text()", ""));
+                }
+
+                content = Guid.NewGuid().ToString();
+                using (var cell = comb.Cell("synced"))
+                {
+                    cell.Update(new InputOf($"<synced>{content}</synced>"));
+                    Assert.Equal($"<synced>{content}</synced>", new TextOf(cell.Content()).AsString());
                 }
             });
         }
@@ -62,13 +112,13 @@ namespace Xive.Comb.Test
             var comb2 = new MutexComb(new RamComb("my-comb"));
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
+                var content = Guid.NewGuid().ToString();
                 using (var cell2 = comb2.Cell("syncCell"))
                 using (var cell1 = comb1.Cell("syncCell"))
                 {
-                    cell1.Content();
-                    cell1.Update(new DeadInput());
-                    cell2.Content();
-                    cell2.Update(new DeadInput());
+                    cell1.Update(new InputOf(content));
+                    cell2.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(cell1.Content()).AsString());
                 }
             });
         }
@@ -78,41 +128,43 @@ namespace Xive.Comb.Test
         {
             using (var file = new TempDirectory())
             {
-                var comb = 
+                var comb =
                     new MutexComb(
                         new FileComb(
-                            "myFileComb", 
+                            "myFileComb",
                             file.Value().FullName
                         )
                     );
 
-                using (var cell = comb.Cell("myCell"))
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
-                    Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                    string content = Guid.NewGuid().ToString();
+                    using (var cell = comb.Cell("myCell"))
                     {
-                        cell.Update(new InputOf("cell content"));
-                        Assert.Equal("cell content", new TextOf(cell.Content()).AsString());
-                    });
-                }
+                        cell.Update(new InputOf(content));
+                        Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                    }
+                });
             }
         }
 
         [Fact]
         public void WorksWithRamCell()
         {
-            var comb = 
+            var comb =
                 new MutexComb(
                     new RamComb("myRamComb")
                 );
 
-            using (var cell = comb.Cell("myCell"))
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
-                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                using (var cell = comb.Cell("myCell"))
                 {
                     cell.Update(new InputOf("cell content"));
                     Assert.Equal("cell content", new TextOf(cell.Content()).AsString());
-                });
-            }
+
+                }
+            });
         }
     }
 }

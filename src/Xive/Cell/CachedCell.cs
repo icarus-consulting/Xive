@@ -48,6 +48,11 @@ namespace Xive.Cell
             this.maxSize = maxBytes;
         }
 
+        public string Name()
+        {
+            return this.name;
+        }
+
         public byte[] Content()
         {
             byte[] result = new byte[0];

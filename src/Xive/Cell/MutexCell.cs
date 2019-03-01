@@ -22,12 +22,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
 namespace Xive.Cell
@@ -38,118 +36,122 @@ namespace Xive.Cell
     public sealed class MutexCell : ICell
     {
         private readonly IList<Mutex> mtx;
-        private readonly string name;
         private readonly ICell cell;
 
         /// <summary>
         /// A cell that is system-wide exclusive for one access at a time.
         /// </summary>
-        public MutexCell(string name, ICell origin)
+        public MutexCell(ICell origin)
         {
-            this.cell = origin;
-            this.mtx = new List<Mutex>();
-            this.name = name;
+            lock (this)
+            {
+                this.cell = origin;
+                this.mtx = new List<Mutex>();
+            }
+        }
+
+        public string Name()
+        {
+            return this.cell.Name();
         }
 
         public byte[] Content()
         {
-            lock (this.mtx)
-            {
-                byte[] result = new byte[0];
-                Block();
-                result = this.cell.Content();
-                return result;
-            }
+            Block();
+            byte[] result = new byte[0];
+            result = this.cell.Content();
+            return result;
         }
 
         public void Update(IInput content)
         {
-            lock (this.mtx)
+            try
             {
-                try
-                {
-                    Block();
-                    Debug.WriteLine("STARTED " + this.name);
-                    this.cell.Update(content);
-                }
-                catch (AbandonedMutexException ex)
-                {
-                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
-                }
-                catch (ObjectDisposedException ox)
-                {
-                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
-                }
-                catch (InvalidOperationException ix)
-                {
-                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
-                }
-            }
+                Block();
 
+                this.cell.Update(content);
+            }
+            catch (AbandonedMutexException ex)
+            {
+                throw new ApplicationException($"Cannot get exclusive access to {this.cell.Name()}: {ex.Message}", ex);
+            }
+            catch (ObjectDisposedException ox)
+            {
+                throw new ApplicationException($"Cannot get exclusive access to {this.cell.Name()}: {ox.Message}", ox);
+            }
+            catch (InvalidOperationException ix)
+            {
+                throw new ApplicationException($"Cannot get exclusive access to {this.cell.Name()}: {ix.Message}", ix);
+            }
         }
 
         public void Dispose()
         {
-            try
+            if (this.mtx.Count == 1)
             {
-                lock (this.mtx)
+                try
                 {
-                    if (this.mtx.Count == 1)
-                    {
-                        this.mtx[0].ReleaseMutex();
-                        Debug.WriteLine("Released " + this.name);
-                    }
-                    else if (this.mtx.Count > 1)
-                    {
-                        throw new ApplicationException("Duplicate mutex found for " + name);
-                    }
+                    this.mtx[0].ReleaseMutex();
+                    this.mtx[0].Dispose();
+                    this.mtx.Clear();
+                }
+                catch (ObjectDisposedException)
+                {
+                    //Do nothing.
+                }
+                catch (ApplicationException ex)
+                {
+                    throw new ApplicationException($"Cannot release mutex for cell '{this.cell.Name()}'. Did you try to dispose the cell in another thread in which you called .Content() or Update()?", ex);
                 }
             }
-            catch (ObjectDisposedException)
+            else if (this.mtx.Count > 1)
             {
-                //Do nothing.
+                throw new ApplicationException("Internal error: Duplicate mutex found for " + this.cell.Name());
             }
-            catch (ApplicationException ex)
-            {
-                //Do nothing.
-            }
+            this.cell.Dispose();
         }
 
         private void Block()
         {
-            lock (this.mtx)
+            lock (this)
             {
+                var name = this.cell.Name();
                 if (this.mtx.Count == 0)
                 {
-                    this.mtx.Add(
-                        new Mutex(
-                            false,
-                            $"Global/" +
+                    var hash =
+                        $"Global/" +
                             new TextOf(
                                 new BytesBase64(
                                     new Md5DigestOf(
                                         new InputOf(
                                             new BytesOf(
-                                                new InputOf(this.name)
+                                                new InputOf(name)
                                             )
                                         )
                                     )
                                 ).AsBytes()
-                            ).AsString().Replace("/", "_").Replace("\\", "_")
-                        )
-                    );
+                            ).AsString().Replace("/", "_").Replace("\\", "_");
+
+                    this.mtx.Add(new Mutex(false, hash));
                     this.mtx[0].WaitOne();
                 }
                 if (this.mtx.Count > 1)
                 {
-                    throw new ApplicationException("Duplicate mutex found for " + name);
+                    throw new ApplicationException("Internal error: Duplicate mutex found for " + name);
                 }
             }
         }
 
         ~MutexCell()
         {
-            Dispose();
+            lock (this.mtx)
+            {
+                if (this.mtx.Count > 0)
+                {
+                    throw new AbandonedMutexException($"A mutex has not been released for cell named '{this.cell.Name()}'. Did you forget to put it into a using block before calling Content() or Update()?");
+                }
+                Dispose();
+            }
         }
     }
 }

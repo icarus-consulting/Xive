@@ -125,7 +125,7 @@ namespace Xive.Hive.Test
                 var hive = new FileHive("product", dir.Value().FullName);
                 new Catalog(hive).Create("2CV");
 
-                using (var cell = new FirstOf<IHoneyComb>(hive.Combs("@id='2CV'")).Value().Cell("Some testing item"))
+                using (var cell = new FirstOf<IHoneyComb>(hive.Combs("@id='2CV'")).Value().Cell("Some-testing-item"))
                 {
                     cell.Update(new InputOf("I am a very cool testdata string"));
                     var productDir = Path.Combine(dir.Value().FullName, "product");
@@ -148,7 +148,7 @@ namespace Xive.Hive.Test
                 using (var cell =
                     new FirstOf<IHoneyComb>(
                         hive.Combs("@id='2CV'")
-                    ).Value().Cell("Some testing item")
+                    ).Value().Cell("Some-testing-item")
                 )
                 {
                     cell.Update(new InputOf("I am a very cool testdata string"));
@@ -172,7 +172,7 @@ namespace Xive.Hive.Test
                 using (var cell =
                     new FirstOf<IHoneyComb>(
                         hive.Combs("@id='2CV'")
-                    ).Value().Cell("Some testing item")
+                    ).Value().Cell("Some-testing-item")
                 )
                 {
                     cell.Update(new InputOf("I am a very cool testdata string"));
@@ -181,7 +181,7 @@ namespace Xive.Hive.Test
                 using (var cell =
                     new FirstOf<IHoneyComb>(
                         hive.Combs("@id='2CV'")
-                    ).Value().Cell("Some testing item")
+                    ).Value().Cell("Some-testing-item")
                 )
                 {
                     Assert.Equal(

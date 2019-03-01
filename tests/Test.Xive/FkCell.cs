@@ -60,5 +60,10 @@ namespace Xive.Test
 
         public void Dispose()
         { }
+
+        public string Name()
+        {
+            return "unknown";
+        }
     }
 }

@@ -31,6 +31,12 @@ namespace Xive
     public interface ICell : IDisposable
     {
         /// <summary>
+        /// Name of the cell.
+        /// </summary>
+        /// <returns></returns>
+        string Name();
+
+        /// <summary>
         /// The content of the cell.
         /// </summary>
         /// <returns>The content as bytes</returns>
