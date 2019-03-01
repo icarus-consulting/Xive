@@ -163,6 +163,11 @@ namespace Xive.Cell
                     );
         }
 
+        public string Name()
+        {
+            return this.name.Value();
+        }
+
         public byte[] Content()
         {
             return this.cellMemory.Value()[this.name.Value()];

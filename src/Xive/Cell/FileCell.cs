@@ -75,6 +75,11 @@ namespace Xive.Cell
                 });
         }
 
+        public string Name()
+        {
+            return this.Name();
+        }
+
         public byte[] Content()
         {
             byte[] result = new byte[0];

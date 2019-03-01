@@ -27,7 +27,6 @@ using System.Threading;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
 namespace Xive.Cell
@@ -46,85 +45,82 @@ namespace Xive.Cell
         /// </summary>
         public MutexCell(string name, ICell origin)
         {
-            this.cell = origin;
-            this.mtx = new List<Mutex>();
-            this.name = name;
+            lock (this)
+            {
+                this.cell = origin;
+                this.mtx = new List<Mutex>();
+                this.name = name;
+            }
+        }
+
+        public string Name()
+        {
+            return this.name;
         }
 
         public byte[] Content()
         {
-            lock (this.mtx)
-            {
-                byte[] result = new byte[0];
-                Block();
-                result = this.cell.Content();
-                return result;
-            }
+            Block();
+            byte[] result = new byte[0];
+            result = this.cell.Content();
+            return result;
         }
 
         public void Update(IInput content)
         {
-            lock (this.mtx)
+            try
             {
-                try
-                {
-                    Block();
-                    Debug.WriteLine("STARTED " + this.name);
-                    this.cell.Update(content);
-                }
-                catch (AbandonedMutexException ex)
-                {
-                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
-                }
-                catch (ObjectDisposedException ox)
-                {
-                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
-                }
-                catch (InvalidOperationException ix)
-                {
-                    throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
-                }
-            }
+                Block();
 
+                this.cell.Update(content);
+            }
+            catch (AbandonedMutexException ex)
+            {
+                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ex.Message}", ex);
+            }
+            catch (ObjectDisposedException ox)
+            {
+                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ox.Message}", ox);
+            }
+            catch (InvalidOperationException ix)
+            {
+                throw new ApplicationException($"Cannot get exclusive access to {this.name}: {ix.Message}", ix);
+            }
         }
 
         public void Dispose()
         {
-            try
+            if (this.mtx.Count == 1)
             {
-                lock (this.mtx)
+                try
                 {
-                    if (this.mtx.Count == 1)
-                    {
-                        this.mtx[0].ReleaseMutex();
-                        Debug.WriteLine("Released " + this.name);
-                    }
-                    else if (this.mtx.Count > 1)
-                    {
-                        throw new ApplicationException("Duplicate mutex found for " + name);
-                    }
+                    this.mtx[0].ReleaseMutex();
+                    this.mtx[0].Dispose();
+                    this.mtx.Clear();
+                }
+                catch (ObjectDisposedException)
+                {
+                    //Do nothing.
+                }
+                catch (ApplicationException ex)
+                {
+                    throw ex;
                 }
             }
-            catch (ObjectDisposedException)
+            else if (this.mtx.Count > 1)
             {
-                //Do nothing.
-            }
-            catch (ApplicationException ex)
-            {
-                //Do nothing.
+                throw new ApplicationException("Duplicate mutex found for " + name);
             }
         }
 
         private void Block()
         {
-            lock (this.mtx)
+            lock (this)
             {
                 if (this.mtx.Count == 0)
                 {
-                    this.mtx.Add(
-                        new Mutex(
-                            false,
-                            $"Global/" +
+                    var hash =
+                        $"Global/" +
                             new TextOf(
                                 new BytesBase64(
                                     new Md5DigestOf(
@@ -135,9 +131,13 @@ namespace Xive.Cell
                                         )
                                     )
                                 ).AsBytes()
-                            ).AsString().Replace("/", "_").Replace("\\", "_")
-                        )
-                    );
+                            ).AsString().Replace("/", "_").Replace("\\", "_");
+
+                    this.mtx.Add(new Mutex(false, hash));
+                    if (this.mtx.Count > 1)
+                    {
+                        throw new ApplicationException("Duplicate mutex found for " + name);
+                    }
                     this.mtx[0].WaitOne();
                 }
                 if (this.mtx.Count > 1)
@@ -149,7 +149,14 @@ namespace Xive.Cell
 
         ~MutexCell()
         {
-            Dispose();
+            lock (this.mtx)
+            {
+                if (this.mtx.Count > 0)
+                {
+                    throw new AbandonedMutexException(this.name);
+                }
+                Dispose();
+            }
         }
     }
 }
