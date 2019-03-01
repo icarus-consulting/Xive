@@ -25,10 +25,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Xml.Linq;
-using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
@@ -107,29 +105,32 @@ namespace Xive.Xocument
 
         public void Dispose()
         {
-            try
+            lock (this.mtx)
             {
-                lock (this.mtx)
+                if (this.mtx.Count == 1)
                 {
-                    if (this.mtx.Count == 1)
+                    try
                     {
                         this.mtx[0].ReleaseMutex();
-                        Debug.WriteLine("Released " + this.name);
+                        this.mtx[0].Dispose();
+                        this.mtx.Clear();
                     }
-                    else if (this.mtx.Count > 1)
+                    catch (ObjectDisposedException)
                     {
-                        throw new ApplicationException("Duplicate mutex found for " + name);
+                        //Do nothing.
+                    }
+                    catch (ApplicationException ex)
+                    {
+                        throw ex;
+                        //Do nothing.
                     }
                 }
+                else if (this.mtx.Count > 1)
+                {
+                    throw new ApplicationException("Duplicate mutex found for " + name);
+                }
             }
-            catch (ObjectDisposedException)
-            {
-                //Do nothing.
-            }
-            catch (ApplicationException)
-            {
-                //Do nothing.
-            }
+
             this.origin.Dispose();
         }
 
@@ -148,7 +149,7 @@ namespace Xive.Xocument
                                     new Md5DigestOf(
                                         new InputOf(
                                             new BytesOf(
-                                                new InputOf(this.name + "XOC")
+                                                new InputOf(this.name)
                                             )
                                         )
                                     )
