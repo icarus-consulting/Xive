@@ -44,8 +44,8 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell() : this(
-            new StickyScalar<string>(() => Guid.NewGuid().ToString()),
-            new ScalarOf<IDictionary<string, byte[]>>(new Dictionary<string, byte[]>())
+            new SolidScalar<string>(() => Guid.NewGuid().ToString()),
+            new SolidScalar<IDictionary<string, byte[]>>(() => new Dictionary<string, byte[]>())
         )
         { }
 
@@ -56,7 +56,7 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell(byte[] content) : this(
-            new StickyScalar<string>(() => Guid.NewGuid().ToString()),
+            new ScalarOf<string>(() => Guid.NewGuid().ToString()),
             content
         )
         { }
@@ -68,8 +68,8 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell(string path, IBytes content) : this(
-            new StickyScalar<string>(() => path),
-            new StickyScalar<IDictionary<string, byte[]>>(
+            new ScalarOf<string>(() => path),
+            new SolidScalar<IDictionary<string, byte[]>>(
                 () => new Dictionary<string, byte[]>()
                 {
                     { path, content.AsBytes() }
@@ -86,7 +86,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(IScalar<string> path, byte[] content) : this(
             path,
-            new StickyScalar<IDictionary<string, byte[]>>(
+            new SolidScalar<IDictionary<string, byte[]>>(
                 () => new Dictionary<string, byte[]> { { path.Value(), content } }
             )
         )
@@ -100,7 +100,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, byte[] content) : this(
             new ScalarOf<string>(path),
-            new ScalarOf<IDictionary<string, byte[]>>(() =>
+            new SolidScalar<IDictionary<string, byte[]>>(() =>
             {
                 return new Dictionary<string, byte[]>()
                 {
@@ -141,13 +141,14 @@ namespace Xive.Cell
         /// <param name="itemMap">map with content for many items</param>
         internal RamCell(IScalar<string> name, IScalar<IDictionary<string, byte[]>> cellMemory)
         {
-            
+            lock (cellMemory)
+            {
                 this.id = Guid.NewGuid().ToString();
-                this.name = 
-                    new StickyScalar<string>(
+                this.name =
+                    new SolidScalar<string>(
                         () => new StrictCellName(name.Value()).AsString()
                     );
-                this.cellMemory = 
+                this.cellMemory =
                     new ScalarOf<IDictionary<string, byte[]>>(() =>
                         {
                             lock (cellMemory)
@@ -161,6 +162,7 @@ namespace Xive.Cell
                             }
                         }
                     );
+            }
         }
 
         public string Name()
