@@ -21,9 +21,8 @@
 //SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
-using Test.Yaapii.Xive;
-using Xive.Hive;
 using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -34,58 +33,27 @@ namespace Xive.Cell.Test
     public class MutexCellTest
     {
         [Fact]
-        public void WorksInParallel()
+        public void AccessIsExclusive()
         {
             var accesses = 0;
-            var cell = 
-                new MutexCell(
-                    "TestCell", 
+            var cell =
                     new FkCell(
                         (content) => { },
-                        () => {
+                        () =>
+                        {
                             accesses++;
                             Assert.Equal(1, accesses);
                             accesses--;
                             return new byte[0];
                         }
-                    )
-                );
-            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
-            {
-                cell.Content();
-            });
-        }
+                    );
 
-        [Fact]
-        public void WorksInParallelWithSameName()
-        {
-            var accesses = 0;
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                new MutexCell(
-                    "TestCell",
-                    new FkCell(
-                        (content) => { },
-                        () => {
-                            accesses++;
-                            Assert.Equal(1, accesses);
-                            accesses--;
-                            return new byte[0];
-                        }
-                    )
-                );
-                new MutexCell(
-                    "TestCell",
-                    new FkCell(
-                        (content) => { },
-                        () => {
-                            accesses++;
-                            Assert.Equal(1, accesses);
-                            accesses--;
-                            return new byte[0];
-                        }
-                    )
-                );
+                using (var mutexed = new MutexCell(cell))
+                {
+                    mutexed.Content();
+                }
             });
         }
 
@@ -93,29 +61,28 @@ namespace Xive.Cell.Test
         public void WorksParallel()
         {
             var cell = new RamCell();
-            new ParallelFunc(() =>
+            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
-                var id = "Item_" + new Random().Next(1, 5);
                 var content = Guid.NewGuid().ToString();
 
-                using (var mutexed = new MutexCell("cell", cell))
+                using (var mutexed = new MutexCell(cell))
                 {
                     mutexed.Update(new InputOf(content));
                     Assert.Equal(content, new TextOf(mutexed.Content()).AsString());
                 }
-                return true;
-            }).Invoke();
+            });
         }
 
         [Fact]
         public void WorksWithRamCell()
         {
-            using (var cell = new MutexCell("my-cell", new RamCell()))
+            var cell = new RamCell();
+            using (var mutexed = new MutexCell(cell))
             {
-                cell.Update(new InputOf("its so hot outside"));
+                mutexed.Update(new InputOf("its so hot outside"));
                 Assert.Equal(
                     "its so hot outside",
-                    new TextOf(cell.Content()).AsString()
+                    new TextOf(mutexed.Content()).AsString()
                 );
             }
         }
@@ -123,11 +90,17 @@ namespace Xive.Cell.Test
         [Fact]
         public void WorksWithFileCell()
         {
-            using(var file = new TempFile())
-            using (var cell = new MutexCell(file.Value(), new FileCell(file.Value())))
+            using (var file = new TempFile())
             {
-                cell.Update(new InputOf("Ram cell Input"));
-                Assert.Equal("Ram cell Input", new TextOf(cell.Content()).AsString());
+                var path = file.Value();
+                Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
+                {
+                    using (var cell = new MutexCell(new FileCell(path)))
+                    {
+                        cell.Update(new InputOf("Ram cell Input"));
+                        Assert.Equal("Ram cell Input", new TextOf(cell.Content()).AsString());
+                    }
+                });
             }
         }
     }
