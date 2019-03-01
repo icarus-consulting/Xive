@@ -36,23 +36,25 @@ namespace Xive.Xocument.Test
         public void DeliversParallel()
         {
             var accesses = 0;
-            var xoc =
-                new MutexXocument("synced",
-                    new FkXocument(() =>
-                    {
-                        accesses++;
-                        Assert.Equal(1, accesses);
-                        accesses--;
-                        return
-                            new XDocument(
-                                new XElement("synced", new XText("here"))
-                            );
-                    })
-                );
-
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                xoc.Value("/synced/text()", "");
+                var xoc =
+                    new MutexXocument("synced",
+                        new FkXocument(() =>
+                        {
+                            accesses++;
+                            Assert.Equal(1, accesses);
+                            accesses--;
+                            return
+                                new XDocument(
+                                    new XElement("synced", new XText("here"))
+                                );
+                        })
+                    );
+                using (xoc)
+                {
+                    xoc.Value("/synced/text()", "");
+                }
             });
         }
 
