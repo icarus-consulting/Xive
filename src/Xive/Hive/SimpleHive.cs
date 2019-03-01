@@ -87,14 +87,17 @@ namespace Xive.Hive
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return
-                new Mapped<string, IHoneyComb>(
-                    comb =>
-                    {
-                        return this.comb($"{this.scope.AsString()}{Path.DirectorySeparatorChar}{comb}");
-                    },
-                    this.catalog(this.scope.AsString(), this.HQ()).List(xpath)
-                );
+            lock (scope)
+            {
+                return
+                    new Mapped<string, IHoneyComb>(
+                        comb =>
+                        {
+                            return this.comb($"{this.scope.AsString()}{Path.DirectorySeparatorChar}{comb}");
+                        },
+                        this.catalog(this.scope.AsString(), this.HQ()).List(xpath)
+                    );
+            }
         }
 
         public IHive Shifted(string scope)
