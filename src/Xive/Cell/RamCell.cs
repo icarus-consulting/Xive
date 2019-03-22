@@ -22,12 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using Yaapii.Atoms;
-using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
-using Yaapii.Atoms.Text;
 
 namespace Xive.Cell
 {
@@ -181,6 +178,7 @@ namespace Xive.Cell
                     var memory = new MemoryStream();
                     content.Stream().CopyTo(memory);
                     memory.Seek(0, SeekOrigin.Begin);
+                    content.Stream().Seek(0, SeekOrigin.Begin);
                     this.cellMemory.Value()[this.name.Value()] = memory;
                 }
                 else

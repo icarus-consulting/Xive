@@ -42,6 +42,17 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
+        public void ResetsStreamAfterUpdate()
+        {
+            using (var cell = new RamCell("my-cell"))
+            {
+                var content = new InputOf("its so hot outside");
+                cell.Update(content);
+                Assert.Equal(0, content.Stream().Position);
+            }
+        }
+
+        [Fact]
         public void CanUpdate()
         {
             using (var cell = new RamCell("my-cell"))

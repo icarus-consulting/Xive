@@ -113,9 +113,9 @@ namespace Xive.Cell.Test
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                using (var file = new FileCell("test.txt"))
+                using (var cell = new FileCell("test.txt"))
                 {
-                    file.Content();
+                    cell.Content();
                 }
             });
         }
@@ -131,6 +131,20 @@ namespace Xive.Cell.Test
                     file.Content();
                 }
             });
+        }
+
+        [Fact]
+        public void ResetsStreamAfterUpdate()
+        {
+            using (var tmp = new TempDirectory())
+            {
+                using (var cell = new FileCell(Path.Combine(tmp.Value().FullName, "test.txt")))
+                {
+                    var content = new InputOf("its so hot outside");
+                    cell.Update(content);
+                    Assert.Equal(0, content.Stream().Position);
+                }
+            }
         }
     }
 }
