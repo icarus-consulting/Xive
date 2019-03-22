@@ -33,7 +33,7 @@ namespace Xive.Comb
     /// </summary>
     public sealed class CachedComb : IHoneyComb
     {
-        private readonly IDictionary<string, byte[]> binMemory;
+        private readonly IDictionary<string, MemoryStream> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
         private readonly IHoneyComb comb;
         private readonly int maxBytes;
@@ -41,7 +41,7 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(IHoneyComb comb, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
+        public CachedComb(IHoneyComb comb, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
         {
             this.comb = comb;
             this.binMemory = binMemory;
