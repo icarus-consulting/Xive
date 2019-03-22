@@ -46,55 +46,15 @@ namespace Xive.Hive
 
         /// <summary>
         /// A hive that exists physically as files.
-        /// </summary>
-        public FileHive(string root, Func<string, IHoneyComb, ICatalog> catalog) : this(
-            "X", root, comb => comb, catalog
-        )
-        { }
-
-        /// <summary>
-        /// A hive that exists physically as files.
-        /// </summary>
-        public FileHive(string scope, string root, Func<string, IHoneyComb, ICatalog> catalog) : this(
-            scope, root, comb => comb, catalog
-        )
-        { }
-
-        /// <summary>
-        /// A hive that exists physically as files.
-        /// </summary>
-        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap) : this(
-            scope,
-            root,
-            combWrap,
-            (hiveName, comb) => new Catalog(hiveName, comb)
-        )
-        { }
-
-        /// <summary>
-        /// A hive that exists physically as files.
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="root"></param>
-        /// <param name="combWrap"></param>
-        /// <param name="catalog"></param>
-        public FileHive(string root, Func<IHoneyComb, IHoneyComb> combWrap, Func<string, IHoneyComb, ICatalog> catalog) : this(
-            "X", root, combWrap, catalog
-        )
-        { }
-
-        /// <summary>
-        /// A hive that exists physically as files.
         /// With this ctor, you can tell the hive how to build its catalog.
         /// </summary>
-        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap, Func<string, IHoneyComb, ICatalog> catalog) : base(
+        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap) : base(
             new StickyScalar<IHive>(() =>
             {
                 return
                     new SimpleHive(
                         scope,
-                        comb => combWrap(new FileComb($"{root}", comb)),
-                        catalog
+                        comb => combWrap(new FileComb($"{root}", comb))
                     );
             })
         )

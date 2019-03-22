@@ -45,6 +45,11 @@ namespace Xive.Hive
             return this.hive.Value().Combs(xpath);
         }
 
+        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        {
+            return this.hive.Value().Combs(xpath, catalog);
+        }
+
         public IHoneyComb HQ()
         {
             return this.hive.Value().HQ();

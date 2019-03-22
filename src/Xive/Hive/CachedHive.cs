@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
@@ -34,7 +35,7 @@ namespace Xive.Hive
     /// <param name="origin"></param>
     public sealed class CachedHive : IHive
     {
-        private readonly IDictionary<string, byte[]> binMemory;
+        private readonly IDictionary<string, MemoryStream> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
         private readonly IHive origin;
         private readonly int maxBytes;
@@ -44,7 +45,7 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live as long as this instance lives.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, int maxBytes = 10485760) : this(origin, new Dictionary<string, byte[]>(), new Dictionary<string, XNode>(), maxBytes)
+        public CachedHive(IHive origin, int maxBytes = 10485760) : this(origin, new Dictionary<string, MemoryStream>(), new Dictionary<string, XNode>(), maxBytes)
         { }
 
 
@@ -53,7 +54,7 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live in the injected memories.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, IDictionary<string, byte[]> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
+        public CachedHive(IHive origin, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
         {
             this.binMemory = binMemory;
             this.xmlMemory = xmlMemory;
@@ -69,10 +70,16 @@ namespace Xive.Hive
                         new CachedComb(
                             comb,
                             this.binMemory,
-                            this.xmlMemory
+                            this.xmlMemory,
+                            this.maxBytes
                         ),
-                    this.origin.Combs(xpath)
-                );
+                        this.origin.Combs(xpath, CachedCatalog())
+                    );
+        }
+
+        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        {
+            throw new InvalidOperationException($"Using a cached hive while providing a custom catalog is not supported.");
         }
 
         public IHoneyComb HQ()
@@ -87,10 +94,10 @@ namespace Xive.Hive
 
         public IHive Shifted(string scope)
         {
-            return 
+            return
                 new CachedHive(
                     this.origin.Shifted(scope),
-                    this.binMemory, 
+                    this.binMemory,
                     this.xmlMemory
                 );
         }
@@ -98,6 +105,20 @@ namespace Xive.Hive
         public string Scope()
         {
             return this.origin.Scope();
+        }
+
+        private ICatalog CachedCatalog()
+        {
+            return
+                new Catalog(
+                    this.origin.Scope(),
+                    new CachedComb(
+                        this.origin.HQ(),
+                        this.binMemory,
+                        this.xmlMemory,
+                        this.maxBytes
+                    )
+                );
         }
     }
 }
