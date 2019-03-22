@@ -22,9 +22,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Yaapii.Atoms;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Cell
 {
@@ -33,7 +36,7 @@ namespace Xive.Cell
     /// </summary>
     public sealed class RamCell : ICell
     {
-        private readonly IScalar<IDictionary<string, byte[]>> cellMemory;
+        private readonly IScalar<IDictionary<string, MemoryStream>> cellMemory;
         private readonly IScalar<string> name;
         private readonly string id;
 
@@ -45,7 +48,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell() : this(
             new SolidScalar<string>(() => Guid.NewGuid().ToString()),
-            new SolidScalar<IDictionary<string, byte[]>>(() => new Dictionary<string, byte[]>())
+            new SolidScalar<IDictionary<string, MemoryStream>>(() => new Dictionary<string, MemoryStream>())
         )
         { }
 
@@ -55,7 +58,7 @@ namespace Xive.Cell
         /// If you create two cells using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(byte[] content) : this(
+        public RamCell(MemoryStream content) : this(
             new ScalarOf<string>(() => Guid.NewGuid().ToString()),
             content
         )
@@ -69,10 +72,10 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, IBytes content) : this(
             new ScalarOf<string>(() => path),
-            new SolidScalar<IDictionary<string, byte[]>>(
-                () => new Dictionary<string, byte[]>()
+            new SolidScalar<IDictionary<string, MemoryStream>>(
+                () => new Dictionary<string, MemoryStream>()
                 {
-                    { path, content.AsBytes() }
+                    { path, new MemoryStream(content.AsBytes()) }
                 }
             )
         )
@@ -84,10 +87,10 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(IScalar<string> path, byte[] content) : this(
+        public RamCell(IScalar<string> path, MemoryStream content) : this(
             path,
-            new SolidScalar<IDictionary<string, byte[]>>(
-                () => new Dictionary<string, byte[]> { { path.Value(), content } }
+            new SolidScalar<IDictionary<string, MemoryStream>>(
+                () => new Dictionary<string, MemoryStream> { { path.Value(), content } }
             )
         )
         { }
@@ -98,11 +101,11 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(string path, byte[] content) : this(
+        public RamCell(string path, MemoryStream content) : this(
             new ScalarOf<string>(path),
-            new SolidScalar<IDictionary<string, byte[]>>(() =>
+            new SolidScalar<IDictionary<string, MemoryStream>>(() =>
             {
-                return new Dictionary<string, byte[]>()
+                return new Dictionary<string, MemoryStream>()
                 {
                     { path, content }
                 };
@@ -116,7 +119,7 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(string path) : this(path, new Dictionary<string, byte[]>())
+        public RamCell(string path) : this(path, new Dictionary<string, MemoryStream>())
         { }
 
         /// <summary>
@@ -126,9 +129,9 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="cellMemory">map with content for many items</param>
-        public RamCell(string path, IDictionary<string, byte[]> cellMemory) : this(
+        public RamCell(string path, IDictionary<string, MemoryStream> cellMemory) : this(
             new ScalarOf<string>(path),
-            new ScalarOf<IDictionary<string, byte[]>>(cellMemory)
+            new ScalarOf<IDictionary<string, MemoryStream>>(cellMemory)
         )
         { }
 
@@ -139,7 +142,7 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="itemMap">map with content for many items</param>
-        internal RamCell(IScalar<string> name, IScalar<IDictionary<string, byte[]>> cellMemory)
+        internal RamCell(IScalar<string> name, IScalar<IDictionary<string, MemoryStream>> cellMemory)
         {
             lock (cellMemory)
             {
@@ -148,20 +151,7 @@ namespace Xive.Cell
                     new SolidScalar<string>(
                         () => new StrictCellName(name.Value()).AsString()
                     );
-                this.cellMemory =
-                    new ScalarOf<IDictionary<string, byte[]>>(() =>
-                        {
-                            lock (cellMemory)
-                            {
-                                var memory = cellMemory.Value();
-                                if (!memory.ContainsKey(name.Value()))
-                                {
-                                    memory[name.Value()] = new byte[0];
-                                }
-                                return memory;
-                            }
-                        }
-                    );
+                this.cellMemory = cellMemory;
             }
         }
 
@@ -172,19 +162,31 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            return this.cellMemory.Value()[this.name.Value()];
+            byte[] result = new byte[0];
+            if (this.cellMemory.Value().ContainsKey(name.Value()))
+            {
+                this.cellMemory.Value()[this.name.Value()].Seek(0, SeekOrigin.Begin);
+                result = this.cellMemory.Value()[this.name.Value()].ToArray();
+            }
+            return result;
         }
 
         public void Update(IInput content)
         {
-            byte[] bytes = new BytesOf(content).AsBytes();
-            if (bytes.Length > 0)
+            lock (cellMemory)
             {
-                this.cellMemory.Value()[this.name.Value()] = bytes;
-            }
-            else
-            {
-                this.cellMemory.Value().Remove(this.name.Value());
+                var stream = content.Stream();
+                if (stream.Length > 0)
+                {
+                    var memory = new MemoryStream();
+                    content.Stream().CopyTo(memory);
+                    memory.Seek(0, SeekOrigin.Begin);
+                    this.cellMemory.Value()[this.name.Value()] = memory;
+                }
+                else
+                {
+                    this.cellMemory.Value().Remove(this.name.Value());
+                }
             }
         }
 
