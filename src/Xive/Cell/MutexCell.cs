@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -43,7 +44,7 @@ namespace Xive.Cell
         /// </summary>
         public MutexCell(ICell origin)
         {
-            lock (this)
+            lock (origin)
             {
                 this.cell = origin;
                 this.mtx = new List<Mutex>();
@@ -52,6 +53,7 @@ namespace Xive.Cell
 
         public string Name()
         {
+            Block();
             return this.cell.Name();
         }
 
@@ -68,7 +70,6 @@ namespace Xive.Cell
             try
             {
                 Block();
-
                 this.cell.Update(content);
             }
             catch (AbandonedMutexException ex)
@@ -87,33 +88,35 @@ namespace Xive.Cell
 
         public void Dispose()
         {
-            if (this.mtx.Count == 1)
+            lock (this.mtx)
             {
-                try
+                if (this.mtx.Count == 1)
                 {
-                    this.mtx[0].ReleaseMutex();
-                    this.mtx[0].Dispose();
-                    this.mtx.Clear();
+                    try
+                    {
+                        this.mtx[0].ReleaseMutex();
+                        this.mtx[0].Dispose();
+                        this.mtx.Clear();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        //Do nothing.
+                    }
+                    catch (ApplicationException ex)
+                    {
+                        throw new ApplicationException($"Cannot release mutex for cell '{this.cell.Name()}'. Did you try to dispose the cell in another thread in which you called .Content() or Update()?", ex);
+                    }
                 }
-                catch (ObjectDisposedException)
+                else if (this.mtx.Count > 1)
                 {
-                    //Do nothing.
-                }
-                catch (ApplicationException ex)
-                {
-                    throw new ApplicationException($"Cannot release mutex for cell '{this.cell.Name()}'. Did you try to dispose the cell in another thread in which you called .Content() or Update()?", ex);
+                    throw new ApplicationException("Internal error: Duplicate mutex found for " + this.cell.Name());
                 }
             }
-            else if (this.mtx.Count > 1)
-            {
-                throw new ApplicationException("Internal error: Duplicate mutex found for " + this.cell.Name());
-            }
-            this.cell.Dispose();
         }
 
         private void Block()
         {
-            lock (this)
+            lock (this.mtx)
             {
                 var name = this.cell.Name();
                 if (this.mtx.Count == 0)
