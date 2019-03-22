@@ -61,8 +61,15 @@ namespace Xive
         /// <summary>
         /// Find a specific comb by xpath.
         /// </summary>
-        /// <param name="xpath"></param>
+        /// <param name="xpath">A xpath which will be resolved in the file HQ/catalog.xml, querying the item nodes.</param>
         /// <returns></returns>
         IEnumerable<IHoneyComb> Combs(string xpath);
+
+        /// <summary>
+        /// Fund a specific comb by xpath while using the provided catalog.
+        /// </summary>
+        /// <param name="xpath">A xpath which will be resolved in the file HQ/catalog.xml, querying the item nodes.</param>
+        /// <returns></returns>
+        IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog);
     }
 }
