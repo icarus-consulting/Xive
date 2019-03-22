@@ -22,12 +22,12 @@
 
 using System;
 using System.Collections.Generic;
+using Xive.Xocument;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Error;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
-using Xive.Xocument;
 
 namespace Xive.Hive
 {
@@ -78,7 +78,7 @@ namespace Xive.Hive
 
         public void Update(string id, IEnumerable<IDirective> content)
         {
-            if(!Exists(id))
+            if (!Exists(id))
             {
                 Create(id);
             }
@@ -122,22 +122,24 @@ namespace Xive.Hive
         {
             using (var xoc = this.Xocument())
             {
-                xoc.Modify(
-                    new Directives()
-                        .Xpath("/catalog")
-                        .Append(
-                            new EnumerableOf<IDirective>(
-                                new AddIfAttributeDirective(this.itemName.Value(), "id", id)
-                            )
-                        )
-                        .Attr("id", id)
-                );
+                if (xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count == 0)
+                {
+                    xoc.Modify(
+                        new Directives()
+                            .Xpath("/catalog")
+                            .Add(this.itemName.Value())
+                            .Attr("id", id)
+                    );
+                }
             }
         }
 
         private bool Exists(string id)
         {
-            return this.List($"@id='{id}'").GetEnumerator().MoveNext();
+            using (var xoc = Xocument())
+            {
+                return xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count > 0;
+            }
         }
 
         private IXocument Xocument()
