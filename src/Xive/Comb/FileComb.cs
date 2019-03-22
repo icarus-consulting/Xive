@@ -81,7 +81,7 @@ namespace Xive.Comb
                 {
                     patch.Add("item")
                         .Add("name")
-                        .Set(Path.GetFileName(file)) 
+                        .Set(Path.GetFileName(file))
                         .Up()
                         .Add("size")
                         .Set(new FileInfo(file).Length)
@@ -90,12 +90,14 @@ namespace Xive.Comb
                 }
 
                 result =
-                       new RamCell(
-                           "_guts.xml",
-                           new BytesOf(
-                               new Xambler(patch).Dom().ToString()
-                           ).AsBytes()
-                       );
+                    new RamCell(
+                        "_guts.xml",
+                        new MemoryStream(
+                            new BytesOf(
+                                new Xambler(patch).Dom().ToString()
+                            ).AsBytes()
+                        )
+                    );
             }
             else
             {
