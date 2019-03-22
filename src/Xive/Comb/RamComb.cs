@@ -38,7 +38,7 @@ namespace Xive.Comb
     public sealed class RamComb : IHoneyComb
     {
         private readonly string name;
-        private readonly IDictionary<string, byte[]> cellMemory;
+        private readonly IDictionary<string, MemoryStream> cellMemory;
         private readonly Func<IXocument, IXocument> xocumentWrap;
         private readonly Func<ICell, ICell> cellWrap;
 
@@ -47,7 +47,7 @@ namespace Xive.Comb
         /// The contents of this comb will live as long as the comb lives.
         /// </summary>
         /// <param name="name"></param>
-        public RamComb(string name) : this(name, cell => cell, xoc => xoc, new Dictionary<string, byte[]>())
+        public RamComb(string name) : this(name, cell => cell, xoc => xoc, new Dictionary<string, MemoryStream>())
         { }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Xive.Comb
         /// <param name="name"></param>
         /// <param name="cellmemory"></param>
         /// <param name="xmlMemory"></param>
-        public RamComb(string name, IDictionary<string, byte[]> cellmemory) : this(name, cell => cell, xoc => xoc, cellmemory)
+        public RamComb(string name, IDictionary<string, MemoryStream> cellmemory) : this(name, cell => cell, xoc => xoc, cellmemory)
         { }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Xive.Comb
         /// By using this ctor, the cells of this comb's ctor exist only as long as the comb instance exists.
         /// By this ctor, you can tell the comb how to wrap a Xocument.
         /// </summary>
-        public RamComb(string name, Func<ICell, ICell> cellWrap) : this(name, cellWrap, xoc => xoc, new Dictionary<string, byte[]>())
+        public RamComb(string name, Func<ICell, ICell> cellWrap) : this(name, cellWrap, xoc => xoc, new Dictionary<string, MemoryStream>())
         { }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Xive.Comb
         /// By using this ctor, the cells of this comb's ctor exist only as long as the comb instance exists.
         /// By this ctor, you can tell the comb how to wrap a Xocument.
         /// </summary>
-        public RamComb(string name, Func<IXocument, IXocument> xocumentWrap) : this(name, cell => cell, xocumentWrap, new Dictionary<string, byte[]>())
+        public RamComb(string name, Func<IXocument, IXocument> xocumentWrap) : this(name, cell => cell, xocumentWrap, new Dictionary<string, MemoryStream>())
         { }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Xive.Comb
         /// You must tell the comb how to build a Xocument from its name and a cell.
         /// By using this ctor, every RamComb with the same name will have the same contents.
         /// </summary>
-        public RamComb(string name, Func<ICell, ICell> cellWrap, Func<IXocument, IXocument> xocumentWrap, IDictionary<string, byte[]> cellMemory)
+        public RamComb(string name, Func<ICell, ICell> cellWrap, Func<IXocument, IXocument> xocumentWrap, IDictionary<string, MemoryStream> cellMemory)
         {
             this.name = name;
             this.cellMemory = cellMemory;
@@ -120,16 +120,19 @@ namespace Xive.Comb
                         .Up()
                         .Up(),
                     new Filtered<string>(
-                       (path) => path.Substring(0,this.name.Length) == this.name,
+                       (path) => path.Substring(0, this.name.Length) == this.name,
                        this.cellMemory.Keys
-                   )).Invoke();
+                   )
+                ).Invoke();
 
                 result =
-                       new RamCell(
-                           "_guts.xml",
-                           new BytesOf(
-                               new Xambler(patch).Dom().ToString()
-                           ).AsBytes()
+                        new RamCell(
+                            "_guts.xml",
+                            new MemoryStream(
+                                new BytesOf(
+                                    new Xambler(patch).Dom().ToString()
+                                ).AsBytes()
+                            )
                        );
             }
             else

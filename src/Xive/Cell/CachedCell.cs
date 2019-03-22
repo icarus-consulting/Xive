@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Yaapii.Atoms;
 using Yaapii.Atoms.IO;
@@ -34,13 +35,13 @@ namespace Xive.Cell
     {
         private readonly ICell origin;
         private readonly string name;
-        private readonly IDictionary<string, byte[]> memory;
+        private readonly IDictionary<string, MemoryStream> memory;
         private readonly int maxSize;
 
         /// <summary>
         /// A cell whose content is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, IDictionary<string, byte[]> memory, int maxBytes = 10485760)
+        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> memory, int maxBytes = 10485760)
         {
             this.origin = origin;
             this.name = name;
@@ -61,12 +62,13 @@ namespace Xive.Cell
                 result = this.origin.Content();
                 if (result.Length <= this.maxSize)
                 {
-                    this.memory[this.name] = result;
+                    this.memory[this.name] = new MemoryStream(result);
                 }
             }
             else
             {
-                result = this.memory[this.name];
+                this.memory[this.name].Seek(0, SeekOrigin.Begin);
+                result = this.memory[this.name].ToArray();
             }
             return result;
         }
@@ -80,7 +82,7 @@ namespace Xive.Cell
                 stream.CopyTo(copy);
                 stream.Seek(0, SeekOrigin.Begin);
                 copy.Seek(0, SeekOrigin.Begin);
-                this.memory[this.name] = new BytesOf(new InputOf(copy)).AsBytes();
+                this.memory[this.name] = copy;
             }
             else
             {
@@ -91,7 +93,7 @@ namespace Xive.Cell
 
         public void Dispose()
         {
-            //Do nothing.
+            this.origin.Dispose();
         }
     }
 }

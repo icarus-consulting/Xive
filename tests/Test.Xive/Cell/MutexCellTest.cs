@@ -64,7 +64,6 @@ namespace Xive.Cell.Test
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
-
                 using (var mutexed = new MutexCell(cell))
                 {
                     mutexed.Update(new InputOf(content));

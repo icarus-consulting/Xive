@@ -22,19 +22,19 @@
 
 using System;
 using System.Collections.Generic;
+using Xive.Xocument;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Error;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
-using Xive.Xocument;
 
 namespace Xive.Hive
 {
     /// <summary>
     /// A catalog to manage a list of combs in a hive.
     /// </summary>
-    public sealed class Catalog : ICatalog
+    public sealed class MutexCatalog : ICatalog
     {
         private readonly IScalar<IHoneyComb> hq;
         private readonly IScalar<string> itemName;
@@ -43,7 +43,7 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(IHive hive) : this(
+        public MutexCatalog(IHive hive) : this(
             new ScalarOf<string>(() => hive.Scope()),
             new ScalarOf<IHoneyComb>(() => hive.HQ()),
             cell => new CellXocument(cell, "catalog")
@@ -53,13 +53,13 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IHoneyComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
+        public MutexCatalog(string itemName, IHoneyComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
         { }
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
+        public MutexCatalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
             new ScalarOf<string>(itemName),
             new ScalarOf<IHoneyComb>(hq),
             xocument
@@ -69,7 +69,7 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        internal Catalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
+        internal MutexCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
         {
             this.hq = hq;
             this.itemName = itemName;
@@ -78,7 +78,7 @@ namespace Xive.Hive
 
         public void Update(string id, IEnumerable<IDirective> content)
         {
-            if(!Exists(id))
+            if (!Exists(id))
             {
                 Create(id);
             }
@@ -122,27 +122,31 @@ namespace Xive.Hive
         {
             using (var xoc = this.Xocument())
             {
-                xoc.Modify(
-                    new Directives()
-                        .Xpath("/catalog")
-                        .Append(
-                            new EnumerableOf<IDirective>(
-                                new AddIfAttributeDirective(this.itemName.Value(), "id", id)
-                            )
-                        )
-                        .Attr("id", id)
-                );
+                if (xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count == 0)
+                {
+                    xoc.Modify(
+                        new Directives()
+                            .Xpath("/catalog")
+                            .Add(this.itemName.Value())
+                            .Attr("id", id)
+                    );
+                }
             }
         }
 
         private bool Exists(string id)
         {
-            return this.List($"@id='{id}'").GetEnumerator().MoveNext();
+            using (var xoc = Xocument())
+            {
+                return xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count > 0;
+            }
         }
 
         private IXocument Xocument()
         {
-            return this.hq.Value().Xocument("catalog.xml");
+            var hq = this.hq.Value();
+            var name = $"{hq.Name()}/catalog.xml";
+            return new MutexXocument(name, this.hq.Value().Xocument("catalog.xml"));
         }
     }
 }

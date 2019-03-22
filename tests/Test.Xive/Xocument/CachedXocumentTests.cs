@@ -22,12 +22,12 @@
 
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Xive.Xocument;
+using Xive.Test;
 using Xunit;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
-namespace Xive.Test.Xocument
+namespace Xive.Xocument.Test
 {
     public sealed class CachedXocumentTests
     {

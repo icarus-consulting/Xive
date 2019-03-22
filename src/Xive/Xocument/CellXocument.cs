@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.Diagnostics;
 using System.IO;
 using System.Xml.Linq;
 using Yaapii.Atoms.IO;
@@ -51,26 +52,28 @@ namespace Xive.Xocument
                                         name = name.Substring(0, name.Length - 4);
                                     }
                                     name = Path.GetFileName(name);
-
                                     byte[] content = cell.Content();
+                                    XDocument doc;
                                     if (content.Length == 0)
                                     {
+                                        doc =
+                                            new XDocument(
+                                                new XElement(name)
+                                            );
 
-                                        cell.Update(
-                                            new InputOf(
-                                                new XDocument(
-                                                    new XElement(name)
-                                                ).ToString()
-                                            )
-                                        );
-                                        content = cell.Content();
+                                        cell.Update(new InputOf(doc.ToString()));
+                                        content = new BytesOf(doc.ToString()).AsBytes();
                                     }
-                                    return
-                                        XDocument.Parse(
-                                            new TextOf(
-                                                new InputOf(content)
-                                            ).AsString()
-                                        );
+                                    else
+                                    {
+                                        doc =
+                                            XDocument.Parse(
+                                                new TextOf(
+                                                    new InputOf(content)
+                                                ).AsString()
+                                            );
+                                    }
+                                    return doc;
                                 }
                             }),
                             xnode =>

@@ -35,8 +35,7 @@ namespace Xive.Hive
     {
         private readonly string scope;
         private readonly Func<IHoneyComb, IHoneyComb> comb;
-        private readonly Func<string, IHoneyComb, ICatalog> catalog;
-        private readonly IDictionary<string, byte[]> memory;
+        private readonly IDictionary<string, MemoryStream> memory;
 
         /// <summary>
         /// A hive that lives in memory.
@@ -48,12 +47,30 @@ namespace Xive.Hive
 
         /// <summary>
         /// A hive that lives in memory.
-        /// With this ctor, this hive's contents will live only as long as this instance lives.
+        /// With this ctor, this hive's contents will live only as long as this instance
+        /// lives.
         /// </summary>
-        /// <param name="scope">Scope name of the hive</param>
-        public RamHive(string scope) : this(
-            scope,
-            (hiveName, comb) => new Catalog(hiveName, comb)
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
+        public RamHive(string name) : this(
+            name,
+            comb => comb,
+            new Dictionary<string, MemoryStream>()
+        )
+        { }
+
+        /// <summary>
+        /// A hive that lives in memory.
+        /// With this ctor, you can construct the hive multiple times with the same name and memory
+        /// and its combs will always have the same contents.
+        /// </summary>
+        /// <param name="name">Unique name of the hive</param>
+        /// <param name="memory">An external memory for the hive</param>
+        /// <param name="combWrap">Wrap the comb if needed.</param>
+        public RamHive(Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory) : this(
+            "X",
+            combWrap,
+            memory
         )
         { }
 
@@ -66,8 +83,7 @@ namespace Xive.Hive
         public RamHive(Func<IHoneyComb, IHoneyComb> combWrap) : this(
             "X",
             combWrap,
-            (hiveName, cmb) => new Catalog(hiveName, cmb),
-            new Dictionary<string, byte[]>()
+            new Dictionary<string, MemoryStream>()
         )
         { }
 
@@ -80,8 +96,7 @@ namespace Xive.Hive
         public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap) : this(
             name,
             combWrap,
-            (hiveName, cmb) => new Catalog(hiveName, cmb),
-            new Dictionary<string, byte[]>()
+            new Dictionary<string, MemoryStream>()
         )
         { }
 
@@ -91,58 +106,10 @@ namespace Xive.Hive
         /// and its combs will always have the same contents.
         /// </summary>
         /// <param name="name">Unique name of the hive</param>
-        /// <param name="memory">An external memory for the hive</param>
-        /// <param name="combWrap">Wrap the comb if needed.</param>
-        public RamHive(Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, byte[]> memory) : this(
-            "X",
-            combWrap,
-            (hiveName, comb) => new Catalog(hiveName, comb),
-            memory
-        )
-        { }
-
-        /// <summary>
-        /// A hive that lives in memory.
-        /// With this ctor, you can construct the hive multiple times with the same name and memory
-        /// and its combs will always have the same contents.
-        /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        /// <param name="memory">An external memory for the hive</param>
-        /// <param name="combWrap">Wrap the comb if needed.</param>
-        public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, byte[]> memory) : this(
-            name,
-            combWrap,
-            (hiveName, comb) => new Catalog(hiveName, comb),
-            memory
-        )
-        { }
-
-        /// <summary>
-        /// A hive that lives in memory.
-        /// With this ctor, you can construct the hive multiple times with the same name and memory
-        /// and its combs will always have the same contents.
-        /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        /// <param name="memory">An external memory for the hive</param>
-        public RamHive(IDictionary<string, byte[]> memory) : this(
+        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
+        public RamHive(IDictionary<string, MemoryStream> memory) : this(
             "X",
             comb => comb,
-            (hiveName, comb) => new Catalog(hiveName, comb),
-            memory
-        )
-        { }
-
-        /// <summary>
-        /// A hive that lives in memory.
-        /// With this ctor, you can construct the hive multiple times with the same name and memory
-        /// and its combs will always have the same contents.
-        /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        /// <param name="memory">An external memory for the hive</param>
-        public RamHive(string name, IDictionary<string, byte[]> memory) : this(
-            name,
-            comb => comb,
-            (hiveName, comb) => new Catalog(hiveName, comb),
             memory
         )
         { }
@@ -154,56 +121,10 @@ namespace Xive.Hive
         /// </summary>
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public RamHive(Func<string, IHoneyComb, ICatalog> catalog, IDictionary<string, byte[]> memory) : this(
-            "X",
-            comb => comb,
-            catalog,
-            memory
-        )
-        { }
-
-        /// <summary>
-        /// A hive that lives in memory.
-        /// With this ctor, you can construct the hive multiple times with the same name and memory
-        /// and its combs will always have the same contents.
-        /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public RamHive(string name, Func<string, IHoneyComb, ICatalog> catalog, IDictionary<string, byte[]> memory) : this(
+        public RamHive(string name, IDictionary<string, MemoryStream> memory) : this(
             name,
             comb => comb,
-            catalog,
             memory
-        )
-        { }
-
-        /// <summary>
-        /// A hive that lives in memory.
-        /// With this ctor, this hive's contents will live only as long as this instance
-        /// lives.
-        /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public RamHive(Func<string, IHoneyComb, ICatalog> catalog) : this(
-            "X",
-            comb => comb,
-            catalog,
-            new Dictionary<string, byte[]>()
-        )
-        { }
-
-        /// <summary>
-        /// A hive that lives in memory.
-        /// With this ctor, this hive's contents will live only as long as this instance
-        /// lives.
-        /// </summary>
-        /// <param name="name">Unique name of the hive</param>
-        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public RamHive(string name, Func<string, IHoneyComb, ICatalog> catalog) : this(
-            name,
-            comb => comb,
-            catalog,
-            new Dictionary<string, byte[]>()
         )
         { }
 
@@ -215,20 +136,24 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
         /// <param name="memory">An external memory for the hive</param>
-        public RamHive(string name, Func<IHoneyComb, IHoneyComb> comb, Func<string, IHoneyComb, ICatalog> catalog, IDictionary<string, byte[]> memory)
+        public RamHive(string name, Func<IHoneyComb, IHoneyComb> comb, IDictionary<string, MemoryStream> memory)
         {
             this.scope = name;
             this.comb = comb;
-            this.catalog = catalog;
             this.memory = memory;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
+            return Combs(xpath, new MutexCatalog(this.scope, HQ()));
+        }
+
+        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        {
             return
                 new Mapped<string, IHoneyComb>(
                     id => this.comb(new RamComb(id, this.memory)),
-                    this.catalog(this.scope, HQ()).List(xpath)
+                    catalog.List(xpath)
                 );
         }
 

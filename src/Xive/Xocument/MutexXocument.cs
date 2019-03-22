@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Xml.Linq;
 using Yaapii.Atoms.Bytes;
@@ -46,60 +47,48 @@ namespace Xive.Xocument
         /// </summary>
         public MutexXocument(string name, IXocument origin) : base()
         {
-            this.name = name;
-            this.origin = origin;
-            this.mtx = new List<Mutex>();
+            lock (this)
+            {
+                this.name = name;
+                this.origin = origin;
+                this.mtx = new List<Mutex>();
+            }
         }
 
         public void Modify(IEnumerable<IDirective> dirs)
         {
-            lock (this.mtx)
-            {
-                Block();
-                this.origin.Modify(dirs);
-            }
+            Block();
+            this.origin.Modify(dirs);
         }
 
         public XNode Node()
         {
-            lock (this.mtx)
-            {
-                Block();
-                return this.origin.Node();
-            }
+            Block();
+            return this.origin.Node();
         }
 
         public IList<IXML> Nodes(string xpath)
         {
-            lock (this.mtx)
-            {
-                IList<IXML> result;
-                Block();
-                result = this.origin.Nodes(xpath);
-                return result;
-            }
+            IList<IXML> result;
+            Block();
+            result = this.origin.Nodes(xpath);
+            return result;
         }
 
         public string Value(string xpath, string def)
         {
-            lock (this.mtx)
-            {
-                string result = String.Empty;
-                Block();
-                result = this.origin.Value(xpath, def);
-                return result;
-            }
+            string result = String.Empty;
+            Block();
+            result = this.origin.Value(xpath, def);
+            return result;
         }
 
         public IList<string> Values(string xpath)
         {
-            lock (this.mtx)
-            {
-                IList<string> result;
-                Block();
-                result = this.origin.Values(xpath);
-                return result;
-            }
+            IList<string> result;
+            Block();
+            result = this.origin.Values(xpath);
+            return result;
         }
 
         public void Dispose()
@@ -122,7 +111,7 @@ namespace Xive.Xocument
                     {
                         throw new ApplicationException($"Cannot release mutex for xocument '{this.name}'. "
                             + "Did you try to dispose the xocument in another thread than "
-                            + "the one where you called its read/modify methods?", 
+                            + "the one where you called its read/modify methods?",
                             ex
                         );
                     }

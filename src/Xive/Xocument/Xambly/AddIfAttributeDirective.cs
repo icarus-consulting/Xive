@@ -114,10 +114,9 @@ namespace Yaapii.Xambly
             var xElement = node as XElement;
             if (String.Compare(xElement.Name.LocalName, this.name.Raw(), true) == 0)
             {
-                foreach (XNode child in Children(node))
+                foreach(var attr in xElement.Attributes())
                 {
-                    var xChild = child as XElement;
-                    if (xChild.Attributes().Contains(new XAttribute(this.name.Raw(), this.value.Raw())))
+                    if (attr.Name == this.attribute.Raw() && attr.Value == this.value.Raw())
                     {
                         matches = true;
                         break;

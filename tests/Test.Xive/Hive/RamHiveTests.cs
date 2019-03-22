@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -36,9 +37,9 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversComb()
         {
-            var mem = new Dictionary<string, byte[]>();
-            var hive = new RamHive("in-memory", mem);
-            var catalog = new Catalog("in-memory", hive.HQ());
+            var memory = new Dictionary<string, MemoryStream>();
+            var hive = new RamHive("in-memory", memory);
+            var catalog = new MutexCatalog("in-memory", hive.HQ());
             catalog.Create("123");
 
             Assert.NotEmpty(catalog.List("@id='123'"));
@@ -47,13 +48,13 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftsScope()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             var hive = new RamHive(mem);
-            var catalog = new Catalog(hive);
+            var catalog = new MutexCatalog(hive);
             catalog.Create("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new Catalog(shifted);
+            var twilightCatalog = new MutexCatalog(shifted);
 
             Assert.Empty(twilightCatalog.List("@id='123'"));
         }
@@ -61,13 +62,13 @@ namespace Xive.Hive.Test
         [Fact]
         public void DistinguishesScope()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             var hive = new RamHive(mem);
-            var catalog = new Catalog(hive);
+            var catalog = new MutexCatalog(hive);
             catalog.Create("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new Catalog(shifted);
+            var twilightCatalog = new MutexCatalog(shifted);
             twilightCatalog.Create("789");
 
             Assert.Contains("twilight-zone\\HQ\\catalog.xml", mem.Keys);
@@ -76,7 +77,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQCell()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             string expected = "Four headquarters are one head";
             var hive = new RamHive("in-memory", mem);
             hive.HQ().Cell("catalog.xml").Update(new InputOf(expected));
@@ -93,7 +94,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQXocument()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             var hive = new RamHive("in-memory", mem);
             hive.HQ().Xocument("catalog.xml")
                 .Modify(
@@ -113,7 +114,7 @@ namespace Xive.Hive.Test
         public void RemembersCombs()
         {
             var hive = new RamHive("animal");
-            var catalog = new Catalog(hive);
+            var catalog = new MutexCatalog(hive);
             catalog.Create("123");
             catalog.Create("456");
 
@@ -138,7 +139,7 @@ namespace Xive.Hive.Test
         public void RemembersXocument()
         {
             var hive = new RamHive("animal");
-            var catalog = new Catalog(hive);
+            var catalog = new MutexCatalog(hive);
             catalog.Create("123");
             catalog.Create("456");
 

@@ -36,7 +36,6 @@ namespace Xive.Hive
     {
         private readonly IText scope;
         private readonly Func<string, IHoneyComb> comb;
-        private readonly Func<string, IHoneyComb, ICatalog> catalog;
         private readonly Func<string, IHive> shift;
 
         /// <summary>
@@ -47,22 +46,7 @@ namespace Xive.Hive
         /// <param name="comb">How to build a comb: (combName) => new SomeCatalog(...)</param>
         public SimpleHive(string scope, Func<string, IHoneyComb> comb) : this(
             new StrictCoordinate(scope),
-            comb,
-            (hiveName, catalogComb) => new Catalog(hiveName, catalogComb)
-        )
-        { }
-
-        /// <summary>
-        /// A simple hive.
-        /// Using this ctor, this hive is rather dumb: You need to tell it how to build a comb and how to build a catalog.
-        /// </summary>
-        /// <param name="scope">Unique name of the hive</param>
-        /// <param name="comb">How to build a comb: (combName) => new SomeCatalog(...)</param>
-        /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        internal SimpleHive(string scope, Func<string, IHoneyComb> comb, Func<string, IHoneyComb, ICatalog> catalog) : this(
-            new StrictCoordinate(scope),
-            comb,
-            catalog
+            comb
         )
         { }
 
@@ -73,11 +57,10 @@ namespace Xive.Hive
         /// <param name="scope">Unique name of the hive</param>
         /// <param name="comb">How to build a comb: (combName) => new SomeCatalog(...)</param>
         /// <param name="catalog">The catalog of the comb</param>
-        internal SimpleHive(IText scope, Func<string, IHoneyComb> comb, Func<string, IHoneyComb, ICatalog> catalog)
+        internal SimpleHive(IText scope, Func<string, IHoneyComb> comb)
         {
             this.scope = scope;
             this.comb = comb;
-            this.catalog = catalog;
         }
 
         public IHoneyComb HQ()
@@ -89,20 +72,35 @@ namespace Xive.Hive
         {
             lock (scope)
             {
+                return Combs(
+                    xpath, 
+                    new MutexCatalog(this.scope.AsString(), this.HQ())
+                );
+            }
+        }
+
+        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        {
+            lock (scope)
+            {
                 return
                     new Mapped<string, IHoneyComb>(
                         comb =>
                         {
                             return this.comb($"{this.scope.AsString()}{Path.DirectorySeparatorChar}{comb}");
                         },
-                        this.catalog(this.scope.AsString(), this.HQ()).List(xpath)
+                        catalog.List(xpath)
                     );
             }
         }
 
         public IHive Shifted(string scope)
         {
-            return new SimpleHive(new StrictCoordinate(scope), this.comb, this.catalog);
+            return 
+                new SimpleHive(
+                    new StrictCoordinate(scope), 
+                    this.comb
+                );
         }
 
         public string Scope()

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;
 
@@ -39,7 +37,6 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            //Block();
             return origin.Content();
         }
 
@@ -50,10 +47,7 @@ namespace Xive.Cell
 
         public void Update(IInput content)
         {
-            //lock (locks[origin.Name()])
-            //{
-                origin.Update(content);
-            //}
+            origin.Update(content);
         }
     }
 }

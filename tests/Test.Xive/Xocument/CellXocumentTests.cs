@@ -25,7 +25,7 @@ using Xive.Xocument;
 using Xunit;
 using Yaapii.Xambly;
 
-namespace Xive.Test.Xocument
+namespace Xive.Xocument.Test
 {
     public sealed class CellXocumentTests
     {

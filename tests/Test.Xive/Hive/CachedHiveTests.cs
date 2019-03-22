@@ -20,13 +20,18 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
+using Test.Yaapii.Xive;
 using Xive.Comb;
 using Xive.Test;
 using Xive.Xocument;
 using Xunit;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Hive.Test
 {
@@ -35,7 +40,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ReadsBinaryOnce()
         {
-            var binCache = new Dictionary<string, byte[]>();
+            var binCache = new Dictionary<string, MemoryStream>();
             var xmlMemory = new Dictionary<string, XNode>();
             int reads = 0;
             var hive =
@@ -60,7 +65,7 @@ namespace Xive.Hive.Test
                     xmlMemory
                 );
 
-            new Catalog(hive).Create("123");
+            new MutexCatalog(hive).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -78,7 +83,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftIncludesCache()
         {
-            var binCache = new Dictionary<string, byte[]>();
+            var binCache = new Dictionary<string, MemoryStream>();
             var xmlMemory = new Dictionary<string, XNode>();
 
             var hive =
@@ -88,10 +93,38 @@ namespace Xive.Hive.Test
                     xmlMemory
                 );
 
-            new Catalog(hive.Shifted("A")).Create("something");
-            new Catalog(hive.Shifted("B")).Create("another thing");
+            new MutexCatalog(hive.Shifted("A")).Create("something");
+            new MutexCatalog(hive.Shifted("B")).Create("another thing");
 
             Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
+        }
+
+        [Fact]
+        public void WorksParallelWithRamHive()
+        {
+            var hive =
+                new MutexHive(
+                    new CachedHive(
+                        new RamHive()
+                    )
+                );
+            var machine = "Dr.Robotic";
+            new MutexCatalog(hive).Create(machine);
+            for (var i = 0; i < 2; i++)
+            {
+                var id = "item";
+
+                using (var cell =
+                    new FirstOf<IHoneyComb>(
+                        hive.Combs($"@id='{machine}'")
+                    ).Value().Cell(id)
+                )
+                {
+                    var content = Guid.NewGuid().ToString();
+                    cell.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                }
+            }
         }
     }
 }

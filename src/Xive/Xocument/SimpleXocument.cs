@@ -44,12 +44,15 @@ namespace Xive.Xocument
         /// A simple Xocument from a <see cref="XNode"/>
         /// </summary>
         /// <param name="node"></param>
-        public SimpleXocument(XNode node) : this(node, update => { })
+        public SimpleXocument(XNode node) : this(
+            node,
+            update => { }
+        )
         { }
 
         /// <summary>
         /// A simple Xocument.
-        /// You can tell the Xocument what to to when it has been modified. 
+        /// You can tell the Xocument what to to after it has been modified. 
         /// For example write its contents to a cell.
         /// </summary>
         public SimpleXocument(XNode node, Action<XNode> update) : this(new StickyScalar<XNode>(() => node), update)
@@ -70,7 +73,7 @@ namespace Xive.Xocument
         public SimpleXocument(string rootName, Action<XNode> update) : this(
             new StickyScalar<XNode>(() =>
             {
-                if(rootName.ToLower().EndsWith(".xml"))
+                if (rootName.ToLower().EndsWith(".xml"))
                 {
                     rootName = rootName.Substring(0, rootName.Length - 4);
                 }
