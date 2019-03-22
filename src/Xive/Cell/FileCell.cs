@@ -25,7 +25,6 @@ using System.IO;
 using Yaapii.Atoms;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
-using Yaapii.Atoms.Text;
 
 namespace Xive.Cell
 {
@@ -79,27 +78,36 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            byte[] result = new byte[0];
-
-            if (File.Exists(this.path.Value()))
+            lock (this)
             {
-                result =
-                    new BytesOf(
-                        new InputOf(new Uri(this.path.Value()))
-                    ).AsBytes();
+                byte[] result = new byte[0];
+
+                if (File.Exists(this.path.Value()))
+                {
+                    using (var file = new FileStream(this.path.Value(), FileMode.Open))
+                    {
+                        var mem = new MemoryStream();
+                        file.CopyTo(mem);
+                        mem.Seek(0, SeekOrigin.Begin);
+                        result = new BytesOf(new InputOf(mem)).AsBytes();
+                    }
+                }
+                return result;
             }
-            return result;
         }
 
         public void Update(IInput content)
         {
-            if (content.Stream().Length == 0)
+            lock (this)
             {
-                Cleanup();
-            }
-            else
-            {
-                Write(content);
+                if (content.Stream().Length == 0)
+                {
+                    Cleanup();
+                }
+                else
+                {
+                    Write(content);
+                }
             }
         }
 
@@ -123,9 +131,14 @@ namespace Xive.Cell
                 {
                     Directory.CreateDirectory(dir);
                 }
+                var origin = content.Stream();
+                var copy = new MemoryStream();
+                content.Stream().CopyTo(copy);
+                copy.Seek(0, SeekOrigin.Begin);
+                origin.Seek(0, SeekOrigin.Begin);
                 File.WriteAllBytes(
                     this.path.Value(),
-                    new BytesOf(content).AsBytes()
+                    copy.ToArray()
                 );
             }
         }
