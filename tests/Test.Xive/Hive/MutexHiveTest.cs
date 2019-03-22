@@ -202,7 +202,7 @@ namespace Xive.Hive.Test
                     return true;
                 },
                 Environment.ProcessorCount << 4,
-                10000000
+                10000
             ).Invoke();
             }
         }
@@ -245,7 +245,7 @@ namespace Xive.Hive.Test
                     return true;
                 },
                 Environment.ProcessorCount << 4,
-                10000000
+                10000
             ).Invoke();
         }
     }
