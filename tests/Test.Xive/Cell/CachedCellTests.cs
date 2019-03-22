@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.IO;
 using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -35,7 +36,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ReadsOnce()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             int reads = 0;
             var cell =
                 new CachedCell(
@@ -60,7 +61,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void FillsCache()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             new CachedCell(
                 new FkCell(
                     content => { },
@@ -84,7 +85,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UpdatesCache()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             var cell =
                 new CachedCell(
                     new FkCell(
@@ -108,7 +109,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ReadSkipsCacheWhenOversized()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             var cell =
                 new CachedCell(
                     new FkCell(
@@ -130,7 +131,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UpdateSkipsCacheWhenOversized()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             var cell =
                 new CachedCell(
                     new FkCell(),
@@ -151,7 +152,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UnderMaxAndThenOverMaxWorks()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             var cell =
                 new CachedCell(
                     new RamCell(),

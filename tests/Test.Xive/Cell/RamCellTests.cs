@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.IO;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
@@ -31,7 +32,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void InitializesWithMemory()
         {
-            using (var cell = new RamCell("my-cell", new byte[1] { 0x00 }))
+            using (var cell = new RamCell("my-cell", new MemoryStream(new byte[1] { 0x00 })))
             {
                 Assert.True(
                     cell.Content()[0]

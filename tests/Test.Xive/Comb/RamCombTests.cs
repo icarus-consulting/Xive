@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -35,7 +36,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersCell()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             new RamComb("my-comb", memory)
                 .Cell("my-cell")
                 .Update(new InputOf("larva"));
@@ -55,7 +56,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersXocument()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             new RamComb("my-comb", memory)
                 .Xocument("xoctor.xml")
                 .Modify(
@@ -79,7 +80,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void DeliversXocument()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("some.xml"))
             {
@@ -93,7 +94,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersSubPathXocument()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/dir/some.xml"))
             {
@@ -111,7 +112,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void XocumentRootSkipsSubDir()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/some.xml"))
             {

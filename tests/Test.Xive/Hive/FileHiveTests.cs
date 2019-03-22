@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using Test.Yaapii.Xive;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;

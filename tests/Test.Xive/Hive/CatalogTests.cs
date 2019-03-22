@@ -26,6 +26,7 @@ using Yaapii.Xambly;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Xocument;
+using System.IO;
 
 namespace Xive.Hive.Test
 {
@@ -36,7 +37,7 @@ namespace Xive.Hive.Test
         [InlineData("456")]
         public void AddsEntry(string id)
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             var catalog =
                 new Catalog(
                     "my-hive",
@@ -59,7 +60,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemovesEntry()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             var catalog =
                 new Catalog(
                     "my-hive",
@@ -82,7 +83,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void UpdatesEntry()
         {
-            var memory = new Dictionary<string, byte[]>();
+            var memory = new Dictionary<string, MemoryStream>();
             var catalog =
                 new Catalog(
                     "my-hive",

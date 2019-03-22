@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
 using Xive.Test;
 using Xunit;
@@ -40,7 +41,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void ReadsBinaryOnce()
         {
-            var binCache = new Dictionary<string, byte[]>();
+            var binCache = new Dictionary<string, MemoryStream>();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -84,7 +85,7 @@ namespace Xive.Comb.Test
                             }
                         )
                     ),
-                    new Dictionary<string, byte[]>(),
+                    new Dictionary<string, MemoryStream>(),
                     xmlCache
                 );
 
@@ -97,7 +98,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void FillsBinCache()
         {
-            var binCache = new Dictionary<string, byte[]>();
+            var binCache = new Dictionary<string, MemoryStream>();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -143,7 +144,7 @@ namespace Xive.Comb.Test
                             )
                         )
                     ),
-                    new Dictionary<string, byte[]>(),
+                    new Dictionary<string, MemoryStream>(),
                     xmlCache
                 );
 
@@ -158,7 +159,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void UpdatesBinaryCache()
         {
-            var cache = new Dictionary<string, byte[]>();
+            var cache = new Dictionary<string, MemoryStream>();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -209,7 +210,7 @@ namespace Xive.Comb.Test
                             }
                         )
                     ),
-                    new Dictionary<string, byte[]>(),
+                    new Dictionary<string, MemoryStream>(),
                     cache
                 );
 

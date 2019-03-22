@@ -34,7 +34,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQ()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             var hq =
                 new SimpleHive(
                     "person", 
@@ -47,7 +47,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemembersHQ()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             var hq =
                 new SimpleHive(
                     "person",
@@ -69,7 +69,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversComb()
         {
-            var mem = new Dictionary<string, byte[]>();
+            var mem = new Dictionary<string, MemoryStream>();
             var hq =
                 new SimpleHive(
                     "person",

@@ -56,7 +56,7 @@ namespace Xive.Hive.Test
             {
                 hive.Combs("@id='2CV'");
             });
-            
+
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace Xive.Hive.Test
             var first = true;
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
-                if(!first)
+                if (!first)
                 {
                     new Catalog(hive).Remove("X");
                     first = false;
@@ -159,6 +159,85 @@ namespace Xive.Hive.Test
                 }
                 return true;
             }, 100, 10000).Invoke();
+        }
+
+        [Fact]
+        public void WorksParallelWithFileHive()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive =
+                    new MutexHive(
+                        new FileHive(dir.Value().FullName)
+                    );
+
+                var machine = "Dr.Robotic";
+                new ParallelFunc(() =>
+                {
+                    var id = "Item_" + new Random().Next(1, 5);
+                    try
+                    {
+                        new Catalog(
+                            hive
+                        ).Create("Dr.Robotic");
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        //ignored with intention
+                    }
+
+                    //using (var cell =
+                    //    new FirstOf<IHoneyComb>(
+                    //        hive.Combs($"@id='{machine}'")
+                    //    ).Value().Cell(id)
+                    //)
+                    //{
+                    //var content = Guid.NewGuid().ToString();
+                    //cell.Update(new InputOf(content));
+                    //Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                    //}
+                    return true;
+                }, 1000, 3000000).Invoke();
+            }
+        }
+
+        [Fact]
+        public void WorksParallelWithRamHive()
+        {
+            var hive =
+                new MutexHive(
+                    new CachedHive(
+                        new RamHive()
+                    )
+                );
+
+            var machine = "Dr.Robotic";
+            new ParallelFunc(() =>
+            {
+                var id = "Item_" + new Random().Next(1, 5);
+                try
+                {
+                    new Catalog(
+                        hive
+                    ).Create(machine);
+                }
+                catch (InvalidOperationException)
+                {
+                        //ignored with intention
+                    }
+
+                using (var cell =
+                    new FirstOf<IHoneyComb>(
+                        hive.Combs($"@id='{machine}'")
+                    ).Value().Cell(id)
+                )
+                {
+                    var content = Guid.NewGuid().ToString();
+                    cell.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                }
+                return true;
+            }, 1000, 3000000).Invoke();
         }
     }
 }
