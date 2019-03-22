@@ -110,7 +110,7 @@ namespace Xive.Hive
         private ICatalog CachedCatalog()
         {
             return
-                new Catalog(
+                new MutexCatalog(
                     this.origin.Scope(),
                     new CachedComb(
                         this.origin.HQ(),

@@ -34,7 +34,7 @@ namespace Xive.Hive
     /// <summary>
     /// A catalog to manage a list of combs in a hive.
     /// </summary>
-    public sealed class Catalog : ICatalog
+    public sealed class MutexCatalog : ICatalog
     {
         private readonly IScalar<IHoneyComb> hq;
         private readonly IScalar<string> itemName;
@@ -43,7 +43,7 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(IHive hive) : this(
+        public MutexCatalog(IHive hive) : this(
             new ScalarOf<string>(() => hive.Scope()),
             new ScalarOf<IHoneyComb>(() => hive.HQ()),
             cell => new CellXocument(cell, "catalog")
@@ -53,13 +53,13 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IHoneyComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
+        public MutexCatalog(string itemName, IHoneyComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
         { }
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        public Catalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
+        public MutexCatalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
             new ScalarOf<string>(itemName),
             new ScalarOf<IHoneyComb>(hq),
             xocument
@@ -69,7 +69,7 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive.
         /// </summary>
-        internal Catalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
+        internal MutexCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
         {
             this.hq = hq;
             this.itemName = itemName;
@@ -144,7 +144,9 @@ namespace Xive.Hive
 
         private IXocument Xocument()
         {
-            return this.hq.Value().Xocument("catalog.xml");
+            var hq = this.hq.Value();
+            var name = $"{hq.Name()}/catalog.xml";
+            return new MutexXocument(name, this.hq.Value().Xocument("catalog.xml"));
         }
     }
 }

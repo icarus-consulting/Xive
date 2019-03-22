@@ -39,7 +39,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new Catalog(
+                new MutexCatalog(
                     "my-hive",
                     new SimpleComb(
                         "hq",
@@ -62,7 +62,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new Catalog(
+                new MutexCatalog(
                     "my-hive",
                     new SimpleComb(
                         "hq",
@@ -85,7 +85,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new Catalog(
+                new MutexCatalog(
                     "my-hive",
                     new SimpleComb(
                         "hq",

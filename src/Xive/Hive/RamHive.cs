@@ -145,7 +145,7 @@ namespace Xive.Hive
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return Combs(xpath, new Catalog(this.scope, HQ()));
+            return Combs(xpath, new MutexCatalog(this.scope, HQ()));
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)

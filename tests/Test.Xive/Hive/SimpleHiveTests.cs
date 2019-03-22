@@ -76,7 +76,7 @@ namespace Xive.Hive.Test
                     comb => new RamComb(comb, mem)
                 ).HQ();
 
-            var catalog = new Catalog("person", hq);
+            var catalog = new MutexCatalog("person", hq);
             catalog.Create("Alfred");
 
             Assert.Contains("Alfred", catalog.List("@id='Alfred'"));

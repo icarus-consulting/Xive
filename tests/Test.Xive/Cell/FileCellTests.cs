@@ -33,7 +33,7 @@ namespace Xive.Cell.Test
     public sealed class FileCellTests
     {
         [Fact]
-        public void Works()
+        public void ReadsWithoutContent()
         {
             using (var dir = new TempDirectory())
             using (var item = new FileCell(Path.Combine(dir.Value().FullName, "itemFile.tmp")))

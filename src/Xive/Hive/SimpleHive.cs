@@ -74,7 +74,7 @@ namespace Xive.Hive
             {
                 return Combs(
                     xpath, 
-                    new Catalog(this.scope.AsString(), this.HQ())
+                    new MutexCatalog(this.scope.AsString(), this.HQ())
                 );
             }
         }

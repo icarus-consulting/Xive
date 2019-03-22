@@ -65,7 +65,7 @@ namespace Xive.Hive.Test
                     xmlMemory
                 );
 
-            new Catalog(hive).Create("123");
+            new MutexCatalog(hive).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -93,8 +93,8 @@ namespace Xive.Hive.Test
                     xmlMemory
                 );
 
-            new Catalog(hive.Shifted("A")).Create("something");
-            new Catalog(hive.Shifted("B")).Create("another thing");
+            new MutexCatalog(hive.Shifted("A")).Create("something");
+            new MutexCatalog(hive.Shifted("B")).Create("another thing");
 
             Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
         }
@@ -109,7 +109,7 @@ namespace Xive.Hive.Test
                     )
                 );
             var machine = "Dr.Robotic";
-            new Catalog(hive).Create(machine);
+            new MutexCatalog(hive).Create(machine);
             for (var i = 0; i < 2; i++)
             {
                 var id = "item";

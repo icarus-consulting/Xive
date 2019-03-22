@@ -21,16 +21,25 @@
 //SOFTWARE.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using Xive.Comb;
-using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Hive
 {
     /// <summary>
     /// A hive that exists physically as files.
     /// </summary>
-    public sealed class FileHive : HiveEnvelope
+    public sealed class FileHive : IHive
     {
+        private readonly string scope;
+        private readonly string root;
+        private readonly Func<IHoneyComb, IHoneyComb> comb;
+
+        /// <summary>
+        /// A hive that exists physically as files.
+        /// </summary>
         public FileHive(string root) : this(
             "X", root
         )
@@ -48,16 +57,40 @@ namespace Xive.Hive
         /// A hive that exists physically as files.
         /// With this ctor, you can tell the hive how to build its catalog.
         /// </summary>
-        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap) : base(
-            new StickyScalar<IHive>(() =>
-            {
-                return
-                    new SimpleHive(
-                        scope,
-                        comb => combWrap(new FileComb($"{root}", comb))
-                    );
-            })
-        )
-        { }
+        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap)
+        {
+            this.scope = scope;
+            this.root = root;
+            this.comb = combWrap;
+        }
+
+        public IEnumerable<IHoneyComb> Combs(string xpath)
+        {
+            return Combs(xpath, new MutexCatalog(this.scope, HQ()));
+        }
+
+        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        {
+            return
+                new Mapped<string, IHoneyComb>(
+                    id => this.comb(new FileComb(Path.Combine(this.root, this.scope), id)),
+                    catalog.List(xpath)
+                );
+        }
+
+        public IHoneyComb HQ()
+        {
+            return this.comb(new FileComb(Path.Combine(this.root, this.scope), "HQ"));
+        }
+
+        public IHive Shifted(string scope)
+        {
+            return new FileHive(scope, this.root, this.comb);
+        }
+
+        public string Scope()
+        {
+            return this.scope;
+        }
     }
 }

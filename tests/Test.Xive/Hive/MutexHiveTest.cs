@@ -41,7 +41,7 @@ namespace Xive.Hive.Test
 
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                var catalog = new Catalog(hive);
+                var catalog = new MutexCatalog(hive);
                 catalog.Create("123");
             });
         }
@@ -50,7 +50,7 @@ namespace Xive.Hive.Test
         public void DeliversCombsInParallel()
         {
             var hive = new MutexHive(new RamHive("product"));
-            new Catalog(hive).Create("2CV");
+            new MutexCatalog(hive).Create("2CV");
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
@@ -86,10 +86,10 @@ namespace Xive.Hive.Test
             {
                 if (!first)
                 {
-                    new Catalog(hive).Remove("X");
+                    new MutexCatalog(hive).Remove("X");
                     first = false;
                 }
-                new Catalog(hive).Create("X");
+                new MutexCatalog(hive).Create("X");
             });
         }
 
@@ -125,7 +125,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var hive = new MutexHive(new FileHive("product", dir.Value().FullName));
-                var catalog = new Catalog(hive);
+                var catalog = new MutexCatalog(hive);
                 catalog.Create("2CV");
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
@@ -142,23 +142,26 @@ namespace Xive.Hive.Test
             var hive = new MutexHive(new RamHive());
             var comb = "Dr.Robotic";
             new ParallelFunc(() =>
-            {
-                var id = "Item_" + new Random().Next(1, 5);
-                var content = Guid.NewGuid().ToString();
-
-                new Catalog(hive).Create("Dr.Robotic");
-
-                using (var item =
-                    new FirstOf<IHoneyComb>(
-                        hive.Combs($"@id='{comb}'")
-                    ).Value().Cell(id)
-                )
                 {
-                    item.Update(new InputOf(content));
-                    Assert.Equal(content, new TextOf(item.Content()).AsString());
-                }
-                return true;
-            }, 100, 10000).Invoke();
+                    var id = "Item_" + new Random().Next(1, 5);
+                    var content = Guid.NewGuid().ToString();
+
+                    new MutexCatalog(hive).Create("Dr.Robotic");
+
+                    using (var item =
+                        new FirstOf<IHoneyComb>(
+                            hive.Combs($"@id='{comb}'")
+                        ).Value().Cell(id)
+                    )
+                    {
+                        item.Update(new InputOf(content));
+                        Assert.Equal(content, new TextOf(item.Content()).AsString());
+                    }
+                    return true;
+                }, 
+                Environment.ProcessorCount << 4, 
+                10000
+            ).Invoke();
         }
 
         [Fact]
@@ -177,8 +180,8 @@ namespace Xive.Hive.Test
                     var id = "Item_" + new Random().Next(1, 5);
                     try
                     {
-                        new Catalog(
-                            hive
+                        new MutexCatalog(
+                            hive.Shifted("to-the-left")
                         ).Create("Dr.Robotic");
                     }
                     catch (InvalidOperationException)
@@ -186,18 +189,21 @@ namespace Xive.Hive.Test
                         //ignored with intention
                     }
 
-                    //using (var cell =
-                    //    new FirstOf<IHoneyComb>(
-                    //        hive.Combs($"@id='{machine}'")
-                    //    ).Value().Cell(id)
-                    //)
-                    //{
-                    //var content = Guid.NewGuid().ToString();
-                    //cell.Update(new InputOf(content));
-                    //Assert.Equal(content, new TextOf(cell.Content()).AsString());
-                    //}
+                    using (var cell =
+                        new FirstOf<IHoneyComb>(
+                            hive.Shifted("to-the-left").Combs($"@id='{machine}'")
+                        ).Value().Cell(id)
+                    )
+                    {
+                        var content = Guid.NewGuid().ToString();
+                        cell.Update(new InputOf(content));
+                        Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                    }
                     return true;
-                }, 1000, 3000000).Invoke();
+                },
+                Environment.ProcessorCount << 4,
+                10000000
+            ).Invoke();
             }
         }
 
@@ -213,31 +219,34 @@ namespace Xive.Hive.Test
 
             var machine = "Dr.Robotic";
             new ParallelFunc(() =>
-            {
-                var id = "Item_" + new Random().Next(1, 5);
-                try
                 {
-                    new Catalog(
-                        hive
-                    ).Create(machine);
-                }
-                catch (InvalidOperationException)
-                {
+                    var id = "Item_" + new Random().Next(1, 5);
+                    try
+                    {
+                        new MutexCatalog(
+                            hive.Shifted("to-the-left")
+                        ).Create(machine);
+                    }
+                    catch (InvalidOperationException)
+                    {
                         //ignored with intention
                     }
 
-                using (var cell =
-                    new FirstOf<IHoneyComb>(
-                        hive.Combs($"@id='{machine}'")
-                    ).Value().Cell(id)
-                )
-                {
-                    var content = Guid.NewGuid().ToString();
-                    cell.Update(new InputOf(content));
-                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
-                }
-                return true;
-            }, 1000, 3000000).Invoke();
+                    using (var cell =
+                        new FirstOf<IHoneyComb>(
+                            hive.Shifted("to-the-left").Combs($"@id='{machine}'")
+                        ).Value().Cell(id)
+                    )
+                    {
+                        var content = Guid.NewGuid().ToString();
+                        cell.Update(new InputOf(content));
+                        Assert.Equal(content, new TextOf(cell.Content()).AsString());
+                    }
+                    return true;
+                },
+                Environment.ProcessorCount << 4,
+                10000000
+            ).Invoke();
         }
     }
 }

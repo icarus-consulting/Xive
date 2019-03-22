@@ -112,6 +112,7 @@ namespace Xive.Cell
                     throw new ApplicationException("Internal error: Duplicate mutex found for " + this.cell.Name());
                 }
             }
+            this.cell.Dispose();
         }
 
         private void Block()
