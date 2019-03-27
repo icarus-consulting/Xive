@@ -20,7 +20,9 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Xml.Linq;
 using Xive.Test;
 using Xunit;
@@ -38,7 +40,8 @@ namespace Xive.Xocument.Test
             new CachedXocument(
                 "buffered.xml",
                 new SimpleXocument("buffered"),
-                cache
+                cache,
+                new Dictionary<string, MemoryStream>()
             ).Node();
 
             Assert.Equal(
@@ -60,12 +63,32 @@ namespace Xive.Xocument.Test
                         reads++;
                         return new XDocument(new XElement("buffered"));
                     }),
-                    cache
+                    cache,
+                    new Dictionary<string, MemoryStream>()
                 );
             xoc.Node();
             xoc.Node();
 
             Assert.Equal(1, reads);
+        }
+
+        [Fact]
+        public void PreventsTypeSwitching()
+        {
+            var xmlCache = new Dictionary<string, XNode>();
+            var binCache = new Dictionary<string, MemoryStream>();
+            binCache.Add("cached.xml", new MemoryStream());
+            var xoc =
+                new CachedXocument(
+                    "cached.xml",
+                    new FkXocument(),
+                    xmlCache,
+                    binCache
+                );
+
+            Assert.Throws<InvalidOperationException>(
+                () => xoc.Value("/irrelevant", String.Empty)
+            );
         }
 
         [Fact]
@@ -76,7 +99,8 @@ namespace Xive.Xocument.Test
                 new CachedXocument(
                     "buffered.xml",
                     new SimpleXocument("buffered"),
-                    cache
+                    cache,
+                    new Dictionary<string, MemoryStream>()
                 );
             xoc.Node();
             xoc.Modify(

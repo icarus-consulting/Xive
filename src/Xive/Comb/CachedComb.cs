@@ -56,6 +56,7 @@ namespace Xive.Comb
                     this.comb.Cell(name),
                     $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
                     this.binMemory,
+                    this.xmlMemory,
                     this.maxBytes
                 );
         }
@@ -71,7 +72,8 @@ namespace Xive.Comb
                 new CachedXocument(
                     $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
                     this.comb.Xocument(name),
-                    this.xmlMemory
+                    this.xmlMemory,
+                    this.binMemory
                 );
         }
     }

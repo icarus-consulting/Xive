@@ -20,8 +20,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Linq;
 using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -49,7 +51,8 @@ namespace Xive.Cell.Test
                         }
                     ),
                     "cached",
-                    cache
+                    cache,
+                    new Dictionary<string, XNode>()
                 );
 
             cell.Content();
@@ -65,13 +68,14 @@ namespace Xive.Cell.Test
             new CachedCell(
                 new FkCell(
                     content => { },
-                    () => 
+                    () =>
                         new BytesOf(
                             new InputOf("Some content")
                         ).AsBytes()
                 ),
                 "cached",
-                cache
+                cache,
+                new Dictionary<string, XNode>()
             ).Content();
 
             Assert.Equal(
@@ -89,11 +93,12 @@ namespace Xive.Cell.Test
             var cell =
                 new CachedCell(
                     new FkCell(
-                        content => {  },
+                        content => { },
                         () => new BytesOf(new InputOf("Old content")).AsBytes()
                     ),
                     "cached",
-                    cache
+                    cache,
+                    new Dictionary<string, XNode>()
                 );
             cell.Content();
             cell.Update(new InputOf("New content"));
@@ -103,6 +108,26 @@ namespace Xive.Cell.Test
                 new TextOf(
                     new InputOf(cache["cached"])
                 ).AsString()
+            );
+        }
+
+        [Fact]
+        public void PreventsTypeSwitching()
+        {
+            var binCache = new Dictionary<string, MemoryStream>();
+            var xmlCache = new Dictionary<string, XNode>();
+            xmlCache.Add("cached", new XElement("irrelevant"));
+
+            var binCell =
+                new CachedCell(
+                    new FkCell(),
+                    "cached",
+                    binCache,
+                    xmlCache
+                );
+
+            Assert.Throws<InvalidOperationException>(
+                () => binCell.Content()
             );
         }
 
@@ -118,6 +143,7 @@ namespace Xive.Cell.Test
                     ),
                     "cached",
                     cache,
+                    new Dictionary<string, XNode>(),
                     64
                 );
             cell.Content();
@@ -137,6 +163,7 @@ namespace Xive.Cell.Test
                     new FkCell(),
                     "cached",
                     cache,
+                    new Dictionary<string, XNode>(),
                     64
                 );
             cell.Update(
@@ -158,6 +185,7 @@ namespace Xive.Cell.Test
                     new RamCell(),
                     "cached",
                     cache,
+                    new Dictionary<string, XNode>(),
                     3
                 );
             cell.Update(
