@@ -20,11 +20,12 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Xml.Linq;
 using Yaapii.Atoms;
-using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Cell
 {
@@ -35,17 +36,29 @@ namespace Xive.Cell
     {
         private readonly ICell origin;
         private readonly string name;
-        private readonly IDictionary<string, MemoryStream> memory;
+        private readonly IScalar<IDictionary<string, MemoryStream>> memory;
         private readonly int maxSize;
 
         /// <summary>
         /// A cell whose content is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> memory, int maxBytes = 10485760)
+        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
         {
             this.origin = origin;
             this.name = name;
-            this.memory = memory;
+            this.memory =
+                new ScalarOf<IDictionary<string, MemoryStream>>(() =>
+                {
+                    if(xmlMemory.ContainsKey(name))
+                    {
+                        throw 
+                            new InvalidOperationException(
+                                $"Cannot use '{name}' as binary cell because it has been stored as xml previously. "
+                                + "Caching works only if you use data consistently."
+                            );
+                    }
+                    return binMemory;
+                });
             this.maxSize = maxBytes;
         }
 
@@ -57,18 +70,18 @@ namespace Xive.Cell
         public byte[] Content()
         {
             byte[] result = new byte[0];
-            if (!this.memory.ContainsKey(this.name))
+            if (!this.memory.Value().ContainsKey(this.name))
             {
                 result = this.origin.Content();
                 if (result.Length <= this.maxSize)
                 {
-                    this.memory[this.name] = new MemoryStream(result);
+                    this.memory.Value()[this.name] = new MemoryStream(result);
                 }
             }
             else
             {
-                this.memory[this.name].Seek(0, SeekOrigin.Begin);
-                result = this.memory[this.name].ToArray();
+                this.memory.Value()[this.name].Seek(0, SeekOrigin.Begin);
+                result = this.memory.Value()[this.name].ToArray();
             }
             return result;
         }
@@ -76,17 +89,17 @@ namespace Xive.Cell
         public void Update(IInput content)
         {
             var stream = content.Stream();
-            if(stream.Length <= this.maxSize)
+            if (stream.Length <= this.maxSize)
             {
                 var copy = new MemoryStream();
                 stream.CopyTo(copy);
                 stream.Seek(0, SeekOrigin.Begin);
                 copy.Seek(0, SeekOrigin.Begin);
-                this.memory[this.name] = copy;
+                this.memory.Value()[this.name] = copy;
             }
             else
             {
-                this.memory.Remove(this.name);
+                this.memory.Value().Remove(this.name);
             }
             this.origin.Update(content);
         }

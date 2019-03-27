@@ -58,7 +58,7 @@ namespace Xive.Hive.Test
                                         return new byte[0];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
                         )
                     ),
                     binCache,
