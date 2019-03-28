@@ -92,6 +92,21 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
+        public void PrependsScopeToCombName()
+        {
+            IHive hive = new RamHive();
+
+            var shifted = hive.Shifted("prepend-this");
+            new MutexCatalog(shifted).Create("an-entry");
+
+            Assert.StartsWith("prepend-this",
+                new FirstOf<IHoneyComb>(
+                    shifted.Combs("@id='an-entry'")
+                ).Value().Name()
+            );
+        }
+
+        [Fact]
         public void DeliversHQXocument()
         {
             var mem = new Dictionary<string, MemoryStream>();

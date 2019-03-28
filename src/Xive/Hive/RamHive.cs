@@ -34,7 +34,7 @@ namespace Xive.Hive
     public sealed class RamHive : IHive
     {
         private readonly string scope;
-        private readonly Func<IHoneyComb, IHoneyComb> comb;
+        private readonly Func<IHoneyComb, IHoneyComb> wrap;
         private readonly IDictionary<string, MemoryStream> memory;
 
         /// <summary>
@@ -136,10 +136,10 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
         /// <param name="memory">An external memory for the hive</param>
-        public RamHive(string name, Func<IHoneyComb, IHoneyComb> comb, IDictionary<string, MemoryStream> memory)
+        public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory)
         {
             this.scope = name;
-            this.comb = comb;
+            this.wrap = combWrap;
             this.memory = memory;
         }
 
@@ -152,27 +152,29 @@ namespace Xive.Hive
         {
             return
                 new Mapped<string, IHoneyComb>(
-                    id => this.comb(new RamComb(id, this.memory)),
+                    name => this.wrap(Comb(name)),
                     catalog.List(xpath)
                 );
         }
 
         public IHoneyComb HQ()
         {
-            return
-                this.comb(
-                    new RamComb($"{this.scope}{Path.DirectorySeparatorChar}HQ", this.memory)
-                );
+            return this.wrap(Comb("HQ"));
         }
 
         public IHive Shifted(string scope)
         {
-            return new RamHive(scope, this.comb, this.memory);
+            return new RamHive(scope, this.wrap, this.memory);
         }
 
         public string Scope()
         {
             return this.scope;
+        }
+
+        private IHoneyComb Comb(string name)
+        {
+            return new RamComb($"{this.scope}{Path.DirectorySeparatorChar}{name}", this.memory);
         }
     }
 }
