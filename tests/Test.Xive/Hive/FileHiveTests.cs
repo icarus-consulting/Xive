@@ -40,7 +40,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 Assert.Equal(
-                    $"HQ",
+                    $"product\\HQ",
                     new FileHive(
                         "product",
                         dir.Value().FullName
@@ -60,6 +60,48 @@ namespace Xive.Hive.Test
                 new MutexCatalog(hive).Create("2CV");
                 Assert.NotEmpty(
                     hive.Combs("@id='2CV'")
+                );
+            }
+        }
+
+        [Fact]
+        public void ShiftsHQ()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = 
+                    new CachedHive(
+                        new FileHive("cockpit", dir.Value().FullName)
+                    );
+                new MutexCatalog(hive).Create("log");
+
+                string a;
+                string b;
+                using (var cat = hive.HQ().Xocument("catalog.xml"))
+                {
+                    a = cat.Node().ToString();
+                }
+
+                using (var shifted = hive.Shifted("factory").HQ().Xocument("catalog.xml"))
+                {
+                    b = shifted.Node().ToString();
+                }
+            }
+        }
+
+        [Fact]
+        public void PrependsScopeToCombName()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName);
+                var shifted = hive.Shifted("prepend-this");
+                new MutexCatalog(shifted).Create("an-entry");
+
+                Assert.StartsWith("prepend-this",
+                    new FirstOf<IHoneyComb>(
+                        shifted.Combs("@id='an-entry'")
+                    ).Value().Name()
                 );
             }
         }

@@ -35,7 +35,7 @@ namespace Xive.Hive
     {
         private readonly string scope;
         private readonly string root;
-        private readonly Func<IHoneyComb, IHoneyComb> comb;
+        private readonly Func<IHoneyComb, IHoneyComb> wrap;
 
         /// <summary>
         /// A hive that exists physically as files.
@@ -61,7 +61,7 @@ namespace Xive.Hive
         {
             this.scope = scope;
             this.root = root;
-            this.comb = combWrap;
+            this.wrap = combWrap;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -73,24 +73,33 @@ namespace Xive.Hive
         {
             return
                 new Mapped<string, IHoneyComb>(
-                    id => this.comb(new FileComb(Path.Combine(this.root, this.scope), id)),
+                    name => this.wrap(Comb(name)),
                     catalog.List(xpath)
                 );
         }
 
         public IHoneyComb HQ()
         {
-            return this.comb(new FileComb(Path.Combine(this.root, this.scope), "HQ"));
+            return this.wrap(Comb("HQ"));
         }
 
         public IHive Shifted(string scope)
         {
-            return new FileHive(scope, this.root, this.comb);
+            return new FileHive(scope, this.root, this.wrap);
         }
 
         public string Scope()
         {
             return this.scope;
+        }
+
+        private IHoneyComb Comb(string name)
+        {
+            return
+                new FileComb(
+                    Path.Combine(this.root),
+                    $"{this.scope}{Path.DirectorySeparatorChar}{name}"
+                );
         }
     }
 }

@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using Test.Yaapii.Xive;
 using Xive.Comb;
 using Xive.Test;
 using Xive.Xocument;
@@ -32,6 +31,9 @@ using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
+using Yaapii.Xambly;
+
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
 namespace Xive.Hive.Test
 {
@@ -81,7 +83,7 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
-        public void ShiftIncludesCache()
+        public void ShiftingRamHiveIncludesScope()
         {
             var binCache = new Dictionary<string, MemoryStream>();
             var xmlMemory = new Dictionary<string, XNode>();
@@ -97,6 +99,108 @@ namespace Xive.Hive.Test
             new MutexCatalog(hive.Shifted("B")).Create("another thing");
 
             Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
+        }
+
+        [Fact]
+        public void ShiftingFileHiveIncludesScope()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var binCache = new Dictionary<string, MemoryStream>();
+                var xmlMemory = new Dictionary<string, XNode>();
+
+                var hive =
+                    new CachedHive(
+                        new FileHive(dir.Value().FullName),
+                        binCache,
+                        xmlMemory
+                    );
+
+                new MutexCatalog(hive.Shifted("A")).Create("something");
+                new MutexCatalog(hive.Shifted("B")).Create("another thing");
+
+                Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
+            }
+        }
+
+        [Fact]
+        public void ShiftingDoesNotOverrideCells()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var binCache = new Dictionary<string, MemoryStream>();
+                var xmlMemory = new Dictionary<string, XNode>();
+
+                var hive =
+                    new CachedHive(
+                        new FileHive(dir.Value().FullName),
+                        binCache,
+                        xmlMemory
+                    );
+
+                new MutexCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
+                new MutexCatalog(hive.Shifted("scope-2")).Create("ambiguous-item");
+
+                using (
+                    var cell =
+                        new FirstOf<IHoneyComb>(
+                            hive.Shifted("scope-1").Combs("@id='ambiguous-item'")
+                        ).Value().Cell("ambiguous.xml")
+                )
+                {
+                    cell.Update(new InputOf("here is some data"));
+                }
+
+                using (
+                    var cell =
+                        new FirstOf<IHoneyComb>(
+                            hive.Shifted("scope-2").Combs("@id='ambiguous-item'")
+                        ).Value().Cell("ambiguous.xml")
+                )
+                {
+                    Assert.Empty(cell.Content());
+                }
+            }
+        }
+
+        [Fact]
+        public void ShiftingDoesNotOverrideXocuments()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var binCache = new Dictionary<string, MemoryStream>();
+                var xmlMemory = new Dictionary<string, XNode>();
+
+                var hive =
+                    new CachedHive(
+                        new FileHive(dir.Value().FullName),
+                        binCache,
+                        xmlMemory
+                    );
+
+                new MutexCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
+                new MutexCatalog(hive.Shifted("scope-2")).Create("ambiguous-item");
+
+                using (
+                    var xoc =
+                        new FirstOf<IHoneyComb>(
+                            hive.Shifted("scope-1").Combs("@id='ambiguous-item'")
+                        ).Value().Xocument("ambiguous.xml")
+                )
+                {
+                    xoc.Modify(new Directives().Xpath("/ambiguous").Add("entry"));
+                }
+
+                using (
+                    var xoc =
+                        new FirstOf<IHoneyComb>(
+                            hive.Shifted("scope-2").Combs("@id='ambiguous-item'")
+                        ).Value().Xocument("ambiguous.xml")
+                )
+                {
+                    Assert.Empty(xoc.Nodes("/ambiguous/entry"));
+                }
+            }
         }
 
         [Fact]
