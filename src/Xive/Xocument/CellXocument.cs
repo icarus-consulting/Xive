@@ -22,6 +22,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Xml.Linq;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -37,7 +38,17 @@ namespace Xive.Xocument
         /// <summary>
         /// A xocument which is stored in a cell.
         /// </summary>
-        public CellXocument(ICell cell, string name) : base(new ScalarOf<IXocument>(() =>
+        public CellXocument(ICell cell, string name) : this(
+            cell,
+            name,
+            Encoding.GetEncoding("utf-16")
+        )
+        {}
+
+        /// <summary>
+        /// A xocument which is stored in a cell.
+        /// </summary>
+        public CellXocument(ICell cell, string name, Encoding encoding) : base(new ScalarOf<IXocument>(() =>
             {
                 lock (cell)
                 {
@@ -58,11 +69,15 @@ namespace Xive.Xocument
                                     {
                                         doc =
                                             new XDocument(
+                                                new XDeclaration("1.0", encoding.ToString(), "yes"),
                                                 new XElement(name)
                                             );
 
-                                        cell.Update(new InputOf(doc.ToString()));
-                                        content = new BytesOf(doc.ToString()).AsBytes();
+                                        var wr = new StringWriter();
+                                        doc.Save(wr);
+
+                                        cell.Update(new InputOf(wr.ToString()));
+                                        content = new BytesOf(wr.ToString()).AsBytes();
                                     }
                                     else
                                     {
