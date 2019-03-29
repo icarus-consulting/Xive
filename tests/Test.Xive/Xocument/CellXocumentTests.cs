@@ -20,9 +20,13 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.IO;
+using System.Text;
 using Xive.Cell;
 using Xive.Xocument;
 using Xunit;
+using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
 namespace Xive.Xocument.Test
@@ -42,6 +46,27 @@ namespace Xive.Xocument.Test
         }
 
         [Fact]
+        public void FileHasHeader()
+        {
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "flash.xml")))
+            {
+                var file = Path.Combine(dir.Value().FullName, "flash.xml");
+                new CellXocument(
+                    item,
+                    "flash.xml"
+                ).Node();
+
+                Assert.Equal(
+                    "<?xml version=\"1.0\" encoding=\"utf-16\" standalone=\"yes\"?>\r\n<flash />",
+                    new TextOf(
+                        new InputOf(new FileInfo(file))
+                    ).AsString()
+                );
+            }
+        }
+        
+        [Fact]
         public void UpdatesContent()
         {
             var xoc =
@@ -58,5 +83,33 @@ namespace Xive.Xocument.Test
 
             Assert.Equal("scratch scratch", xoc.Value("/flash/grandmaster/text()", ""));
         }
+
+        [Theory]
+        [InlineData("UTF-7")]
+        [InlineData("UTF-8")]
+        [InlineData("UTF-16")]
+        [InlineData("UTF-32")]
+        public void DealsWithEncodings(string name)
+        {
+            var encoding = Encoding.GetEncoding(name);
+            var xoc =
+               new CellXocument(
+                   new RamCell("flash.xml"),
+                   "flash.xml",
+                   encoding
+               );
+
+            xoc.Modify(
+                new Directives()
+                    .Xpath("/flash")
+                    .Add("grandmaster").Set("üöä")
+            );
+
+            Assert.Equal(
+                "üöä",
+                xoc.Value("/flash/grandmaster/text()", "")
+            );
+        }
+
     }
 }
