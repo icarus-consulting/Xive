@@ -23,6 +23,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -41,7 +42,7 @@ namespace Xive.Xocument
         public CellXocument(ICell cell, string name) : this(
             cell,
             name,
-            Encoding.GetEncoding("utf-16")
+            Encoding.GetEncoding("utf-8")
         )
         {}
 
@@ -67,24 +68,35 @@ namespace Xive.Xocument
                                     XDocument doc;
                                     if (content.Length == 0)
                                     {
-                                        doc =
-                                            new XDocument(
-                                                new XDeclaration("1.0", encoding.ToString(), "yes"),
-                                                new XElement(name)
-                                            );
 
-                                        var wr = new StringWriter();
-                                        doc.Save(wr);
+                                        var memory = new MemoryStream();
+                                        XmlWriterSettings xws = new XmlWriterSettings();
+                                        xws.OmitXmlDeclaration = false;
+                                        xws.Indent = true;
+                                        xws.Encoding = encoding;
 
-                                        cell.Update(new InputOf(wr.ToString()));
-                                        content = new BytesOf(wr.ToString()).AsBytes();
+                                        using (XmlWriter xw = XmlWriter.Create(memory, xws))
+                                        {
+                                            doc =
+                                                new XDocument(
+                                                    new XDeclaration("1.0", encoding.ToString(), "yes"),
+                                                    new XElement(name)
+                                                );
+                                            doc.WriteTo(xw);
+                                        }
+
+                                        memory.Seek(0, SeekOrigin.Begin);
+                                        cell.Update(new InputOf(memory));
+                                        memory.Seek(0, SeekOrigin.Begin);
+                                        content = new BytesOf(new InputOf(memory)).AsBytes();
                                     }
                                     else
                                     {
                                         doc =
                                             XDocument.Parse(
                                                 new TextOf(
-                                                    new InputOf(content)
+                                                    new InputOf(content),
+                                                    encoding
                                                 ).AsString()
                                             );
                                     }
@@ -95,7 +107,11 @@ namespace Xive.Xocument
                             {
                                 using (cell)
                                 {
-                                    cell.Update(new InputOf(xnode.ToString()));
+                                    cell.Update(
+                                        new InputOf(
+                                            encoding.GetBytes(xnode.ToString())
+                                        )
+                                    );
                                 }
                             }
                         );

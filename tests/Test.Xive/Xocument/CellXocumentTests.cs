@@ -45,6 +45,49 @@ namespace Xive.Xocument.Test
             );
         }
 
+        [Theory]
+        [InlineData("UTF-7")]
+        [InlineData("UTF-8")]
+        [InlineData("UTF-16")]
+        [InlineData("UTF-32")]
+        public void WorksWithEncoding(string name)
+        {
+            var encoding = Encoding.GetEncoding(name);
+            var inBytes = encoding.GetBytes("Can or can't I dö prüpär äncöding?");
+
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "encoded.tmp")))
+            {
+                var xoc =
+                    new CellXocument(
+                        item,
+                        "encoded.xml"
+                    );
+
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("encoded")
+                        .Set(
+                            new TextOf(
+                                new InputOf(inBytes),
+                                encoding
+                            ).AsString()
+                        )
+                    );
+
+                xoc =
+                    new CellXocument(
+                        item,
+                        "encoded.xml"
+                    );
+
+                Assert.Equal(
+                    "Can or can't I dö prüpär äncöding?",
+                    xoc.Value("/encoded/text()", string.Empty)
+                );
+            }
+        }
+
         [Fact]
         public void FileHasHeader()
         {
@@ -58,14 +101,14 @@ namespace Xive.Xocument.Test
                 ).Node();
 
                 Assert.Equal(
-                    "<?xml version=\"1.0\" encoding=\"utf-16\" standalone=\"yes\"?>\r\n<flash />",
+                    "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\r\n<flash />",
                     new TextOf(
                         new InputOf(new FileInfo(file))
                     ).AsString()
                 );
             }
         }
-        
+
         [Fact]
         public void UpdatesContent()
         {
@@ -74,7 +117,7 @@ namespace Xive.Xocument.Test
                     new RamCell("flash.xml"),
                     "flash.xml"
                 );
-            
+
             xoc.Modify(
                 new Directives()
                     .Xpath("/flash")
@@ -92,23 +135,27 @@ namespace Xive.Xocument.Test
         public void DealsWithEncodings(string name)
         {
             var encoding = Encoding.GetEncoding(name);
-            var xoc =
+            using (var xoc =
                new CellXocument(
                    new RamCell("flash.xml"),
                    "flash.xml",
                    encoding
-               );
+               )
+            )
+            {
 
-            xoc.Modify(
-                new Directives()
-                    .Xpath("/flash")
-                    .Add("grandmaster").Set("üöä")
-            );
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("/flash")
+                        .Add("grandmaster")
+                        .Set("üöä")
+                );
 
-            Assert.Equal(
-                "üöä",
-                xoc.Value("/flash/grandmaster/text()", "")
-            );
+                Assert.Equal(
+                    "üöä",
+                    xoc.Value("/flash/grandmaster/text()", "")
+                );
+            }
         }
 
     }

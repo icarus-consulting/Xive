@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
@@ -32,6 +33,31 @@ namespace Xive.Cell.Test
 {
     public sealed class FileCellTests
     {
+        [Theory]
+        [InlineData("UTF-7")]
+        [InlineData("UTF-8")]
+        [InlineData("UTF-16")]
+        [InlineData("UTF-32")]
+        public void WorksWithEncoding(string name)
+        {
+            var encoding = Encoding.GetEncoding(name);
+            var inBytes = encoding.GetBytes("Can or can't I dö prüpär äncöding?");
+
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "itemFile.tmp")))
+            {
+                item.Update(new InputOf(inBytes));
+
+                Assert.Equal(
+                    "Can or can't I dö prüpär äncöding?",
+                    new TextOf(
+                        new InputOf(inBytes),
+                        encoding
+                    ).AsString()
+                );
+            }
+        }
+
         [Fact]
         public void ReadsWithoutContent()
         {
