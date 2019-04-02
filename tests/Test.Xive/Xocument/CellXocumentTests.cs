@@ -45,6 +45,49 @@ namespace Xive.Xocument.Test
             );
         }
 
+        [Theory]
+        [InlineData("UTF-7")]
+        [InlineData("UTF-8")]
+        [InlineData("UTF-16")]
+        [InlineData("UTF-32")]
+        public void WorksWithEncoding(string name)
+        {
+            var encoding = Encoding.GetEncoding(name);
+            var inBytes = encoding.GetBytes("Can or can't I dö prüpär äncöding?");
+
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "encoded.tmp")))
+            {
+                var xoc =
+                    new CellXocument(
+                        item,
+                        "encoded.xml"
+                    );
+
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("encoded")
+                        .Set(
+                            new TextOf(
+                                new InputOf(inBytes),
+                                encoding
+                            ).AsString()
+                        )
+                    );
+
+                xoc =
+                    new CellXocument(
+                        item,
+                        "encoded.xml"
+                    );
+
+                Assert.Equal(
+                    "Can or can't I dö prüpär äncöding?",
+                    xoc.Value("/encoded/text()", string.Empty)
+                );
+            }
+        }
+
         [Fact]
         public void FileHasHeader()
         {

@@ -84,7 +84,8 @@ namespace Xive.Xocument
                                         doc =
                                             XDocument.Parse(
                                                 new TextOf(
-                                                    new InputOf(content)
+                                                    new InputOf(content),
+                                                    encoding
                                                 ).AsString()
                                             );
                                     }
