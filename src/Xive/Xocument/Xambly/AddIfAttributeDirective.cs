@@ -47,9 +47,9 @@ namespace Yaapii.Xambly
         /// </summary>
         public AddIfAttributeDirective(string node, string name, string value)
         {
-            this.name = new ArgOf(node);
-            this.attribute = new ArgOf(name);
-            this.value = new ArgOf(value);
+            this.name = new AttributeArg(node);
+            this.attribute = new AttributeArg(name);
+            this.value = new AttributeArg(value);
         }
 
         /// <summary>
