@@ -42,7 +42,7 @@ namespace Xive.Xocument
         public CellXocument(ICell cell, string name) : this(
             cell,
             name,
-            Encoding.GetEncoding("utf-16")
+            Encoding.Default
         )
         {}
 
