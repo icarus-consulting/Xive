@@ -108,7 +108,7 @@ namespace Xive.Xocument.Test
                 );
             }
         }
-        
+
         [Fact]
         public void UpdatesContent()
         {
@@ -117,7 +117,7 @@ namespace Xive.Xocument.Test
                     new RamCell("flash.xml"),
                     "flash.xml"
                 );
-            
+
             xoc.Modify(
                 new Directives()
                     .Xpath("/flash")
@@ -135,23 +135,27 @@ namespace Xive.Xocument.Test
         public void DealsWithEncodings(string name)
         {
             var encoding = Encoding.GetEncoding(name);
-            var xoc =
+            using (var xoc =
                new CellXocument(
                    new RamCell("flash.xml"),
                    "flash.xml",
                    encoding
-               );
+               )
+            )
+            {
 
-            xoc.Modify(
-                new Directives()
-                    .Xpath("/flash")
-                    .Add("grandmaster").Set("üöä")
-            );
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("/flash")
+                        .Add("grandmaster")
+                        .Set("üöä")
+                );
 
-            Assert.Equal(
-                "üöä",
-                xoc.Value("/flash/grandmaster/text()", "")
-            );
+                Assert.Equal(
+                    "üöä",
+                    xoc.Value("/flash/grandmaster/text()", "")
+                );
+            }
         }
 
     }
