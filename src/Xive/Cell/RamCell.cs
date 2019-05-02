@@ -44,8 +44,8 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell() : this(
-            new SolidScalar<string>(() => Guid.NewGuid().ToString()),
-            new SolidScalar<IDictionary<string, MemoryStream>>(() => new Dictionary<string, MemoryStream>())
+            new Solid<string>(() => Guid.NewGuid().ToString()),
+            new Solid<IDictionary<string, MemoryStream>>(() => new Dictionary<string, MemoryStream>())
         )
         { }
 
@@ -69,7 +69,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, IBytes content) : this(
             new ScalarOf<string>(() => path),
-            new SolidScalar<IDictionary<string, MemoryStream>>(
+            new Solid<IDictionary<string, MemoryStream>>(
                 () => new Dictionary<string, MemoryStream>()
                 {
                     { path, new MemoryStream(content.AsBytes()) }
@@ -86,7 +86,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(IScalar<string> path, MemoryStream content) : this(
             path,
-            new SolidScalar<IDictionary<string, MemoryStream>>(
+            new Solid<IDictionary<string, MemoryStream>>(
                 () => new Dictionary<string, MemoryStream> { { path.Value(), content } }
             )
         )
@@ -100,7 +100,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, MemoryStream content) : this(
             new ScalarOf<string>(path),
-            new SolidScalar<IDictionary<string, MemoryStream>>(() =>
+            new Solid<IDictionary<string, MemoryStream>>(() =>
             {
                 return new Dictionary<string, MemoryStream>()
                 {
@@ -145,7 +145,7 @@ namespace Xive.Cell
             {
                 this.id = Guid.NewGuid().ToString();
                 this.name =
-                    new SolidScalar<string>(
+                    new Solid<string>(
                         () => new StrictCellName(name.Value()).AsString()
                     );
                 this.cellMemory = cellMemory;

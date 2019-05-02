@@ -26,6 +26,7 @@ using System.IO;
 using System.Xml.Linq;
 using Xive.Test;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 

@@ -55,7 +55,7 @@ namespace Xive.Xocument
         /// You can tell the Xocument what to to after it has been modified. 
         /// For example write its contents to a cell.
         /// </summary>
-        public SimpleXocument(XNode node, Action<XNode> update) : this(new StickyScalar<XNode>(() => node), update)
+        public SimpleXocument(XNode node, Action<XNode> update) : this(new Sticky<XNode>(() => node), update)
         { }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Xive.Xocument
         /// For example write its contents to a cell.
         /// </summary>
         public SimpleXocument(string rootName, Action<XNode> update) : this(
-            new StickyScalar<XNode>(() =>
+            new Sticky<XNode>(() =>
             {
                 if (rootName.ToLower().EndsWith(".xml"))
                 {

@@ -24,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 
@@ -40,7 +41,7 @@ namespace Xive.Cell
         /// A cell which exists physically as a file.
         /// </summary>
         public FileCell(string root, string name) : this(
-            new SolidScalar<string>(() =>
+            new Solid<string>(() =>
                 Path.Combine(root, new StrictCellName(name).AsString())
             )
         )
@@ -58,7 +59,7 @@ namespace Xive.Cell
         private FileCell(IScalar<string> path)
         {
             this.path = 
-                new SolidScalar<string>(() =>
+                new Solid<string>(() =>
                 {
                     var pth = path.Value();
                     if (!Path.IsPathRooted(pth))

@@ -14,7 +14,7 @@ namespace Xive.Cell
 
         public SyncCell(ICell origin) : this(
             origin,
-            new SyncScalar<IDictionary<string, bool>>(
+            new Sync<IDictionary<string, bool>>(
                 () => new Dictionary<string, bool>()
                 {
                     { origin.Name(), false }
