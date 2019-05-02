@@ -23,8 +23,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using Xive.Comb;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Hive
 {
@@ -33,7 +36,7 @@ namespace Xive.Hive
     /// </summary>
     public sealed class RamHive : IHive
     {
-        private readonly string scope;
+        private readonly IScalar<string> scope;
         private readonly Func<IHoneyComb, IHoneyComb> wrap;
         private readonly IDictionary<string, MemoryStream> memory;
 
@@ -136,7 +139,19 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
         /// <param name="memory">An external memory for the hive</param>
-        public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory)
+        public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory) : this(
+
+            new StickyScalar<string>(() =>
+                {
+                    return Regex.Replace(name, @"\s", "");
+                }
+            ),
+            combWrap,
+            memory
+        )
+        { }
+
+        public RamHive(IScalar<string> name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory)
         {
             this.scope = name;
             this.wrap = combWrap;
@@ -145,7 +160,7 @@ namespace Xive.Hive
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return Combs(xpath, new MutexCatalog(this.scope, HQ()));
+            return Combs(xpath, new MutexCatalog(this.scope.Value(), HQ()));
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
@@ -169,12 +184,12 @@ namespace Xive.Hive
 
         public string Scope()
         {
-            return this.scope;
+            return this.scope.Value();
         }
 
         private IHoneyComb Comb(string name)
         {
-            return new RamComb($"{this.scope}{Path.DirectorySeparatorChar}{name}", this.memory);
+            return new RamComb($"{this.scope.Value()}{Path.DirectorySeparatorChar}{name}", this.memory);
         }
     }
 }
