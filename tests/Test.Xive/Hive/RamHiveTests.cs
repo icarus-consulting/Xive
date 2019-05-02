@@ -60,6 +60,34 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
+        public void ShiftsToScopeWithWhiteline()
+        {
+            var mem = new Dictionary<string, MemoryStream>();
+            var hive = new RamHive(mem);
+            var catalog = new MutexCatalog(hive);
+            catalog.Create("123");
+            var shifted = hive.Shifted("twilight zone");
+            var twilightCatalog = new MutexCatalog(shifted);
+            Assert.Empty(twilightCatalog.List("@id='123'"));
+        }
+
+        [Fact]
+        public void CreatesAtScopeWithWhiteLine()
+        {
+            var mem = new Dictionary<string, MemoryStream>();
+            var hive = new RamHive(mem);
+            var shifted = hive.Shifted("twilight zone");
+            var twilightCatalog = new MutexCatalog(shifted);
+            twilightCatalog.Create("whiteline");
+            Assert.Equal(
+                1,
+                new Yaapii.Atoms.Enumerable.LengthOf(
+                    twilightCatalog.List("@id='whiteline'")
+                ).Value()
+            );
+        }
+
+        [Fact]
         public void DistinguishesScope()
         {
             var mem = new Dictionary<string, MemoryStream>();
