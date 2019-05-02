@@ -23,9 +23,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml.Linq;
+using Xive.Cell;
 using Xive.Test;
 using Xunit;
+using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
@@ -70,6 +74,51 @@ namespace Xive.Xocument.Test
             xoc.Node();
 
             Assert.Equal(1, reads);
+        }
+
+        [Theory]
+        [InlineData("UTF-7")]
+        [InlineData("UTF-8")]
+        [InlineData("UTF-16")]
+        [InlineData("UTF-32")]
+        public void WorksWithEncoding(string name)
+        {
+            var encoding = Encoding.GetEncoding(name);
+            var inBytes = encoding.GetBytes("Can or can't I dö prüpär äncöding?");
+
+            var binCache = new Dictionary<string, MemoryStream>();
+            var xmlCache = new Dictionary<string, XNode>();
+
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "encoded.xml")))
+            {
+                var xoc =
+                    new CachedXocument(
+                        "encoded.xml",
+                        new CellXocument(
+                            item,
+                            "encoded.xml"
+                        ),
+                        xmlCache,
+                        binCache
+                    );
+
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("encoded")
+                        .Set(
+                            new TextOf(
+                                new InputOf(inBytes),
+                                encoding
+                            ).AsString()
+                        )
+                    );
+
+                Assert.Equal(
+                    "Can or can't I dö prüpär äncöding?",
+                    xoc.Value("/encoded/text()", string.Empty)
+                );
+            }
         }
 
         [Fact]

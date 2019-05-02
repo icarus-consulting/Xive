@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xive.Cell;
 using Xive.Xocument;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Collection;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;

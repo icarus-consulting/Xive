@@ -34,7 +34,7 @@ namespace Xive
     /// </summary>
     public sealed class StrictCoordinate : IText
     {
-        private readonly SolidScalar<string> validated;
+        private readonly Solid<string> validated;
 
         /// <summary>
         /// A coordinate which disallows illegal chars in comb names. 
@@ -43,7 +43,7 @@ namespace Xive
         /// <param name="text"></param>
         public StrictCoordinate(string text)
         {
-            this.validated = new SolidScalar<string>(() =>
+            this.validated = new Solid<string>(() =>
             {
                 string regexSearch = new string(Path.GetInvalidPathChars());
                 Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));

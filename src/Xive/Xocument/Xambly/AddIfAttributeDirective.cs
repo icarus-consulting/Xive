@@ -58,7 +58,7 @@ namespace Yaapii.Xambly
         /// <returns>The string</returns>
         public override string ToString()
         {
-            return new FormattedText("ADDIFATTRIBUTE '{0}' '{1}'='{2}'", this.name.Raw(), this.attribute.Raw(), this.value.Raw()).AsString();
+            return new Formatted("ADDIFATTRIBUTE '{0}' '{1}'='{2}'", this.name.Raw(), this.attribute.Raw(), this.value.Raw()).AsString();
         }
 
         /// <summary>
