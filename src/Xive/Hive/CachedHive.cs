@@ -88,7 +88,8 @@ namespace Xive.Hive
                 new CachedComb(
                     this.origin.HQ(),
                     this.binMemory,
-                    this.xmlMemory
+                    this.xmlMemory,
+                    this.maxBytes
                 );
         }
 
@@ -98,7 +99,8 @@ namespace Xive.Hive
                 new CachedHive(
                     this.origin.Shifted(scope),
                     this.binMemory,
-                    this.xmlMemory
+                    this.xmlMemory,
+                    this.maxBytes
                 );
         }
 
