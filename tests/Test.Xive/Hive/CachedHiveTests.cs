@@ -83,6 +83,136 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
+        public void ConsidersMaxBytes()
+        {
+            var binCache = new Dictionary<string, MemoryStream>();
+            var xmlMemory = new Dictionary<string, XNode>();
+            var maxBytes = 0;
+            int reads = 0;
+            var hive =
+                new CachedHive(
+                    new SimpleHive("phonebook",
+                        combName =>
+                        new SimpleComb(
+                            "my-comb",
+                            cellname =>
+                                new FkCell(
+                                    content => { },
+                                    () =>
+                                    {
+                                        reads++;
+                                        return new byte[20];
+                                    }
+                                ),
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                        )
+                    ),
+                    binCache,
+                    xmlMemory,
+                    maxBytes
+                );
+
+            new MutexCatalog(hive).Create("123");
+
+            var cell =
+                new FirstOf<IHoneyComb>(
+                    hive.Combs("@id='123'")
+                )
+                .Value()
+                .Cell("adalbert");
+
+            cell.Content();
+            cell.Content();
+
+            Assert.Equal(2, reads);
+        }
+
+        [Fact]
+        public void ConsidersMaxBytesOnShifted()
+        {
+            var binCache = new Dictionary<string, MemoryStream>();
+            var xmlMemory = new Dictionary<string, XNode>();
+            var maxBytes = 0;
+            int reads = 0;
+            var hive =
+                new CachedHive(
+                    new SimpleHive("phonebook",
+                        combName =>
+                        new SimpleComb(
+                            "my-comb",
+                            cellname =>
+                                new FkCell(
+                                    content => { },
+                                    () =>
+                                    {
+                                        reads++;
+                                        return new byte[20];
+                                    }
+                                ),
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                        )
+                    ),
+                    binCache,
+                    xmlMemory,
+                    maxBytes
+                );
+
+            new MutexCatalog(hive.Shifted("A")).Create("123");
+
+            var cell =
+                new FirstOf<IHoneyComb>(
+                    hive.Shifted("A").Combs("@id='123'")
+                )
+                .Value()
+                .Cell("adalbert");
+
+            cell.Content();
+            cell.Content();
+
+            Assert.Equal(2, reads);
+        }
+
+        [Fact]
+        public void ConsidersMaxBytesOnHQ()
+        {
+            var binCache = new Dictionary<string, MemoryStream>();
+            var xmlMemory = new Dictionary<string, XNode>();
+            var maxBytes = 0;
+            int reads = 0;
+            var hive =
+                new CachedHive(
+                    new SimpleHive("phonebook",
+                        combName =>
+                        new SimpleComb(
+                            "my-comb",
+                            cellname =>
+                                new FkCell(
+                                    content => { },
+                                    () =>
+                                    {
+                                        reads++;
+                                        return new byte[20];
+                                    }
+                                ),
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                        )
+                    ),
+                    binCache,
+                    xmlMemory,
+                    maxBytes
+                );
+
+            //new MutexCatalog(hive).Create("123");
+
+            var cell = hive.HQ().Cell("adalbert");
+
+            cell.Content();
+            cell.Content();
+
+            Assert.Equal(2, reads);
+        }
+
+        [Fact]
         public void BlackListsBinaries()
         {
             var binCache = new Dictionary<string, MemoryStream>();
