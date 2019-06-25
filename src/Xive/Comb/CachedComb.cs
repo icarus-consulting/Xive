@@ -36,27 +36,42 @@ namespace Xive.Comb
         private readonly IDictionary<string, MemoryStream> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
         private readonly IHoneyComb comb;
+        private readonly IList<string> blacklist;
         private readonly int maxBytes;
 
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(IHoneyComb comb, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
+        public CachedComb(IHoneyComb comb, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760) : this(
+            comb,
+            binMemory,
+            xmlMemory,
+            new List<string>(),
+            maxBytes
+        )
+        { }
+
+        /// <summary>
+        /// A comb that is cached in memory.
+        /// </summary>
+        public CachedComb(IHoneyComb comb, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, IList<string> blacklist, int maxBytes = 10485760)
         {
             this.comb = comb;
             this.binMemory = binMemory;
             this.xmlMemory = xmlMemory;
+            this.blacklist = blacklist;
             this.maxBytes = maxBytes;
         }
 
         public ICell Cell(string name)
         {
-            return 
+            return
                 new CachedCell(
                     this.comb.Cell(name),
                     $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
                     this.binMemory,
                     this.xmlMemory,
+                    this.blacklist,
                     this.maxBytes
                 );
         }
@@ -73,7 +88,8 @@ namespace Xive.Comb
                     $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
                     this.comb.Xocument(name),
                     this.xmlMemory,
-                    this.binMemory
+                    this.binMemory,
+                    this.blacklist
                 );
         }
     }

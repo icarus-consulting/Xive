@@ -63,6 +63,36 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
+        public void BlacklistsItems()
+        {
+            var cache = new Dictionary<string, MemoryStream>();
+            int reads = 0;
+            var cell =
+                new CachedCell(
+                    new FkCell(
+                        content => { },
+                        () =>
+                        {
+                            reads++;
+                            return new byte[0];
+                        }
+                    ),
+                    "a/file/which/is/blacklisted/data.dat",
+                    cache,
+                    new Dictionary<string, XNode>(),
+                    new List<string>()
+                    {
+                        "a/*/blacklisted/*"
+                    }
+                );
+
+            cell.Content();
+            cell.Content();
+
+            Assert.Equal(2, reads);
+        }
+
+        [Fact]
         public void FillsCache()
         {
             var cache = new Dictionary<string, MemoryStream>();
