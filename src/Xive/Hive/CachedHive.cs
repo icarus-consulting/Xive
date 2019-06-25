@@ -126,7 +126,7 @@ namespace Xive.Hive
                     this.origin.HQ(),
                     this.binMemory,
                     this.xmlMemory,
-                    this.blacklist
+                    this.blacklist,
                     this.maxBytes
                 );
         }
