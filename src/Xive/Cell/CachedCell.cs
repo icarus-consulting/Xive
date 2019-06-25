@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;
@@ -37,12 +38,26 @@ namespace Xive.Cell
         private readonly ICell origin;
         private readonly string name;
         private readonly IScalar<IDictionary<string, MemoryStream>> memory;
+        private readonly IList<string> blacklist;
         private readonly int maxSize;
 
         /// <summary>
         /// A cell whose content is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
+        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760) : this(
+            origin,
+            name,
+            binMemory,
+            xmlMemory,
+            new List<string>(),
+            maxBytes
+        )
+        { }
+
+        /// <summary>
+        /// A cell whose content is cached in memory.
+        /// </summary>
+        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, IList<string> blacklist, int maxBytes = 10485760)
         {
             this.origin = origin;
             this.name = name;
@@ -59,6 +74,7 @@ namespace Xive.Cell
                     }
                     return binMemory;
                 });
+            this.blacklist = blacklist;
             this.maxSize = maxBytes;
         }
 
@@ -70,10 +86,10 @@ namespace Xive.Cell
         public byte[] Content()
         {
             byte[] result = new byte[0];
-            if (!this.memory.Value().ContainsKey(this.name))
+            if (!this.memory.Value().ContainsKey(this.name) || Blacklisted(this.name))
             {
                 result = this.origin.Content();
-                if (result.Length <= this.maxSize)
+                if (result.Length <= this.maxSize && !Blacklisted(this.name))
                 {
                     this.memory.Value()[this.name] = new MemoryStream(result);
                 }
@@ -95,7 +111,10 @@ namespace Xive.Cell
                 stream.CopyTo(copy);
                 stream.Seek(0, SeekOrigin.Begin);
                 copy.Seek(0, SeekOrigin.Begin);
-                this.memory.Value()[this.name] = copy;
+                if (!Blacklisted(this.name))
+                {
+                    this.memory.Value()[this.name] = copy;
+                }
             }
             else
             {
@@ -107,6 +126,20 @@ namespace Xive.Cell
         public void Dispose()
         {
             this.origin.Dispose();
+        }
+
+        private bool Blacklisted(string name)
+        {
+            bool blacklisted = false;
+            foreach (var entry in this.blacklist)
+            {
+                var pattern =
+                    Regex.Escape(entry.ToLower()).Replace("\\*", ".*").Replace("\\?", ".") + "$";
+                blacklisted = Regex.IsMatch(name.ToLower(), pattern);
+                if (blacklisted)
+                    break;
+            }
+            return blacklisted;
         }
     }
 }

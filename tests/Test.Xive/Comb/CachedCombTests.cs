@@ -69,6 +69,71 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
+        public void BlacklistsBinaries()
+        {
+            var binCache = new Dictionary<string, MemoryStream>();
+            int reads = 0;
+            var comb =
+                new CachedComb(
+                    new SimpleComb(
+                        "my-comb",
+                        cellname =>
+                            new FkCell(
+                                content => { },
+                                () =>
+                                {
+                                    reads++;
+                                    return new byte[0];
+                                }
+                            ),
+                        (xocName, cell) => new FkXocument()
+                    ),
+                    binCache,
+                    new Dictionary<string, XNode>(),
+                    new List<string>()
+                    {
+                        "*mister*"
+                    }
+                );
+
+            comb.Cell("hello/mister/adalbert.dat").Content();
+            comb.Cell("hello/mister/adalbert.dat").Content();
+
+            Assert.Equal(2, reads);
+        }
+
+        [Fact]
+        public void BlacklistsXmls()
+        {
+            var xmlCache = new Dictionary<string, XNode>();
+            int reads = 0;
+            var comb =
+                new CachedComb(
+                    new SimpleComb(
+                        "my-comb",
+                        cellname => new FkCell(),
+                        (xocName, cell) => new FkXocument(() =>
+                        {
+                            reads++;
+                            return new XDocument();
+                        }
+                        )
+                    ),
+                    new Dictionary<string, MemoryStream>(),
+                    xmlCache,
+                    new List<string>()
+                    {
+                        "*/*/names.*"
+                    }
+                );
+
+            comb.Xocument("files/with/names.xml").Node();
+            comb.Xocument("files/with/names.xml").Node();
+
+            Assert.Equal(2, reads);
+        }
+
+        [Fact]
         public void ReadsXmlOnce()
         {
             var xmlCache = new Dictionary<string, XNode>();

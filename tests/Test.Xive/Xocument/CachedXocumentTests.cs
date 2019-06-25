@@ -33,6 +33,8 @@ using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
+
 namespace Xive.Xocument.Test
 {
     public sealed class CachedXocumentTests
@@ -52,6 +54,33 @@ namespace Xive.Xocument.Test
                 "<buffered />",
                 cache["buffered.xml"].ToString()
             );
+        }
+
+        [Fact]
+        public void BlacklistsItems()
+        {
+            var reads = 0;
+            var cache = new Dictionary<string, XNode>();
+            var xoc =
+                new CachedXocument(
+                    "some/path/where/a/file/is/placed/buffered.xml",
+                    new FkXocument(() =>
+                    {
+                        reads++;
+                        return new XDocument(new XElement("buffered"));
+                    }),
+                    cache,
+                    new Dictionary<string, MemoryStream>(),
+                    new List<string>()
+                    {
+                        "some/*/is/*/buffered.xml"
+                    }
+                );
+
+            xoc.Node();
+            xoc.Node();
+
+            Assert.Equal(2, reads);
         }
 
         [Fact]
