@@ -37,6 +37,7 @@ namespace Xive.Hive
     {
         private readonly IDictionary<string, MemoryStream> binMemory;
         private readonly IDictionary<string, XNode> xmlMemory;
+        private readonly IList<string> blacklist;
         private readonly IHive origin;
         private readonly int maxBytes;
 
@@ -45,7 +46,41 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live as long as this instance lives.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, int maxBytes = 10485760) : this(origin, new Dictionary<string, MemoryStream>(), new Dictionary<string, XNode>(), maxBytes)
+        public CachedHive(IHive origin, int maxBytes = 10485760) : this(
+            origin,
+            new Dictionary<string, MemoryStream>(),
+            new Dictionary<string, XNode>(),
+            new List<string>(),
+            maxBytes
+        )
+        { }
+
+        /// <summary>
+        /// A cached hive.
+        /// By using this ctor, the contents of the hive will live as long as this instance lives.
+        /// </summary>
+        /// <param name="origin"></param>
+        public CachedHive(IHive origin, IList<string> blacklist, int maxBytes = 10485760) : this(
+            origin,
+            new Dictionary<string, MemoryStream>(),
+            new Dictionary<string, XNode>(),
+            blacklist,
+            maxBytes
+        )
+        { }
+
+        /// <summary>
+        /// A cached hive.
+        /// By using this ctor, the contents of the hive will live in the injected memories.
+        /// </summary>
+        /// <param name="origin"></param>
+        public CachedHive(IHive origin, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760) : this(
+            origin,
+            binMemory,
+            xmlMemory,
+            new List<string>(),
+            maxBytes
+        )
         { }
 
 
@@ -54,12 +89,13 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live in the injected memories.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760)
+        public CachedHive(IHive origin, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, IList<string> blacklist, int maxBytes = 10485760)
         {
             this.binMemory = binMemory;
             this.xmlMemory = xmlMemory;
             this.origin = origin;
             this.maxBytes = maxBytes;
+            this.blacklist = blacklist;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -71,6 +107,7 @@ namespace Xive.Hive
                             comb,
                             this.binMemory,
                             this.xmlMemory,
+                            this.blacklist,
                             this.maxBytes
                         ),
                         this.origin.Combs(xpath, CachedCatalog())
@@ -88,7 +125,8 @@ namespace Xive.Hive
                 new CachedComb(
                     this.origin.HQ(),
                     this.binMemory,
-                    this.xmlMemory
+                    this.xmlMemory,
+                    this.blacklist
                 );
         }
 
@@ -98,7 +136,8 @@ namespace Xive.Hive
                 new CachedHive(
                     this.origin.Shifted(scope),
                     this.binMemory,
-                    this.xmlMemory
+                    this.xmlMemory,
+                    this.blacklist
                 );
         }
 
@@ -116,6 +155,7 @@ namespace Xive.Hive
                         this.origin.HQ(),
                         this.binMemory,
                         this.xmlMemory,
+                        this.blacklist,
                         this.maxBytes
                     )
                 );

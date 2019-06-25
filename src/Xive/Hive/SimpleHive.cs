@@ -36,7 +36,6 @@ namespace Xive.Hive
     {
         private readonly IText scope;
         private readonly Func<string, IHoneyComb> comb;
-        private readonly Func<string, IHive> shift;
 
         /// <summary>
         /// A simple hive.
