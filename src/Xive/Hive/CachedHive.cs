@@ -138,6 +138,7 @@ namespace Xive.Hive
                     this.origin.Shifted(scope),
                     this.binMemory,
                     this.xmlMemory,
+                    this.blacklist,
                     this.maxBytes
                 );
         }
