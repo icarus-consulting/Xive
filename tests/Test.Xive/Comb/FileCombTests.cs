@@ -314,7 +314,7 @@ namespace Xive.Comb.Test
                 var comb = new FileComb(dir.Value().FullName, "AComb");
 
                 var name = "folder/something.tmp";
-                Directory.CreateDirectory(Path.Combine(dir.Value().FullName, "emptyFolder");
+                Directory.CreateDirectory(Path.Combine(dir.Value().FullName, "emptyFolder"));
                 using (var cell = comb.Cell(name))
                 {
                     cell.Update(new InputOf("abc"));
