@@ -305,6 +305,36 @@ namespace Xive.Comb.Test
                 }
             }
         }
+
+        [Fact]
+        public void DoesNotListFolders()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(dir.Value().FullName, "AComb");
+
+                var name = "folder/something.tmp";
+                Directory.CreateDirectory(Path.Combine(dir.Value().FullName, "emptyFolder");
+                using (var cell = comb.Cell(name))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+
+                using (var guts = comb.Cell("_guts.xml"))
+                {
+                    Assert.Equal(
+                       "1",
+                        new FirstOf<string>(
+                            new XMLCursor(
+                                new InputOf(
+                                   guts.Content()
+                                )
+                            ).Values($"count(/items/item)")
+                        ).Value()
+                    );
+                }
+            }
+        }
     }
 }
 
