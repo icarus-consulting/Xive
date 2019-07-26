@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using Xive.Hive;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -230,6 +231,105 @@ namespace Xive.Comb.Test
                                    guts.Content()
                                 )
                             ).Values($"/items/item[name/text()='{name}']/size/text()")
+                        ).Value()
+                    );
+                }
+            }
+        }
+
+        [Fact]
+        public void ListsItemsWithFolder()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(dir.Value().FullName, "combName");
+                var name = @"folder\something.tmp";
+
+                using (var cell = comb.Cell(name))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+
+                using (var guts = comb.Cell("_guts.xml"))
+                {
+                    Assert.Equal(
+                        name,
+                        new FirstOf<string>(
+                            new XMLCursor(
+                                new InputOf(
+                                    guts.Content()
+                                )
+                            ).Values($"/items/item/name/text()")
+                        ).Value()
+                    );
+                }
+            }
+        }
+
+        [Fact]
+        public void ListsCombFiles()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = new FileHive(dir.Value().FullName);
+                var program = hive.Shifted("program");
+                new MutexCatalog(program).Create("programid");
+                new MutexCatalog(program).Create("anotherProgramId");
+
+                var comb = new FirstOf<IHoneyComb>(program.Combs("@id='programid'")).Value();
+
+                var name = "something.tmp";
+
+                using (var cell = comb.Cell(name))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+                comb = new FirstOf<IHoneyComb>(program.Combs("@id='anotherProgramId'")).Value();
+
+                using (var cell = comb.Cell(name))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+                using (var guts = comb.Cell("_guts.xml"))
+                {
+                    Assert.Equal(
+                       "1",
+                        new FirstOf<string>(
+                            new XMLCursor(
+                                new InputOf(
+                                   guts.Content()
+                                )
+                            ).Values($"count(/items/item)")
+                        ).Value()
+                    );
+                }
+            }
+        }
+
+        [Fact]
+        public void DoesNotListFolders()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(dir.Value().FullName, "AComb");
+
+                var name = "folder/something.tmp";
+                Directory.CreateDirectory(Path.Combine(dir.Value().FullName, "emptyFolder"));
+                using (var cell = comb.Cell(name))
+                {
+                    cell.Update(new InputOf("abc"));
+                }
+
+                using (var guts = comb.Cell("_guts.xml"))
+                {
+                    Assert.Equal(
+                       "1",
+                        new FirstOf<string>(
+                            new XMLCursor(
+                                new InputOf(
+                                   guts.Content()
+                                )
+                            ).Values($"count(/items/item)")
                         ).Value()
                     );
                 }

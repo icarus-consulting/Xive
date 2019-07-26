@@ -76,13 +76,13 @@ namespace Xive.Comb
                 var patch = new Directives().Add("items");
 
                 foreach (var file in Directory.GetFiles(
-                        Path.GetDirectoryName(this.comb.Value().Name()),
-                        "*.*",
+                        this.comb.Value().Name(),
+                        "*",
                         SearchOption.AllDirectories))
                 {
                     patch.Add("item")
                         .Add("name")
-                        .Set(Path.GetFileName(file))
+                        .Set(file.Replace(this.comb.Value().Name() + Path.DirectorySeparatorChar, ""))
                         .Up()
                         .Add("size")
                         .Set(new FileInfo(file).Length)
