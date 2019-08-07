@@ -108,7 +108,7 @@ namespace Xive.Hive
                 
                 if (this.mtx.Count == 0)
                 {
-                    this.mtx.Add(new Mutex(false, $"Global/{this.hive.Scope()}"));
+                    this.mtx.Add(new Mutex(false, $"Local/{this.hive.Scope()}"));
                     this.mtx[0].WaitOne();
                 }
                 if (this.mtx.Count > 1)

@@ -20,13 +20,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Yaapii.Atoms;
-using Yaapii.Atoms.Scalar;
+using Xive.Hive;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
@@ -40,8 +37,7 @@ namespace Xive.Xocument
     {
         private readonly string name;
         private readonly IXocument origin;
-        private readonly IScalar<IDictionary<string, XNode>> xmlMemory;
-        private readonly IList<string> blacklist;
+        private readonly ICache cache;
 
         /// <summary>
         /// A Xocument whose data is cached.
@@ -50,45 +46,18 @@ namespace Xive.Xocument
         /// <param name="name"></param>
         /// <param name="origin"></param>
         /// <param name="xmlMemory"></param>
-        public CachedXocument(string name, IXocument origin, IDictionary<string, XNode> xmlMemory, IDictionary<string, MemoryStream> binMemory) : this(
-            name, origin, xmlMemory, binMemory, new List<string>()
-        )
-        { }
-
-        /// <summary>
-        /// A Xocument whose data is cached.
-        /// If data is updated, cache and origin are updated too.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="origin"></param>
-        /// <param name="xmlMemory"></param>
-        public CachedXocument(string name, IXocument origin, IDictionary<string, XNode> xmlMemory, IDictionary<string, MemoryStream> binMemory, IList<string> blacklist)
+        public CachedXocument(string name, IXocument origin, ICache cache)
         {
-            this.blacklist = blacklist;
             this.name = name;
             this.origin = origin;
-            this.xmlMemory =
-                new ScalarOf<IDictionary<string, XNode>>(() =>
-                {
-                    if (binMemory.ContainsKey(this.name))
-                    {
-                        throw
-                            new InvalidOperationException(
-                                $"Cannot use '{this.name}' as Xocument because it has previously been used as cell. "
-                                + " Caching only works with consistent usage of contents."
-                            );
-                    }
-                    return xmlMemory;
-                });
+            this.cache = cache;
         }
 
         public void Modify(IEnumerable<IDirective> dirs)
         {
             this.origin.Modify(dirs);
-            if (!Blacklisted(this.name))
-            {
-                this.xmlMemory.Value()[this.name] = this.origin.Node();
-            }
+            this.cache.Remove(name);
+            this.cache.Xml(this.name, () => this.origin.Node());
         }
 
         public IList<IXML> Nodes(string xpath)
@@ -108,39 +77,16 @@ namespace Xive.Xocument
 
         public XNode Node()
         {
-            XNode result;
-            if (!this.xmlMemory.Value().ContainsKey(this.name) || Blacklisted(this.name))
-            {
-                result = this.origin.Node();
-                if (!Blacklisted(this.name))
-                {
-                    this.xmlMemory.Value().Add(this.name, result);
-                }
-            }
-            else
-            {
-                result = this.xmlMemory.Value()[this.name];
-            }
-            return result;
+            return
+                this.cache.Xml(
+                    this.name,
+                    () => this.origin.Node()
+                );
         }
 
         public void Dispose()
         {
             this.origin.Dispose();
-        }
-
-        private bool Blacklisted(string name)
-        {
-            bool blacklisted = false;
-            foreach (var entry in this.blacklist)
-            {
-                var pattern = 
-                    Regex.Escape(entry.ToLower()).Replace("\\*", ".*").Replace("\\?", ".") + "$";
-                blacklisted = Regex.IsMatch(name.ToLower(), pattern);
-                if (blacklisted)
-                    break;
-            }
-            return blacklisted;
         }
 
         private IXocument Content()

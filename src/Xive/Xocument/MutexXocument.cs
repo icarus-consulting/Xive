@@ -134,7 +134,7 @@ namespace Xive.Xocument
                     this.mtx.Add(
                         new Mutex(
                             false,
-                            $"Global/" +
+                            $"Local/" +
                             new TextOf(
                                 new BytesBase64(
                                     new Md5DigestOf(

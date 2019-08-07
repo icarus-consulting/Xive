@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using Xive.Cell;
+using Xive.Hive;
 using Xive.Xocument;
 
 namespace Xive.Comb
@@ -33,8 +34,7 @@ namespace Xive.Comb
     /// </summary>
     public sealed class CachedComb : IHoneyComb
     {
-        private readonly IDictionary<string, MemoryStream> binMemory;
-        private readonly IDictionary<string, XNode> xmlMemory;
+        private readonly ICache cache;
         private readonly IHoneyComb comb;
         private readonly IList<string> blacklist;
         private readonly int maxBytes;
@@ -42,10 +42,9 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(IHoneyComb comb, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760) : this(
+        public CachedComb(IHoneyComb comb, ICache cache, int maxBytes = 10485760) : this(
             comb,
-            binMemory,
-            xmlMemory,
+            cache,
             new List<string>(),
             maxBytes
         )
@@ -54,11 +53,10 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(IHoneyComb comb, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, IList<string> blacklist, int maxBytes = 10485760)
+        public CachedComb(IHoneyComb comb, ICache cache, IList<string> blacklist, int maxBytes = 10485760)
         {
             this.comb = comb;
-            this.binMemory = binMemory;
-            this.xmlMemory = xmlMemory;
+            this.cache = cache;
             this.blacklist = blacklist;
             this.maxBytes = maxBytes;
         }
@@ -69,10 +67,7 @@ namespace Xive.Comb
                 new CachedCell(
                     this.comb.Cell(name),
                     $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
-                    this.binMemory,
-                    this.xmlMemory,
-                    this.blacklist,
-                    this.maxBytes
+                    this.cache
                 );
         }
 
@@ -87,9 +82,7 @@ namespace Xive.Comb
                 new CachedXocument(
                     $"{this.comb.Name()}{Path.DirectorySeparatorChar}{name}",
                     this.comb.Xocument(name),
-                    this.xmlMemory,
-                    this.binMemory,
-                    this.blacklist
+                    this.cache
                 );
         }
     }

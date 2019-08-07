@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Xml.Linq;
 using Xive.Comb;
@@ -42,8 +43,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ReadsBinaryOnce()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
+            var cache = new SimpleCache();
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -60,11 +60,10 @@ namespace Xive.Hive.Test
                                         return new byte[0];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
                         )
                     ),
-                    binCache,
-                    xmlMemory
+                    cache
                 );
 
             new MutexCatalog(hive).Create("123");
@@ -85,9 +84,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ConsidersMaxBytes()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
-            var maxBytes = 0;
+            var cache = new LimitedCache(0, new SimpleCache());
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -104,12 +101,10 @@ namespace Xive.Hive.Test
                                         return new byte[20];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
                         )
                     ),
-                    binCache,
-                    xmlMemory,
-                    maxBytes
+                    cache
                 );
 
             new MutexCatalog(hive).Create("123");
@@ -130,9 +125,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ConsidersMaxBytesOnShifted()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
-            var maxBytes = 0;
+            var cache = new LimitedCache(0, new SimpleCache());
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -149,12 +142,10 @@ namespace Xive.Hive.Test
                                         return new byte[20];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
                         )
                     ),
-                    binCache,
-                    xmlMemory,
-                    maxBytes
+                    cache
                 );
 
             new MutexCatalog(hive.Shifted("A")).Create("123");
@@ -175,9 +166,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ConsidersMaxBytesOnHQ()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
-            var maxBytes = 0;
+            var cache = new LimitedCache(0, new SimpleCache());
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -194,15 +183,11 @@ namespace Xive.Hive.Test
                                         return new byte[20];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
                         )
                     ),
-                    binCache,
-                    xmlMemory,
-                    maxBytes
+                    cache
                 );
-
-            //new MutexCatalog(hive).Create("123");
 
             var cell = hive.HQ().Cell("adalbert");
 
@@ -215,8 +200,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void BlackListsBinaries()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
+            var cache = new BlacklistCache("*dal*rt*");
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -233,15 +217,10 @@ namespace Xive.Hive.Test
                                         return new byte[0];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
                         )
                     ),
-                    binCache,
-                    xmlMemory,
-                    new List<string>()
-                    {
-                        "*dal*rt*"
-                    }
+                    cache
                 );
 
             new MutexCatalog(hive).Create("123");
@@ -262,8 +241,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void BlackListsShiftedBinaries()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
+            var cache = new BlacklistCache("*dal*rt*");
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -280,15 +258,10 @@ namespace Xive.Hive.Test
                                         return new byte[0];
                                     }
                                 ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), xmlMemory, binCache)
+                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
                         )
                     ),
-                    binCache,
-                    xmlMemory,
-                    new List<string>()
-                    {
-                        "*dal*rt*"
-                    }
+                    cache
                 ).Shifted("hello");
 
             new MutexCatalog(hive).Create("123");
@@ -309,20 +282,23 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftingRamHiveIncludesScope()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlMemory = new Dictionary<string, XNode>();
+            var cache = new SimpleCache();
 
             var hive =
                 new CachedHive(
                     new RamHive(),
-                    binCache,
-                    xmlMemory
+                    cache
                 );
 
             new MutexCatalog(hive.Shifted("A")).Create("something");
             new MutexCatalog(hive.Shifted("B")).Create("another thing");
 
-            Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
+            Assert.Contains(
+                "another thing",
+                cache.Xml(
+                    @"B\HQ\catalog.xml",
+                    () => new XElement("not-this")).ToString()
+                );
         }
 
         [Fact]
@@ -330,20 +306,21 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var binCache = new Dictionary<string, MemoryStream>();
-                var xmlMemory = new Dictionary<string, XNode>();
+                var cache = new SimpleCache();
 
                 var hive =
                     new CachedHive(
                         new FileHive(dir.Value().FullName),
-                        binCache,
-                        xmlMemory
+                        cache
                     );
 
                 new MutexCatalog(hive.Shifted("A")).Create("something");
                 new MutexCatalog(hive.Shifted("B")).Create("another thing");
 
-                Assert.Contains(@"B\HQ\catalog.xml", xmlMemory.Keys);
+                Assert.Contains(
+                    "another thing",
+                    cache.Xml(@"B\HQ\catalog.xml", () => new XElement("not-this")).ToString()
+                );
             }
         }
 
@@ -352,14 +329,12 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var binCache = new Dictionary<string, MemoryStream>();
-                var xmlMemory = new Dictionary<string, XNode>();
+                var cache = new SimpleCache();
 
                 var hive =
                     new CachedHive(
                         new FileHive(dir.Value().FullName),
-                        binCache,
-                        xmlMemory
+                        cache
                     );
 
                 new MutexCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
@@ -392,14 +367,12 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var binCache = new Dictionary<string, MemoryStream>();
-                var xmlMemory = new Dictionary<string, XNode>();
+                var cache = new SimpleCache();
 
                 var hive =
                     new CachedHive(
                         new FileHive(dir.Value().FullName),
-                        binCache,
-                        xmlMemory
+                        cache
                     );
 
                 new MutexCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
