@@ -20,13 +20,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
+using Xive.Hive;
 using Yaapii.Atoms;
-using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.IO;
 
 namespace Xive.Cell
 {
@@ -37,45 +34,16 @@ namespace Xive.Cell
     {
         private readonly ICell origin;
         private readonly string name;
-        private readonly IScalar<IDictionary<string, MemoryStream>> memory;
-        private readonly IList<string> blacklist;
-        private readonly int maxSize;
+        private readonly ICache cache;
 
         /// <summary>
         /// A cell whose content is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, int maxBytes = 10485760) : this(
-            origin,
-            name,
-            binMemory,
-            xmlMemory,
-            new List<string>(),
-            maxBytes
-        )
-        { }
-
-        /// <summary>
-        /// A cell whose content is cached in memory.
-        /// </summary>
-        public CachedCell(ICell origin, string name, IDictionary<string, MemoryStream> binMemory, IDictionary<string, XNode> xmlMemory, IList<string> blacklist, int maxBytes = 10485760)
+        public CachedCell(ICell origin, string name, ICache cache)
         {
             this.origin = origin;
             this.name = name;
-            this.memory =
-                new ScalarOf<IDictionary<string, MemoryStream>>(() =>
-                {
-                    if(xmlMemory.ContainsKey(name))
-                    {
-                        throw 
-                            new InvalidOperationException(
-                                $"Cannot use '{name}' as binary cell because it has been stored as xml previously. "
-                                + "Caching works only if you use data consistently."
-                            );
-                    }
-                    return binMemory;
-                });
-            this.blacklist = blacklist;
-            this.maxSize = maxBytes;
+            this.cache = cache;
         }
 
         public string Name()
@@ -86,60 +54,32 @@ namespace Xive.Cell
         public byte[] Content()
         {
             byte[] result = new byte[0];
-            if (!this.memory.Value().ContainsKey(this.name) || Blacklisted(this.name))
-            {
-                result = this.origin.Content();
-                if (result.Length <= this.maxSize && !Blacklisted(this.name))
-                {
-                    this.memory.Value()[this.name] = new MemoryStream(result);
-                }
-            }
-            else
-            {
-                this.memory.Value()[this.name].Seek(0, SeekOrigin.Begin);
-                result = this.memory.Value()[this.name].ToArray();
-            }
+            var stream =
+                this.cache.Binary(
+                    this.name,
+                    () => new MemoryStream(this.origin.Content())
+                );
+            stream.Seek(0, SeekOrigin.Begin);
+            result = stream.ToArray();
             return result;
         }
 
         public void Update(IInput content)
         {
             var stream = content.Stream();
-            if (stream.Length <= this.maxSize)
-            {
-                var copy = new MemoryStream();
-                stream.CopyTo(copy);
-                stream.Seek(0, SeekOrigin.Begin);
-                copy.Seek(0, SeekOrigin.Begin);
-                if (!Blacklisted(this.name))
-                {
-                    this.memory.Value()[this.name] = copy;
-                }
-            }
-            else
-            {
-                this.memory.Value().Remove(this.name);
-            }
-            this.origin.Update(content);
+            var copy = new MemoryStream();
+            stream.CopyTo(copy);
+            stream.Seek(0, SeekOrigin.Begin);
+            copy.Seek(0, SeekOrigin.Begin);
+            this.origin.Update(new InputOf(copy));
+            copy.Seek(0, SeekOrigin.Begin);
+            this.cache.Remove(this.name);
+            this.cache.Binary(this.name, () => { return copy; });
         }
 
         public void Dispose()
         {
             this.origin.Dispose();
-        }
-
-        private bool Blacklisted(string name)
-        {
-            bool blacklisted = false;
-            foreach (var entry in this.blacklist)
-            {
-                var pattern =
-                    Regex.Escape(entry.ToLower()).Replace("\\*", ".*").Replace("\\?", ".") + "$";
-                blacklisted = Regex.IsMatch(name.ToLower(), pattern);
-                if (blacklisted)
-                    break;
-            }
-            return blacklisted;
         }
     }
 }

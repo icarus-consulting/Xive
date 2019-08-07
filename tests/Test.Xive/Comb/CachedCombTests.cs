@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using Xive.Hive;
 using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.Bytes;
@@ -41,7 +42,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void ReadsBinaryOnce()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
+            var cache = new SimpleCache();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -58,8 +59,7 @@ namespace Xive.Comb.Test
                             ),
                         (xocName, cell) => new FkXocument()
                     ),
-                    binCache,
-                    new Dictionary<string, XNode>()
+                    cache
                 );
 
             comb.Cell("adalbert").Content();
@@ -71,7 +71,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void BlacklistsBinaries()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
+            var cache = new BlacklistCache("*mister*");
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -88,12 +88,7 @@ namespace Xive.Comb.Test
                             ),
                         (xocName, cell) => new FkXocument()
                     ),
-                    binCache,
-                    new Dictionary<string, XNode>(),
-                    new List<string>()
-                    {
-                        "*mister*"
-                    }
+                    cache
                 );
 
             comb.Cell("hello/mister/adalbert.dat").Content();
@@ -105,7 +100,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void BlacklistsXmls()
         {
-            var xmlCache = new Dictionary<string, XNode>();
+            var cache = new BlacklistCache("*/*/names.*");
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -119,12 +114,7 @@ namespace Xive.Comb.Test
                         }
                         )
                     ),
-                    new Dictionary<string, MemoryStream>(),
-                    xmlCache,
-                    new List<string>()
-                    {
-                        "*/*/names.*"
-                    }
+                    cache
                 );
 
             comb.Xocument("files/with/names.xml").Node();
@@ -136,7 +126,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void ReadsXmlOnce()
         {
-            var xmlCache = new Dictionary<string, XNode>();
+            var cache = new SimpleCache();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -150,8 +140,7 @@ namespace Xive.Comb.Test
                             }
                         )
                     ),
-                    new Dictionary<string, MemoryStream>(),
-                    xmlCache
+                    cache
                 );
 
             comb.Xocument("names.xml").Node();
@@ -163,7 +152,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void FillsBinCache()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
+            var cache = new SimpleCache();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -180,8 +169,7 @@ namespace Xive.Comb.Test
                             ),
                         (xocName, cell) => new FkXocument()
                     ),
-                    binCache,
-                    new Dictionary<string, XNode>()
+                    cache
                 );
 
             comb.Cell("my-cell").Content();
@@ -189,7 +177,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "some data",
                 new TextOf(
-                    new InputOf(binCache["my-comb\\my-cell"])
+                    new InputOf(cache.Binary("my-comb\\my-cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -197,34 +185,39 @@ namespace Xive.Comb.Test
         [Fact]
         public void FillsXmlCache()
         {
-            var xmlCache = new Dictionary<string, XNode>();
+            var cache = new SimpleCache();
             var comb =
                 new CachedComb(
                     new SimpleComb(
                         "my-comb",
                         cellname => new FkCell(),
-                        (xocName, cell) => new FkXocument(() =>
+                        (xocName, cell) => 
+                        new FkXocument(() =>
                             new XDocument(
                                 new XElement("test", new XText("some data"))
                             )
                         )
                     ),
-                    new Dictionary<string, MemoryStream>(),
-                    xmlCache
+                    cache
                 );
 
-            comb.Cell("my-cell").Content();
+            comb.Xocument("test").Node();
 
             Assert.Equal(
                 "some data",
-                comb.Xocument("test.xml").Values("/test/text()")[0]
+                new XMLCursor(
+                    cache.Xml(
+                        "my-comb\\test", 
+                        () => new XElement("not-this")
+                    )
+                ).Values("/test/text()")[0]
             );
         }
 
         [Fact]
         public void UpdatesBinaryCache()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new SimpleCache();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -241,8 +234,7 @@ namespace Xive.Comb.Test
                             ),
                         (xocName, cell) => new FkXocument()
                     ),
-                    cache,
-                    new Dictionary<string, XNode>()
+                    cache
                 );
 
             comb.Cell("my-cell").Content();
@@ -251,7 +243,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "New content",
                 new TextOf(
-                    new InputOf(cache["my-comb\\my-cell"])
+                    new InputOf(cache.Binary("my-comb\\my-cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -259,7 +251,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void UpdatesXmlCache()
         {
-            var cache = new Dictionary<string, XNode>();
+            var cache = new SimpleCache();
             var contents = new string[] { "<root>old</root>", "<root>new</root>" };
             var index = 0;
             var comb =
@@ -275,7 +267,6 @@ namespace Xive.Comb.Test
                             }
                         )
                     ),
-                    new Dictionary<string, MemoryStream>(),
                     cache
                 );
 
@@ -284,7 +275,9 @@ namespace Xive.Comb.Test
 
             Assert.Equal(
                 "new",
-                new XMLCursor(cache["my-comb\\xoc.xml"]).Values("/root/text()")[0]
+                new XMLCursor(
+                    cache.Xml("my-comb\\xoc.xml", () => new XElement("not-this"))
+                ).Values("/root/text()")[0]
             );
         }
     }

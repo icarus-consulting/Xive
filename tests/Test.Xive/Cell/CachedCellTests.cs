@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using Xive.Hive;
 using Xive.Test;
 using Xunit;
 using Yaapii.Atoms.Bytes;
@@ -39,7 +40,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ReadsOnce()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new SimpleCache();
             int reads = 0;
             var cell =
                 new CachedCell(
@@ -52,8 +53,7 @@ namespace Xive.Cell.Test
                         }
                     ),
                     "cached",
-                    cache,
-                    new Dictionary<string, XNode>()
+                    cache
                 );
 
             cell.Content();
@@ -65,7 +65,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void BlacklistsItems()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new BlacklistCache("a/*/blacklisted/*");
             int reads = 0;
             var cell =
                 new CachedCell(
@@ -78,12 +78,7 @@ namespace Xive.Cell.Test
                         }
                     ),
                     "a/file/which/is/blacklisted/data.dat",
-                    cache,
-                    new Dictionary<string, XNode>(),
-                    new List<string>()
-                    {
-                        "a/*/blacklisted/*"
-                    }
+                    cache
                 );
 
             cell.Content();
@@ -95,7 +90,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void FillsCache()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new SimpleCache();
             new CachedCell(
                 new FkCell(
                     content => { },
@@ -105,14 +100,13 @@ namespace Xive.Cell.Test
                         ).AsBytes()
                 ),
                 "cached",
-                cache,
-                new Dictionary<string, XNode>()
+                cache
             ).Content();
 
             Assert.Equal(
                 "Some content",
                 new TextOf(
-                    new InputOf(cache["cached"])
+                    new InputOf(cache.Binary("cached", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -120,7 +114,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UpdatesCache()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new SimpleCache();
             var cell =
                 new CachedCell(
                     new FkCell(
@@ -128,8 +122,7 @@ namespace Xive.Cell.Test
                         () => new BytesOf(new InputOf("Old content")).AsBytes()
                     ),
                     "cached",
-                    cache,
-                    new Dictionary<string, XNode>()
+                    cache
                 );
             cell.Content();
             cell.Update(new InputOf("New content"));
@@ -137,7 +130,9 @@ namespace Xive.Cell.Test
             Assert.Equal(
                 "New content",
                 new TextOf(
-                    new InputOf(cache["cached"])
+                    new InputOf(
+                        cache.Binary("cached", () => new MemoryStream())
+                    )
                 ).AsString()
             );
         }
@@ -145,16 +140,14 @@ namespace Xive.Cell.Test
         [Fact]
         public void PreventsTypeSwitching()
         {
-            var binCache = new Dictionary<string, MemoryStream>();
-            var xmlCache = new Dictionary<string, XNode>();
-            xmlCache.Add("cached", new XElement("irrelevant"));
+            var cache = new SimpleCache();
+            cache.Xml("cached", () => new XElement("irrelevant"));
 
             var binCell =
                 new CachedCell(
                     new FkCell(),
                     "cached",
-                    binCache,
-                    xmlCache
+                    cache
                 );
 
             Assert.Throws<InvalidOperationException>(
@@ -165,7 +158,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ReadSkipsCacheWhenOversized()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new LimitedCache(64, new SimpleCache());
             var cell =
                 new CachedCell(
                     new FkCell(
@@ -173,51 +166,45 @@ namespace Xive.Cell.Test
                         () => new byte[128]
                     ),
                     "cached",
-                    cache,
-                    new Dictionary<string, XNode>(),
-                    64
+                    cache
                 );
             cell.Content();
 
-            Assert.DoesNotContain(
-                "cached",
-                cache.Keys
+            Assert.NotEqual(
+                128,
+                cache.Binary("cached", () => new MemoryStream()).Length
             );
         }
 
         [Fact]
         public void UpdateSkipsCacheWhenOversized()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new LimitedCache(64, new SimpleCache());
             var cell =
                 new CachedCell(
                     new FkCell(),
                     "cached",
-                    cache,
-                    new Dictionary<string, XNode>(),
-                    64
+                    cache
                 );
             cell.Update(
                 new InputOf(new byte[128])
             );
 
-            Assert.DoesNotContain(
-                "cached",
-                cache.Keys
+            Assert.Equal(
+                0,
+                cache.Binary("cached", () => new MemoryStream()).Length
             );
         }
 
         [Fact]
         public void UnderMaxAndThenOverMaxWorks()
         {
-            var cache = new Dictionary<string, MemoryStream>();
+            var cache = new LimitedCache(3, new SimpleCache());
             var cell =
                 new CachedCell(
                     new RamCell(),
                     "cached",
-                    cache,
-                    new Dictionary<string, XNode>(),
-                    3
+                    cache
                 );
             cell.Update(
                 new InputOf(new byte[0])

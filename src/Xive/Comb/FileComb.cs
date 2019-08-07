@@ -74,20 +74,22 @@ namespace Xive.Comb
             if (name.Equals("_guts.xml"))
             {
                 var patch = new Directives().Add("items");
-
-                foreach (var file in Directory.GetFiles(
-                        this.comb.Value().Name(),
-                        "*",
-                        SearchOption.AllDirectories))
+                if (Directory.Exists(this.comb.Value().Name()))
                 {
-                    patch.Add("item")
-                        .Add("name")
-                        .Set(file.Replace(this.comb.Value().Name() + Path.DirectorySeparatorChar, ""))
-                        .Up()
-                        .Add("size")
-                        .Set(new FileInfo(file).Length)
-                        .Up()
-                        .Up();
+                    foreach (var file in Directory.GetFiles(
+                            this.comb.Value().Name(),
+                            "*",
+                            SearchOption.AllDirectories))
+                    {
+                        patch.Add("item")
+                            .Add("name")
+                            .Set(file.Replace(this.comb.Value().Name() + Path.DirectorySeparatorChar, ""))
+                            .Up()
+                            .Add("size")
+                            .Set(new FileInfo(file).Length)
+                            .Up()
+                            .Up();
+                    }
                 }
 
                 result =
