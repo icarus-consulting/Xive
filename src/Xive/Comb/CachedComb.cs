@@ -36,29 +36,14 @@ namespace Xive.Comb
     {
         private readonly ICache cache;
         private readonly IHoneyComb comb;
-        private readonly IList<string> blacklist;
-        private readonly int maxBytes;
 
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(IHoneyComb comb, ICache cache, int maxBytes = 10485760) : this(
-            comb,
-            cache,
-            new List<string>(),
-            maxBytes
-        )
-        { }
-
-        /// <summary>
-        /// A comb that is cached in memory.
-        /// </summary>
-        public CachedComb(IHoneyComb comb, ICache cache, IList<string> blacklist, int maxBytes = 10485760)
+        public CachedComb(IHoneyComb comb, ICache cache)
         {
             this.comb = comb;
             this.cache = cache;
-            this.blacklist = blacklist;
-            this.maxBytes = maxBytes;
         }
 
         public ICell Cell(string name)

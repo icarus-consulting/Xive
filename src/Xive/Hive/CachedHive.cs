@@ -22,8 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml.Linq;
 using Xive.Comb;
 using Yaapii.Atoms.Enumerable;
 
@@ -47,9 +45,7 @@ namespace Xive.Hive
         /// <param name="origin"></param>
         public CachedHive(IHive origin, int maxBytes = 10485760) : this(
             origin,
-            new SimpleCache(),
-            new List<string>(),
-            maxBytes
+            new LimitedCache(maxBytes, new SimpleCache())
         )
         { }
 
@@ -60,22 +56,13 @@ namespace Xive.Hive
         /// <param name="origin"></param>
         public CachedHive(IHive origin, IList<string> blacklist, int maxBytes = 10485760) : this(
             origin,
-            new SimpleCache(),
-            blacklist,
-            maxBytes
-        )
-        { }
-
-        /// <summary>
-        /// A cached hive.
-        /// By using this ctor, the contents of the hive will live in the injected memories.
-        /// </summary>
-        /// <param name="origin"></param>
-        public CachedHive(IHive origin, ICache cache, int maxBytes = 10485760) : this(
-            origin,
-            cache,
-            new List<string>(),
-            maxBytes
+            new BlacklistCache(
+                blacklist,
+                new LimitedCache(
+                    maxBytes,
+                    new SimpleCache()
+                )
+            )
         )
         { }
 
@@ -85,12 +72,10 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live in the injected memories.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, ICache cache, IList<string> blacklist, int maxBytes = 10485760)
+        public CachedHive(IHive origin, ICache cache)
         {
             this.cache = cache;
             this.origin = origin;
-            this.maxBytes = maxBytes;
-            this.blacklist = blacklist;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -100,9 +85,7 @@ namespace Xive.Hive
                     comb =>
                         new CachedComb(
                             comb,
-                            this.cache,
-                            this.blacklist,
-                            this.maxBytes
+                            this.cache
                         ),
                         this.origin.Combs(xpath, CachedCatalog())
                     );
@@ -118,9 +101,7 @@ namespace Xive.Hive
             return
                 new CachedComb(
                     this.origin.HQ(),
-                    this.cache,
-                    this.blacklist,
-                    this.maxBytes
+                    this.cache
                 );
         }
 
@@ -129,9 +110,7 @@ namespace Xive.Hive
             return
                 new CachedHive(
                     this.origin.Shifted(scope),
-                    this.cache,
-                    this.blacklist,
-                    this.maxBytes
+                    this.cache
                 );
         }
 
@@ -147,9 +126,7 @@ namespace Xive.Hive
                     this.origin.Scope(),
                     new CachedComb(
                         this.origin.HQ(),
-                        this.cache,
-                        this.blacklist,
-                        this.maxBytes
+                        this.cache
                     )
                 );
         }
