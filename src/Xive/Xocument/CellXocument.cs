@@ -20,7 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Diagnostics;
+using System;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -45,7 +45,7 @@ namespace Xive.Xocument
             name,
             Encoding.GetEncoding("utf-8")
         )
-        {}
+        { }
 
         /// <summary>
         /// A xocument which is stored in a cell.
@@ -93,13 +93,24 @@ namespace Xive.Xocument
                                     }
                                     else
                                     {
-                                        doc =
-                                            XDocument.Parse(
-                                                new TextOf(
-                                                    new InputOf(content),
-                                                    encoding
-                                                ).AsString()
-                                            );
+                                        try
+                                        {
+                                            doc =
+                                                XDocument.Parse(
+                                                    new TextOf(
+                                                        new InputOf(content),
+                                                        encoding
+                                                    ).AsString()
+                                                );
+                                        }
+                                        catch (XmlException ex)
+                                        {
+                                            throw
+                                                new ApplicationException(
+                                                    $"Cannot make XML from cell with name '{cell.Name()}' and content: '{new TextOf(new InputOf(content), encoding).AsString()}'",
+                                                    ex
+                                                );
+                                        }
                                     }
                                     return doc;
                                 }
