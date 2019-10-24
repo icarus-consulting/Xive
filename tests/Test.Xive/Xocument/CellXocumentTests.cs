@@ -20,15 +20,17 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.IO;
 using System.Text;
 using Xive.Cell;
-using Xive.Xocument;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
 namespace Xive.Xocument.Test
 {
     public sealed class CellXocumentTests
@@ -158,5 +160,17 @@ namespace Xive.Xocument.Test
             }
         }
 
+        [Fact]
+        public void FailsOnInvalidXml()
+        {
+            var xoc =
+                new CellXocument(
+                    new RamCell("flash.xml", new BytesOf("To be or not to be")),
+                    "flash.xml"
+                );
+            Assert.Throws<ApplicationException>(() =>
+                xoc.Value("/flash/grandmaster/text()", "")
+            );
+        }
     }
 }
