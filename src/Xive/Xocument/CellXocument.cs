@@ -107,7 +107,7 @@ namespace Xive.Xocument
                                         {
                                             throw
                                                 new ApplicationException(
-                                                    $"Cannot make XML from cell with name '{cell.Name()}' and content: '{new TextOf(new InputOf(content), encoding).AsString()}'",
+                                                    $"Cannot parse content as XML from cell '{cell.Name()}'. Content: '{new TextOf(new InputOf(content), encoding).AsString()}'",
                                                     ex
                                                 );
                                         }
