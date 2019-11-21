@@ -27,6 +27,9 @@ using Xive.Cell;
 using Xive.Comb;
 using Xive.Xocument;
 using System.IO;
+using Yaapii.Atoms.IO;
+using System.Threading.Tasks;
+using System;
 
 namespace Xive.Hive.Test
 {
@@ -106,6 +109,32 @@ namespace Xive.Hive.Test
                 "123",
                 catalog.List("todo[text()='code some stuff']")
             );
+        }
+
+        [Fact]
+        public void WorksParallelWithDirectAccessToCatalog()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive =
+                    new MutexHive(
+                       new FileHive(
+                           "machine",
+                           dir.Value().FullName
+                       )
+                    );
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                {
+                    using (var xoc = hive.HQ().Xocument("catalog.xml"))
+                    {
+                        xoc.Modify(
+                            new Directives().Xpath("/catalog")
+                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someContent")
+                        );
+                    }
+                    Assert.NotEmpty(hive.Combs("'*'"));
+                });
+            }
         }
     }
 }
