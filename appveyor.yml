@@ -7,6 +7,7 @@ image:
   - Ubuntu
 configuration: Release
 environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
   GITHUB_TOKEN:
     secure: tvoyJ/iv8Y+9VaKvOFvxegvQFBNqPkhiwghS8lQDsrt7B/1MWU4e8uOHQzfTU580
   CODECOV_TOKEN:
@@ -18,8 +19,9 @@ nuget:
   account_feed: true
 build_script:
   - sh: printf "This is Linux"
+  - sh: .\build.sh
   - cmd: echo This is Windows
-  - cmd: .\build.ps1
+  - ps: .\build.ps1
 test: off
 artifacts:
 - path: '.\artifacts\**\*.nupkg'
