@@ -20,7 +20,7 @@ nuget:
 build_script:
   - sh: chmod +x build.sh
   - sh: ./build.sh
-  #- ps: .\build.ps1
+  - ps: .\build.ps1
 test: off
 artifacts:
 - path: '.\artifacts\**\*.nupkg'
