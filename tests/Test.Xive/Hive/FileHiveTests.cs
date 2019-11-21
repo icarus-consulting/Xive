@@ -38,9 +38,9 @@ namespace Xive.Hive.Test
         public void DeliversHQ()
         {
             using (var dir = new TempDirectory())
-            {
+            {                
                 Assert.Equal(
-                    $"product\\HQ",
+                    $"product"+ Path.DirectorySeparatorChar + "HQ",
                     new FileHive(
                         "product",
                         dir.Value().FullName
