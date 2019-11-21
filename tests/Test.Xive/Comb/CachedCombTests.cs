@@ -207,7 +207,7 @@ namespace Xive.Comb.Test
                 "some data",
                 new XMLCursor(
                     cache.Xml(
-                        "my-comb\\test", 
+                        "my-comb" + Path.DirectorySeparatorChar + "test", 
                         () => new XElement("not-this")
                     )
                 ).Values("/test/text()")[0]
