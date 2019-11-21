@@ -122,13 +122,13 @@ namespace Xive.Hive.Test
                            dir.Value().FullName
                        )
                     );
-                Parallel.For(0, 20, i =>
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
                     using (var xoc = hive.HQ().Xocument("catalog.xml"))
                     {
                         xoc.Modify(
                             new Directives().Xpath("/catalog")
-                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someCOntent")
+                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someContent")
                         );
                     }
                     Assert.NotEmpty(hive.Combs("'*'"));
