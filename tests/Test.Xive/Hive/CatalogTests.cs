@@ -29,6 +29,7 @@ using Xive.Xocument;
 using System.IO;
 using Yaapii.Atoms.IO;
 using System.Threading.Tasks;
+using System;
 
 namespace Xive.Hive.Test
 {
