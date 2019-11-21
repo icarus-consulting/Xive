@@ -147,7 +147,7 @@ namespace Xive.Xocument
                                         )
                                     )
                                 ).AsBytes()
-                            )
+                            ).AsString()
                         )
                     );
                     this.mtx[0].WaitOne();
