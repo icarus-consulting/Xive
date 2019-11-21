@@ -276,7 +276,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "new",
                 new XMLCursor(
-                    cache.Xml("my-comb\\xoc.xml", () => new XElement("not-this"))
+                    cache.Xml("my-comb"+Path.PathSeparator+"xoc.xml", () => new XElement("not-this"))
                 ).Values("/root/text()")[0]
             );
         }
