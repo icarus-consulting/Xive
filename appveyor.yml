@@ -19,9 +19,9 @@ nuget:
   account_feed: true
 build_script:
   - sh: printf "This is Linux"
-  - sh: .\build.sh
-  - cmd: echo This is Windows
-  - ps: .\build.ps1
+  - sh: build.sh
+  - ps: echo This is Windows
+  #- ps: .\build.ps1
 test: off
 artifacts:
 - path: '.\artifacts\**\*.nupkg'
