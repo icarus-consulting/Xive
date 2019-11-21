@@ -21,7 +21,7 @@ build_script:
   - sh: printf "This is Linux"
   - sh: .\build.sh
   - ps: echo This is Windows
-  - ps: .\build.ps1
+  #- ps: .\build.ps1
 test: off
 artifacts:
 - path: '.\artifacts\**\*.nupkg'
