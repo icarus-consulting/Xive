@@ -45,6 +45,10 @@ namespace Xive.Hive
             {
                 this.origin.Update(name, binary);
             }
+            else
+            {
+                this.origin.Update(name, new MemoryStream());
+            }
         }
 
         public void Update(string name, XNode xNode)

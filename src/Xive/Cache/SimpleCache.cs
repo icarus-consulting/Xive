@@ -43,7 +43,14 @@ namespace Xive.Hive
 
         public void Update(string name, MemoryStream binary)
         {
-            this.binMemory[name] = binary;
+            if(binary.Length == 0)
+            {
+                this.binMemory.Remove(name);
+            }
+            else
+            {
+                this.binMemory[name] = binary;
+            }
         }
 
         public void Update(string name, XNode xNode)
