@@ -18,10 +18,8 @@ skip_branch_with_pr: true
 nuget:
   account_feed: true
 build_script:
-  - sh: printf "This is Linux"
   - sh: chmod +x build.sh
   - sh: ./build.sh
-  - ps: echo This is Windows
   #- ps: .\build.ps1
 test: off
 artifacts:
