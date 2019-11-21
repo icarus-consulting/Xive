@@ -141,7 +141,7 @@ namespace Xive.Xocument
                                         new InputOf(
                                             new BytesOf(
                                                 new InputOf(
-                                                    this.name.AsString().Replace("/", "_").Replace("\\", "_")
+                                                    this.name.Replace("/", "_").Replace("\\", "_")
                                                 )
                                             )
                                         )
