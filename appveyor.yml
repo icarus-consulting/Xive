@@ -17,6 +17,8 @@ skip_branch_with_pr: true
 nuget:
   account_feed: true
 build_script:
+  - sh: printf "I'll be shown on Linux!"
+  - cmd: echo Hey, I'm displayed on Windows only!
 - cmd: .\build.ps1
 test: off
 artifacts:
