@@ -135,7 +135,7 @@ Task("Generate-Coverage")
 	}
 	else
 	{
-Verbose("Is Linux no  coverage");
+		Verbose("Generating coverage is not supported on Linux");
 	}
 });
 
