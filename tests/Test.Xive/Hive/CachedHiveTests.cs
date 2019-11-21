@@ -296,7 +296,7 @@ namespace Xive.Hive.Test
             Assert.Contains(
                 "another thing",
                 cache.Xml(
-                    @"B\HQ\catalog.xml",
+                    @"B" + Path.DirectorySeparatorChar + "HQ" + Path.DirectorySeparatorChar + "catalog.xml",
                     () => new XElement("not-this")).ToString()
                 );
         }
