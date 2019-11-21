@@ -14,19 +14,19 @@ var configuration   = Argument<string>("configuration", "Release");
 // we define where the build artifacts should be places
 // this is relative to the project root folder
 var buildArtifacts      = new DirectoryPath("./artifacts/");
-var framework     = "netstandard2.0";
-var testFramework = "netcoreapp2.1";
-var project = new DirectoryPath("./src/Xive/Xive.csproj");
+var framework     		= "netstandard2.0";
+var testFramework 		= "netcoreapp2.1";
+var project 			= new DirectoryPath("./src/Xive/Xive.csproj");
 
-var owner = "icarus-consulting";
-var repository = "Xive";
+var owner 				= "icarus-consulting";
+var repository 			= "Xive";
 
-var githubtoken = "";
-var codecovToken = "";
+var githubtoken 		= "";
+var codecovToken 		= "";
 
 var isAppVeyor          = AppVeyor.IsRunningOnAppVeyor;
-
-var version = "0.6.2";
+var os 					= CakeContext.Environment.Platform.Family;
+var version 			= "0.6.2";
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,28 +108,35 @@ Task("Generate-Coverage")
 .IsDependentOn("Build")
 .Does(() => 
 {
-	try
+	if(os == PlatformFamily.Windows)
 	{
-		OpenCover(
-			tool => 
-			{
-				tool.DotNetCoreTest("./tests/Test.Xive/",
-				new DotNetCoreTestSettings
+		try
+		{
+			OpenCover(
+				tool => 
 				{
-					 Configuration = "Release"
-				});
-			},
-			new FilePath("./coverage.xml"),
-			new OpenCoverSettings()
-			{
-				OldStyle = true
-			}
-			.WithFilter("+[Xive]*")
-		);
+					tool.DotNetCoreTest("./tests/Test.Xive/",
+					new DotNetCoreTestSettings
+					{
+						Configuration = "Release"
+					});
+				},
+				new FilePath("./coverage.xml"),
+				new OpenCoverSettings()
+				{
+					OldStyle = true
+				}
+				.WithFilter("+[Xive]*")
+			);
+		}
+		catch(Exception ex)
+		{
+			Information("Error: " + ex.ToString());
+		}
 	}
-	catch(Exception ex)
+	else
 	{
-		Information("Error: " + ex.ToString());
+Verbose("Is Linux no  coverage");
 	}
 });
 
