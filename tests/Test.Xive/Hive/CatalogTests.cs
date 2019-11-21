@@ -128,7 +128,7 @@ namespace Xive.Hive.Test
                     {
                         xoc.Modify(
                             new Directives().Xpath("/catalog")
-                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someCOntent")
+                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someContent")
                         );
                     }
                     Assert.NotEmpty(hive.Combs("'*'"));
