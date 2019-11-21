@@ -25,7 +25,6 @@ var githubtoken 		= "";
 var codecovToken 		= "";
 
 var isAppVeyor          = AppVeyor.IsRunningOnAppVeyor;
-var os 					= CakeContext.Environment.Platform.Family;
 var version 			= "0.6.2";
 
 
@@ -108,7 +107,7 @@ Task("Generate-Coverage")
 .IsDependentOn("Build")
 .Does(() => 
 {
-	if(os == PlatformFamily.Windows)
+	if(IsRunningOnWindows())
 	{
 		try
 		{
@@ -146,7 +145,10 @@ Task("Upload-Coverage")
 .WithCriteria(() => isAppVeyor)
 .Does(() =>
 {
-    Codecov("coverage.xml", codecovToken);
+	if(IsRunningOnWindows())
+	{
+    	Codecov("coverage.xml", codecovToken);
+	}
 });
 
 ///////////////////////////////////////////////////////////////////////////////
