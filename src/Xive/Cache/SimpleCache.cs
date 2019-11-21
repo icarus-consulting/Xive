@@ -41,10 +41,14 @@ namespace Xive.Hive
             return this.xmlMemory.ContainsKey(name) || this.binMemory.ContainsKey(name);
         }
 
-        public void Remove(string name)
+        public void Update(string name, MemoryStream binary)
         {
-            this.binMemory.Remove(name);
-            this.xmlMemory.Remove(name);
+            this.binMemory[name] = binary;
+        }
+
+        public void Update(string name, XNode xNode)
+        {
+            this.xmlMemory[name] = xNode;
         }
 
         public MemoryStream Binary(string name, Func<MemoryStream> ifAbsent)

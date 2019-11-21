@@ -153,7 +153,7 @@ namespace Xive.Hive.Test
                            )
                         )
                     );
-                Parallel.For(0, Environment.ProcessorCount << 5, i =>
+                Parallel.For(0, Environment.ProcessorCount << 6, i =>
                 {
                     using (var xoc = hive.HQ().Xocument("catalog.xml"))
                     {

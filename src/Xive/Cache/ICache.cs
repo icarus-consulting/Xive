@@ -10,7 +10,8 @@ namespace Xive.Hive
     public interface ICache
     {
         bool Has(string name);
-        void Remove(string name);
+        void Update(string name, MemoryStream binary);
+        void Update(string name, XNode xNode);
         MemoryStream Binary(string name, Func<MemoryStream> ifAbsent);
         XNode Xml(string name, Func<XNode> ifAbsent);
     }
