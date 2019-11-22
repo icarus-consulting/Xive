@@ -139,12 +139,14 @@ namespace Xive.Xocument
                                     new Md5DigestOf(
                                         new InputOf(
                                             new BytesOf(
-                                                new InputOf(this.name)
+                                                new InputOf(
+                                                    this.name.Replace("/", "_").Replace("\\", "_")
+                                                )
                                             )
                                         )
                                     )
                                 ).AsBytes()
-                            ).AsString().Replace("/", "_").Replace("\\", "_")
+                            ).AsString()
                         )
                     );
                     this.mtx[0].WaitOne();
