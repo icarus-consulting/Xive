@@ -134,7 +134,7 @@ namespace Xive.Xocument
                     this.mtx.Add(
                         new Mutex(
                             false,
-                            $"Local/" +
+                            $"Local\\" +
                             new TextOf(
                                 new BytesBase64(
                                     new Md5DigestOf(
@@ -147,7 +147,7 @@ namespace Xive.Xocument
                                         )
                                     )
                                 ).AsBytes()
-                            ).AsString()
+                            ).AsString().Replace("/", "_").Replace("\\", "_")
                         )
                     );
                     this.mtx[0].WaitOne();
