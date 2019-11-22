@@ -73,8 +73,7 @@ namespace Xive.Cell
             copy.Seek(0, SeekOrigin.Begin);
             this.origin.Update(new InputOf(copy));
             copy.Seek(0, SeekOrigin.Begin);
-            this.cache.Remove(this.name);
-            this.cache.Binary(this.name, () => { return copy; });
+            this.cache.Update(this.name, copy);
         }
 
         public void Dispose()

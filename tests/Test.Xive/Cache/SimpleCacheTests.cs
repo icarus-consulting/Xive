@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using Xive.Hive;
 using Xunit;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Text;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -49,22 +50,39 @@ namespace Xive.Test.Cache
         }
 
         [Fact]
-        public void ClearsXmlCache()
+        public void UpdatesCacheWithXNode()
         {
             var cache = new SimpleCache();
-            var first =
-                cache.Xml(
-                    "test",
-                    () => new XElement("node", new XText(new Random().Next().ToString()))
-                ).ToString();
-            cache.Remove("test");
+            var node = new XElement("node", new XText("someNiceNode"));
+            cache.Update(
+                "test",
+                node
+            );
             var second =
                 cache.Xml(
                     "test",
                     () => new XElement("node", new XText(new Random().Next().ToString()))
                 ).ToString();
 
-            Assert.NotEqual(first, second);
+            Assert.Equal(node.ToString(), second);
+        }
+
+        [Fact]
+        public void UpdatesCacheWithBinary()
+        {
+            var cache = new SimpleCache();
+            var binary = new MemoryStream(new BytesOf("nice binary things").AsBytes());
+            cache.Update(
+                "test",
+                binary
+            );
+            var second =
+                cache.Binary(
+                    "test",
+                    () => new MemoryStream(new BytesOf("some other things").AsBytes())
+                );
+
+            Assert.Equal("nice binary things", new TextOf(second).AsString());
         }
 
         [Fact]
