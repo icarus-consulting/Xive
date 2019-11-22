@@ -146,7 +146,7 @@ namespace Xive.Xocument
                                         )
                                     )
                                 ).AsBytes()
-                            ).AsString()
+                            ).AsString().Replace("/", "_").Replace("\\", "_")
                         )
                     );
                     this.mtx[0].WaitOne();
