@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Xive.Xocument;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
@@ -127,7 +126,7 @@ namespace Xive.Hive
                 {
                     xoc.Modify(
                         new Directives()
-                            .Xpath("catalog")
+                            .Xpath("/catalog")
                             .Add(this.itemName.Value())
                             .Attr("id", id)
                     );
@@ -139,14 +138,14 @@ namespace Xive.Hive
         {
             using (var xoc = Xocument())
             {
-                return xoc.Nodes(Path.DirectorySeparatorChar + "catalog" + Path.DirectorySeparatorChar + $"{this.itemName.Value()}[@id='{id}']").Count > 0;
+                return xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count > 0;
             }
         }
 
         private IXocument Xocument()
         {
             var hq = this.hq.Value();
-            var name = hq.Name() + Path.DirectorySeparatorChar + "catalog.xml";
+            var name = $"{hq.Name()}/catalog.xml";
             return new MutexXocument(name, this.hq.Value().Xocument("catalog.xml"));
         }
     }
