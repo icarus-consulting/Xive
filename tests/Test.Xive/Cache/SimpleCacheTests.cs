@@ -112,5 +112,13 @@ namespace Xive.Test.Cache
             cache.Binary("Cheezeburger", () => new MemoryStream());
             Assert.True(cache.Has("Cheezeburger"));
         }
+
+        [Fact]
+        public void IgnoresBackslashes()
+        {
+            var cache = new SimpleCache();
+            cache.Update("someName/file.txt", new MemoryStream(new BytesOf("hello").AsBytes()));
+            Assert.True(cache.Has("someName\\file.txt"));
+        }
     }
 }
