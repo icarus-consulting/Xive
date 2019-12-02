@@ -56,8 +56,7 @@ namespace Xive.Xocument
         public void Modify(IEnumerable<IDirective> dirs)
         {
             this.origin.Modify(dirs);
-            this.cache.Remove(name);
-            this.cache.Xml(this.name, () => this.origin.Node());
+            this.cache.Update(this.name, this.origin.Node());
         }
 
         public IList<IXML> Nodes(string xpath)

@@ -33,7 +33,6 @@ namespace Xive.Hive
     /// </summary>
     public sealed class MutexHive : IHive
     {
-        private readonly IList<Mutex> mtx;
         private readonly IHive hive;
 
         /// <summary>
@@ -42,105 +41,38 @@ namespace Xive.Hive
         public MutexHive(IHive hive)
         {
             this.hive = hive;
-            this.mtx = new List<Mutex>();
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            lock (this.hive)
-            {
-                Block();
-                IEnumerable<IHoneyComb> combs;
-                combs = 
-                    new Mapped<IHoneyComb, IHoneyComb>(
-                        (comb) => new MutexComb(comb), hive.Combs(xpath)
-                    );
-                Unblock();
-                return combs;
-            }
+            return
+                new Mapped<IHoneyComb, IHoneyComb>(
+                    (comb) => new MutexComb(comb), hive.Combs(xpath)
+                );
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
         {
-            lock (this.hive)
-            {
-                Block();
-                IEnumerable<IHoneyComb> combs;
-                combs = 
-                    new Mapped<IHoneyComb, IHoneyComb>(
-                        (comb) => new MutexComb(comb), hive.Combs(xpath, catalog)
-                    );
-                Unblock();
-                return combs;
-            }
+            return
+                new Mapped<IHoneyComb, IHoneyComb>(
+                    (comb) => new MutexComb(comb), hive.Combs(xpath, catalog)
+                );
         }
 
         public IHoneyComb HQ()
         {
-            IHoneyComb result;
-            lock (this.hive)
-            {
-                result = new MutexComb(hive.HQ());
-            }
-            return result;
+            return new MutexComb(hive.HQ());
         }
 
         public IHive Shifted(string scope)
         {
-            lock(this.hive)
-            {
-                return new MutexHive(this.hive.Shifted(scope));
-            }
+            return new MutexHive(this.hive.Shifted(scope));
         }
 
         public string Scope()
         {
-            lock (this.hive)
-            {
-                return this.hive.Scope();
-            }
+            return this.hive.Scope();
         }
 
-        private void Block()
-        {
-            lock (this)
-            {
-                
-                if (this.mtx.Count == 0)
-                {
-                    this.mtx.Add(new Mutex(false, $"{this.hive.Scope()}"));
-                    this.mtx[0].WaitOne();
-                }
-                if (this.mtx.Count > 1)
-                {
-                    throw new ApplicationException($"Internal error: Duplicate mutex found for hive '{this.hive.Scope()}'");
-                }
-            }
-        }
-
-        private void Unblock()
-        {
-            if (this.mtx.Count == 1)
-            {
-                try
-                {
-                    this.mtx[0].ReleaseMutex();
-                    this.mtx[0].Dispose();
-                    this.mtx.Clear();
-                }
-                catch (ObjectDisposedException)
-                {
-                    //Do nothing.
-                }
-                catch (ApplicationException ex)
-                {
-                    throw new ApplicationException($"Cannot release mutex for hive '{this.hive.Scope()}': {ex.Message}", ex);
-                }
-            }
-            else if (this.mtx.Count > 1)
-            {
-                throw new ApplicationException("Internal error: Duplicate mutex found for " + this.hive.Scope());
-            }
-        }
     }
 }

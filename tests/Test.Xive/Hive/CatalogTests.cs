@@ -30,6 +30,8 @@ using System.IO;
 using Yaapii.Atoms.IO;
 using System.Threading.Tasks;
 using System;
+using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.List;
 
 namespace Xive.Hive.Test
 {
@@ -133,6 +135,38 @@ namespace Xive.Hive.Test
                         );
                     }
                     Assert.NotEmpty(hive.Combs("'*'"));
+                });
+            }
+        }
+
+        [Fact]
+        public void WorksParallelWithCachedHive()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive =
+                    new MutexHive(
+                        new CachedHive(
+                           new FileHive(
+                               "machine",
+                               dir.Value().FullName
+                           )
+                        )
+                    );
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                {
+                    using (var xoc = hive.HQ().Xocument("catalog.xml"))
+                    {
+                        xoc.Modify(
+                            new Directives().Xpath("/catalog")
+                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someContent")
+                        );
+                    }
+                    var comb = new FirstOf<IHoneyComb>(hive.Combs($"@id='123{i.ToString()}'")).Value();
+                    using (var xoc = comb.Xocument("index.xml"))
+                    {
+                        xoc.Modify(new Directives().Xpath("/index").Add("node").Set("content"));
+                    }
                 });
             }
         }

@@ -39,9 +39,21 @@ namespace Xive.Hive
             return result;
         }
 
-        public void Remove(string name)
+        public void Update(string name, MemoryStream binary)
         {
-            this.origin.Remove(name);
+            if (binary.Length <= this.maxBytes)
+            {
+                this.origin.Update(name, binary);
+            }
+            else
+            {
+                this.origin.Update(name, new MemoryStream());
+            }
+        }
+
+        public void Update(string name, XNode xNode)
+        {
+            this.origin.Update(name, xNode);
         }
 
         public XNode Xml(string name, Func<XNode> ifAbsent)

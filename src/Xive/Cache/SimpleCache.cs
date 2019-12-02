@@ -38,17 +38,32 @@ namespace Xive.Hive
 
         public bool Has(string name)
         {
+            name = Normalized(name);
             return this.xmlMemory.ContainsKey(name) || this.binMemory.ContainsKey(name);
         }
 
-        public void Remove(string name)
+        public void Update(string name, MemoryStream binary)
         {
-            this.binMemory.Remove(name);
-            this.xmlMemory.Remove(name);
+            name = Normalized(name);
+            if (binary.Length == 0)
+            {
+                this.binMemory.Remove(name);
+            }
+            else
+            {
+                this.binMemory[name] = binary;
+            }
+        }
+
+        public void Update(string name, XNode xNode)
+        {
+            name = Normalized(name);
+            this.xmlMemory[name] = xNode;
         }
 
         public MemoryStream Binary(string name, Func<MemoryStream> ifAbsent)
         {
+            name = Normalized(name);
             if (!binMemory.ContainsKey(name))
             {
                 if (this.xmlMemory.ContainsKey(name))
@@ -66,6 +81,7 @@ namespace Xive.Hive
 
         public XNode Xml(string name, Func<XNode> ifAbsent)
         {
+            name = Normalized(name);
             if (!this.xmlMemory.ContainsKey(name))
             {
                 if (this.binMemory.ContainsKey(name))
@@ -79,6 +95,11 @@ namespace Xive.Hive
                 this.xmlMemory[name] = ifAbsent();
             }
             return this.xmlMemory[name];
+        }
+
+        private string Normalized(string name)
+        {
+            return name.Replace('\\', '/');
         }
     }
 }
