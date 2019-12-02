@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.IO;
+using Xive.Comb;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
@@ -62,6 +63,40 @@ namespace Xive.Cell.Test
                     "its so hot outside",
                     new TextOf(cell.Content()).AsString()
                 );
+            }
+        }
+
+        [Fact]
+        public void IsInsensitiveToSeparatorChars()
+        {
+            var comb = new RamComb("my-comb");
+            using (var cell = comb.Cell("this-is/my-cell"))
+            {
+                cell.Update(new InputOf("its so hot outside"));
+            }
+            using (var cell = comb.Cell("this-is\\my-cell"))
+            {
+                Assert.Equal(
+                   "its so hot outside",
+                   new TextOf(cell.Content()).AsString()
+               );
+            }
+        }
+
+        [Fact]
+        public void IsCaseInsensitive()
+        {
+            var comb = new RamComb("my-comb");
+            using (var cell = comb.Cell("this-is/MY-cell"))
+            {
+                cell.Update(new InputOf("its so cold outside"));
+            }
+            using (var cell = comb.Cell("this-IS\\my-cell"))
+            {
+                Assert.Equal(
+                   "its so cold outside",
+                   new TextOf(cell.Content()).AsString()
+               );
             }
         }
     }

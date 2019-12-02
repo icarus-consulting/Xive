@@ -120,5 +120,13 @@ namespace Xive.Test.Cache
             cache.Update("someName/file.txt", new MemoryStream(new BytesOf("hello").AsBytes()));
             Assert.True(cache.Has("someName\\file.txt"));
         }
+
+        [Fact]
+        public void IsCaseInsensitive()
+        {
+            var cache = new SimpleCache();
+            cache.Update("someName/file.txt", new MemoryStream(new BytesOf("hello").AsBytes()));
+            Assert.True(cache.Has("SOMEname\\file.TXT"));
+        }
     }
 }

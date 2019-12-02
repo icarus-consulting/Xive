@@ -29,6 +29,8 @@ using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
+#pragma warning disable MaxPublicMethodCount // a public methods count maximum
+
 namespace Xive.Comb.Test
 {
     public sealed class RamCombTests
@@ -119,6 +121,24 @@ namespace Xive.Comb.Test
                 Assert.Equal(
                     1,
                     xoc.Nodes("/some").Count
+                );
+            }
+        }
+
+        [Fact]
+        public void ReturnsGutsCaseAndSeparatorInsensitive()
+        {
+            var memory = new Dictionary<string, MemoryStream>();
+            var comb = new RamComb("my-comb", memory);
+            using (var xoc = comb.Xocument("sub\\DIR/some.xml"))
+            {
+                xoc.Modify(new Directives().Xpath("/some").Add("test"));
+            }
+            using (var xoc = comb.Xocument("_guts.xml"))
+            {
+                Assert.Equal(
+                    "sub/dir/some.xml",
+                    xoc.Value("/items/item/name/text()", "")
                 );
             }
         }
