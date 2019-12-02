@@ -61,7 +61,7 @@ namespace Xive.Cell
             this.path = 
                 new Solid<string>(() =>
                 {
-                    var pth = new NormalizedPath(
+                    var pth = new Normalized(
                             path.Value()
                         ).AsString();
                     if (!Path.IsPathRooted(pth))
@@ -150,7 +150,7 @@ namespace Xive.Cell
         private string DirectoryName()
         {
             return
-                new NormalizedPath(
+                new Normalized(
                     Path.GetDirectoryName(
                         this.path.Value()
                     )

@@ -57,7 +57,7 @@ namespace Xive.Comb
                         //var fullPath = Path.Combine(root, name);
                         return
                             new SimpleComb(
-                                new NormalizedPath(
+                                new Normalized(
                                     Path.Combine(root, name)
                                 ).AsString(),
                                 path => new FileCell(path),
@@ -86,7 +86,7 @@ namespace Xive.Comb
                         patch.Add("item")
                             .Add("name")
                             .Set(
-                                new NormalizedPath(file)
+                                new Normalized(file)
                                 .AsString()
                                 .Replace(this.comb.Value().Name() + Path.AltDirectorySeparatorChar, "")
                                 )

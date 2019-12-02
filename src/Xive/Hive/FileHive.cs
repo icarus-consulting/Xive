@@ -65,7 +65,7 @@ namespace Xive.Hive
             this.wrap = combWrap;
             this.root = new Solid<string>(() =>
             {
-                return new NormalizedPath(root).AsString();
+                return new Normalized(root).AsString();
             });
         }
 
@@ -85,7 +85,7 @@ namespace Xive.Hive
 
         public IHoneyComb HQ()
         {
-            return this.wrap(Comb("HQ"));
+            return this.wrap(Comb("hq"));
         }
 
         public IHive Shifted(string scope)
