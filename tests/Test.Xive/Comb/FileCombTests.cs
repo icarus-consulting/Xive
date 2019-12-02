@@ -153,11 +153,13 @@ namespace Xive.Comb.Test
                     cell.Update(new InputOf("content results in file creation"));
                     Assert.True(
                         File.Exists(
-                            Path.Combine(
-                                dir.Value().FullName,
-                                "my-comb",
-                                path
-                            )
+                            new Normalized(
+                                Path.Combine(
+                                    dir.Value().FullName,
+                                    "my-comb",
+                                    path
+                                    )
+                            ).AsString()
                         )
                     );
                 }
