@@ -5,10 +5,16 @@ using Yaapii.Atoms;
 
 namespace Xive
 {
+    /// <summary>
+    /// A text with only forward slashes instead of backslashes and only lower-cased
+    /// </summary>
     public sealed class Normalized : IText
     {
         private readonly Lazy<string> name;
 
+        /// <summary>
+        /// A text with only forward slashes instead of backslashes and only lower-cased
+        /// </summary>
         public Normalized(string name)
         {
             this.name = new Lazy<string>(() => name.Replace('\\', '/').ToLower());
