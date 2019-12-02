@@ -63,7 +63,7 @@ namespace Xive.Comb
             {
                 return 
                     new MutexXocument(
-                        comb.Name() + Path.DirectorySeparatorChar + name,
+                        comb.Name() + Path.AltDirectorySeparatorChar + name,
                         this.comb.Xocument(name)
                     );
             }

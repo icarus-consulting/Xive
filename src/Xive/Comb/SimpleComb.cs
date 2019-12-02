@@ -57,7 +57,7 @@ namespace Xive.Comb
 
         public ICell Cell(string name)
         {
-            return this.cell(this.name.Value() + Path.DirectorySeparatorChar + name);
+            return this.cell(this.name.Value() + Path.AltDirectorySeparatorChar + name);
         }
 
         public string Name()
