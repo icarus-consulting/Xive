@@ -122,6 +122,20 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
+        public void WorksWithBackslash()
+        {
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"someFolder\\filename.txt")))
+            {
+                item.Update(new InputOf("after holiday is before holiday"));
+                Assert.True(
+                    File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
+                );
+            }
+        }
+
+
+        [Fact]
         public void FailsOnMissingFilename()
         {
             Assert.Throws<ArgumentException>(() =>

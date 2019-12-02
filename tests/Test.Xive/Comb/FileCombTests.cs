@@ -50,6 +50,23 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
+        public void DeliversCellWithForwardSlashes()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var comb = new FileComb(
+                    new Normalized(
+                        dir.Value().FullName
+                    ).AsString(),
+                    "my-comb");
+                using (var cell = comb.Cell("Non-existing"))
+                {
+                    Assert.InRange<int>(cell.Content().Length, 0, 0);
+                }
+            }
+        }
+
+        [Fact]
         public void DeliversXocument()
         {
             using (var dir = new TempDirectory())

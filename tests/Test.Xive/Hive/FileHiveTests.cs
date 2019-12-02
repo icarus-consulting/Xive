@@ -35,7 +35,7 @@ namespace Xive.Hive.Test
     public sealed class FileHiveTests
     {
         [Fact]
-        public void DeliversHQ()
+        public void DeliversHQWithBackSlashes()
         {
             using (var dir = new TempDirectory())
             {                
@@ -44,6 +44,25 @@ namespace Xive.Hive.Test
                     new FileHive(
                         "product",
                         dir.Value().FullName
+                    )
+                    .HQ()
+                    .Name()
+                );
+            }
+        }
+
+        [Fact]
+        public void DeliversHQWithForwardSlashes()
+        {
+            using (var dir = new TempDirectory())
+            {
+                Assert.Equal(
+                    $"product/hq",
+                    new FileHive(
+                        "product",
+                        new Normalized(
+                            dir.Value().FullName
+                        ).AsString()
                     )
                     .HQ()
                     .Name()
