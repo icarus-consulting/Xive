@@ -154,16 +154,17 @@ namespace Xive.Cell
 
         public string Name()
         {
-            return this.name.Value();
+            return Normalized(this.name.Value());
         }
 
         public byte[] Content()
         {
             byte[] result = new byte[0];
-            if (this.cellMemory.Value().ContainsKey(name.Value()))
+            var name = Normalized(this.name.Value());
+            if (this.cellMemory.Value().ContainsKey(name))
             {
-                this.cellMemory.Value()[this.name.Value()].Seek(0, SeekOrigin.Begin);
-                result = this.cellMemory.Value()[this.name.Value()].ToArray();
+                this.cellMemory.Value()[name].Seek(0, SeekOrigin.Begin);
+                result = this.cellMemory.Value()[name].ToArray();
             }
             return result;
         }
@@ -172,6 +173,7 @@ namespace Xive.Cell
         {
             lock (cellMemory)
             {
+                var name = Normalized(this.name.Value());
                 var stream = content.Stream();
                 if (stream.Length > 0)
                 {
@@ -179,11 +181,11 @@ namespace Xive.Cell
                     content.Stream().CopyTo(memory);
                     memory.Seek(0, SeekOrigin.Begin);
                     content.Stream().Seek(0, SeekOrigin.Begin);
-                    this.cellMemory.Value()[this.name.Value()] = memory;
+                    this.cellMemory.Value()[name] = memory;
                 }
                 else
                 {
-                    this.cellMemory.Value().Remove(this.name.Value());
+                    this.cellMemory.Value().Remove(name);
                 }
             }
         }
@@ -191,6 +193,11 @@ namespace Xive.Cell
         public void Dispose()
         {
             //Do nothing.
+        }
+
+        private string Normalized(string name)
+        {
+            return name.Replace('\\', '/');
         }
     }
 }

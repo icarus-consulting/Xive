@@ -71,7 +71,7 @@ namespace Xive.Hive.Test
             var twilightCatalog = new MutexCatalog(shifted);
             twilightCatalog.Create("789");
 
-            Assert.Contains("twilight-zone\\HQ\\catalog.xml", mem.Keys);
+            Assert.Contains("twilight-zone/HQ/catalog.xml", mem.Keys);
         }
 
         [Fact]
