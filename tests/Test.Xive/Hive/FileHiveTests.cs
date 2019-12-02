@@ -130,7 +130,7 @@ namespace Xive.Hive.Test
                                     "product",
                                     "2CV"
                                 )
-                            ).ToString()                        
+                            ).AsString()                        
                         )
                     );
                 }
