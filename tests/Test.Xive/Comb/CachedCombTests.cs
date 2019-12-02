@@ -177,7 +177,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "some data",
                 new TextOf(
-                    new InputOf(cache.Binary("my-comb" + Path.DirectorySeparatorChar + "my-cell", () => new MemoryStream()))
+                    new InputOf(cache.Binary("my-comb/my-cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -207,7 +207,7 @@ namespace Xive.Comb.Test
                 "some data",
                 new XMLCursor(
                     cache.Xml(
-                        "my-comb" + Path.DirectorySeparatorChar + "test", 
+                        "my-comb/test", 
                         () => new XElement("not-this")
                     )
                 ).Values("/test/text()")[0]
@@ -243,7 +243,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "New content",
                 new TextOf(
-                    new InputOf(cache.Binary("my-comb" + Path.DirectorySeparatorChar + "my-cell", () => new MemoryStream()))
+                    new InputOf(cache.Binary("my-comb/my-cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -277,7 +277,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "new",
                 new XMLCursor(
-                    cache.Xml("my-comb" + Path.DirectorySeparatorChar + "xoc.xml", () => new XElement("not-this"))
+                    cache.Xml("my-comb/xoc.xml", () => new XElement("not-this"))
                 ).Values("/root/text()")[0]
             );
         }

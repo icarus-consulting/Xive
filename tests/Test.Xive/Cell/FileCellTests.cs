@@ -100,7 +100,7 @@ namespace Xive.Cell.Test
         public void RejectsWhiteSpacesFilename()
         {
             using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder{Path.AltDirectorySeparatorChar}white space file name")))
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/white space file name")))
             {
                 Assert.Throws<ArgumentException>(
                     () => item.Update(new InputOf("after holiday is before holiday"))
@@ -112,7 +112,7 @@ namespace Xive.Cell.Test
         public void AllowsWhiteSpacesFoldername()
         {
             using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder{Path.AltDirectorySeparatorChar}filename.txt")))
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/filename.txt")))
             {
                 item.Update(new InputOf("after holiday is before holiday"));
                 Assert.True(

@@ -139,7 +139,7 @@ namespace Xive.Comb
             }
             else
             {
-                result = this.cellWrap(new RamCell($"{this.name}{Path.AltDirectorySeparatorChar}{name}", cellMemory));
+                result = this.cellWrap(new RamCell($"{this.name}/{name}", cellMemory));
             }
             return result;
         }

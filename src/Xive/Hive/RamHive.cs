@@ -174,7 +174,7 @@ namespace Xive.Hive
 
         private IHoneyComb Comb(string name)
         {
-            return new RamComb($"{this.scope}{Path.AltDirectorySeparatorChar}{name}", this.memory);
+            return new RamComb($"{this.scope}/{name}", this.memory);
         }
     }
 }

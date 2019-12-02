@@ -51,7 +51,7 @@ namespace Xive.Comb
             return
                 new CachedCell(
                     this.comb.Cell(name),
-                    $"{this.comb.Name()}{Path.AltDirectorySeparatorChar}{name}",
+                    $"{this.comb.Name()}/{name}",
                     this.cache
                 );
         }
@@ -65,7 +65,7 @@ namespace Xive.Comb
         {
             return
                 new CachedXocument(
-                    $"{this.comb.Name()}{Path.AltDirectorySeparatorChar}{name}",
+                    $"{this.comb.Name()}/{name}",
                     this.comb.Xocument(name),
                     this.cache
                 );

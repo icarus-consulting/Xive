@@ -64,7 +64,7 @@ namespace Xive.Hive
 
         public IHoneyComb HQ()
         {
-            return this.comb($"{this.scope.AsString()}{Path.AltDirectorySeparatorChar}HQ");
+            return this.comb($"{this.scope.AsString()}/HQ");
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -86,7 +86,7 @@ namespace Xive.Hive
                     new Mapped<string, IHoneyComb>(
                         comb =>
                         {
-                            return this.comb($"{this.scope.AsString()}{Path.AltDirectorySeparatorChar}{comb}");
+                            return this.comb($"{this.scope.AsString()}/{comb}");
                         },
                         catalog.List(xpath)
                     );

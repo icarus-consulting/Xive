@@ -103,7 +103,7 @@ namespace Xive.Hive
             return
                 new FileComb(
                     Path.Combine(this.root.Value()),
-                    $"{this.scope}{Path.AltDirectorySeparatorChar}{name}"
+                    $"{this.scope}/{name}"
                 );
         }
     }

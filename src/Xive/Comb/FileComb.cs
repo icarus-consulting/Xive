@@ -88,7 +88,7 @@ namespace Xive.Comb
                             .Set(
                                 new Normalized(file)
                                 .AsString()
-                                .Replace(this.comb.Value().Name() + Path.AltDirectorySeparatorChar, "")
+                                .Replace(this.comb.Value().Name() + "/", "")
                                 )
                             .Up()
                             .Add("size")
