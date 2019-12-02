@@ -82,5 +82,22 @@ namespace Xive.Cell.Test
                );
             }
         }
+
+        [Fact]
+        public void IsCaseInsensitive()
+        {
+            var comb = new RamComb("my-comb");
+            using (var cell = comb.Cell("this-is/MY-cell"))
+            {
+                cell.Update(new InputOf("its so cold outside"));
+            }
+            using (var cell = comb.Cell("this-IS\\my-cell"))
+            {
+                Assert.Equal(
+                   "its so cold outside",
+                   new TextOf(cell.Content()).AsString()
+               );
+            }
+        }
     }
 }
