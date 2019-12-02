@@ -24,7 +24,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Xive.Comb;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Hive
 {
@@ -34,7 +36,7 @@ namespace Xive.Hive
     public sealed class FileHive : IHive
     {
         private readonly string scope;
-        private readonly string root;
+        private readonly IScalar<string> root;
         private readonly Func<IHoneyComb, IHoneyComb> wrap;
 
         /// <summary>
@@ -60,8 +62,11 @@ namespace Xive.Hive
         public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap)
         {
             this.scope = scope;
-            this.root = root;
             this.wrap = combWrap;
+            this.root = new Solid<string>(() =>
+            {
+                return new NormalizedPath(root).AsString();
+            });
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -85,7 +90,7 @@ namespace Xive.Hive
 
         public IHive Shifted(string scope)
         {
-            return new FileHive(scope, this.root, this.wrap);
+            return new FileHive(scope, this.root.Value(), this.wrap);
         }
 
         public string Scope()
@@ -97,8 +102,8 @@ namespace Xive.Hive
         {
             return
                 new FileComb(
-                    Path.Combine(this.root),
-                    $"{this.scope}{Path.DirectorySeparatorChar}{name}"
+                    Path.Combine(this.root.Value()),
+                    $"{this.scope}{Path.AltDirectorySeparatorChar}{name}"
                 );
         }
     }
