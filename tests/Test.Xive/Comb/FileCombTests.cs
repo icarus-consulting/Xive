@@ -243,7 +243,7 @@ namespace Xive.Comb.Test
             using (var dir = new TempDirectory())
             {
                 var comb = new FileComb(dir.Value().FullName, "combName");
-                var name = @"folder\something.tmp";
+                var name = @"folder/something.tmp";
 
                 using (var cell = comb.Cell(name))
                 {
