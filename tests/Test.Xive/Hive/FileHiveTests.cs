@@ -123,7 +123,15 @@ namespace Xive.Hive.Test
                 {
                     cell.Update(new InputOf("bytes over bytes here..."));
                     Assert.True(
-                        Directory.Exists(Path.Combine(dir.Value().FullName, "product", "2CV"))
+                        Directory.Exists(
+                            new Normalized(
+                                Path.Combine(
+                                    dir.Value().FullName,
+                                    "product",
+                                    "2CV"
+                                )
+                            ).ToString()                        
+                        )
                     );
                 }
             }
@@ -138,7 +146,15 @@ namespace Xive.Hive.Test
                 hive = hive.Shifted("product");
                 new MutexCatalog(hive).Create("2CV");
                 Assert.True(
-                    Directory.Exists(Path.Combine(dir.Value().FullName, "product", "HQ"))
+                    Directory.Exists(
+                        new Normalized(
+                            Path.Combine(
+                                dir.Value().FullName,
+                                "product",
+                                "HQ"
+                            )
+                        ).AsString()
+                    )
                 );
             }
         }
@@ -197,7 +213,12 @@ namespace Xive.Hive.Test
                     cell.Update(new InputOf("I am a very cool testdata string"));
                     var combDir = Path.Combine(dir.Value().FullName, "product", "2CV");
                     Assert.True(
-                        Directory.Exists(combDir),
+                        Directory.Exists(
+                            new Normalized(  
+                                combDir                                
+                            ).AsString()
+                        )
+                        ,
                         $"Directory '{combDir}' doesn't exist"
                     );
                 }
