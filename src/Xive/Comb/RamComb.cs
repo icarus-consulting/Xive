@@ -108,20 +108,21 @@ namespace Xive.Comb
             ICell result;
             if (name.Equals("_guts.xml"))
             {
-                var patch = new Directives().Add("items");
 
+                var itemName = new Normalized(this.name).AsString();
+                var patch = new Directives().Add("items");
                 new Each<string>(
                     (key) =>
                         patch.Add("item")
                         .Add("name")
-                        .Set(key.Substring((this.name + "/").Length))
+                        .Set(key.Substring((itemName + "/").Length))
                         .Up()
                         .Add("size")
                         .Set(this.cellMemory[key].Length)
                         .Up()
                         .Up(),
                     new Filtered<string>(
-                       (path) => path.Substring(0, this.name.Length) == this.name,
+                       (path) => path.Substring(0, itemName.Length) == itemName,
                        this.cellMemory.Keys
                    )
                 ).Invoke();

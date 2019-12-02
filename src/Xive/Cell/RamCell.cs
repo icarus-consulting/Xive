@@ -154,13 +154,13 @@ namespace Xive.Cell
 
         public string Name()
         {
-            return Normalized(this.name.Value());
+            return new Normalized(this.name.Value()).AsString();
         }
 
         public byte[] Content()
         {
             byte[] result = new byte[0];
-            var name = Normalized(this.name.Value());
+            var name = new Normalized(this.name.Value()).AsString();
             if (this.cellMemory.Value().ContainsKey(name))
             {
                 this.cellMemory.Value()[name].Seek(0, SeekOrigin.Begin);
@@ -173,7 +173,7 @@ namespace Xive.Cell
         {
             lock (cellMemory)
             {
-                var name = Normalized(this.name.Value());
+                var name = new Normalized(this.name.Value()).AsString();
                 var stream = content.Stream();
                 if (stream.Length > 0)
                 {
@@ -193,11 +193,6 @@ namespace Xive.Cell
         public void Dispose()
         {
             //Do nothing.
-        }
-
-        private string Normalized(string name)
-        {
-            return name.Replace('\\', '/');
         }
     }
 }
