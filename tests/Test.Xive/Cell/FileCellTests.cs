@@ -115,8 +115,6 @@ namespace Xive.Cell.Test
             using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/filename.txt")))
             {
                 item.Update(new InputOf("after holiday is before holiday"));
-                Console.WriteLine("AllowsWhiteSpacesFoldername: " + Path.Combine(dir.Value().FullName, $"white space folder/filename.txt"));
-                Console.WriteLine("AllowsWhiteSpacesFoldername: " + Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"));
                 Assert.True(
                     File.Exists(Path.Combine(dir.Value().FullName, "white space folder", "filename.txt"))
                 );
@@ -127,11 +125,10 @@ namespace Xive.Cell.Test
         public void AllowBackslash()
         {
             using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"someFolder\\filename.txt")))
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"someFolder/filename.txt")))
             {
-                Console.WriteLine("AllowsBackslash          : " + Path.Combine(dir.Value().FullName, $"someFolder\\filename.txt"));
                 item.Update(new InputOf("after holiday is before holiday"));
-                Console.WriteLine("AllowsBackslash          : " + Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"));
+                Console.Write("search path: "+ Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"));
                 Assert.True(
                     File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
                 );
