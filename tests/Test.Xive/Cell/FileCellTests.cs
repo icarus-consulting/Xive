@@ -122,6 +122,32 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
+        public void AllowsWhiteSpacesFoldername2()
+        {
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/filename.txt")))
+            {
+                item.Update(new InputOf("after holiday is before holiday"));
+                Assert.True(
+                    File.Exists(Path.Combine(dir.Value().FullName, "white space folder", "filename.txt"))
+                );
+            }
+        }
+
+        [Fact]
+        public void AllowsWhiteSpacesFoldernameback()
+        {
+            using (var dir = new TempDirectory())
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "white space folder\\filename.txt")))
+            {
+                item.Update(new InputOf("after holiday is before holiday"));
+                Assert.True(
+                    File.Exists(Path.Combine(dir.Value().FullName, "white space folder", "filename.txt"))
+                );
+            }
+        }
+
+        [Fact]
         public void AllowBackslash()
         {
             using (var dir = new TempDirectory())
