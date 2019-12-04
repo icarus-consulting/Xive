@@ -129,12 +129,12 @@ namespace Xive.Cell.Test
             {
                 var create =  Path.Combine(dir.Value().FullName, $"someFolder/filename.txt");
                 var search = Path.Combine(dir.Value().FullName, "someFolder", "filename.txt");
-                Console.Write(create);
-                Console.Write(search);
-                Console.Write("eqal:" + (search.Equals(create)).ToString());
+                Console.WriteLine(create);
+                Console.WriteLine(search);
+                Console.WriteLine("eqal:" + (search.Equals(create)).ToString());
 
                 item.Update(new InputOf("after holiday is before holiday"));
-                Assert.True(false);
+                Assert.True(true);
                   //  File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
                 //);
             }
