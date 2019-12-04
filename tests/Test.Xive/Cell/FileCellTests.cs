@@ -127,16 +127,16 @@ namespace Xive.Cell.Test
             using (var dir = new TempDirectory())
             using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"someFolder/filename.txt")))
             {
+                item.Update(new InputOf("after holiday is before holiday"));
                 var create =  Path.Combine(dir.Value().FullName, $"someFolder/filename.txt");
                 var search = Path.Combine(dir.Value().FullName, "someFolder", "filename.txt");
                 Console.WriteLine(create);
                 Console.WriteLine(search);
                 Console.WriteLine("eqal:" + (search.Equals(create)).ToString());
 
-                item.Update(new InputOf("after holiday is before holiday"));
-                Assert.True(true);
-                  //  File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
-                //);
+                Assert.True(
+                    File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
+                );
             }
         }
 
