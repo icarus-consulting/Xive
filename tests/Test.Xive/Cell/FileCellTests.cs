@@ -134,7 +134,7 @@ namespace Xive.Cell.Test
                 Console.Write("eqal:" + (search.Equals(create)).ToString());
 
                 item.Update(new InputOf("after holiday is before holiday"));
-                Assert.True(true);
+                Assert.True(false);
                   //  File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
                 //);
             }
