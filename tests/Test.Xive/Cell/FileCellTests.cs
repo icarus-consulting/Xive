@@ -122,12 +122,13 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
-        public void WorksWithBackslash()
+        public void AllowBackslash()
         {
             using (var dir = new TempDirectory())
             using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"someFolder\\filename.txt")))
             {
                 item.Update(new InputOf("after holiday is before holiday"));
+                Console.WriteLine("AllowBackslash:" + Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"));
                 Assert.True(
                     File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
                 );
