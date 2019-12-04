@@ -122,20 +122,7 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
-        public void AllowsWhiteSpacesFoldername2()
-        {
-            using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/filename.txt")))
-            {
-                item.Update(new InputOf("after holiday is before holiday"));
-                Assert.True(
-                    File.Exists(Path.Combine(dir.Value().FullName, "white space folder", "filename.txt"))
-                );
-            }
-        }
-
-        [Fact]
-        public void AllowsWhiteSpacesFoldernameback()
+        public void AllowsBackslash()
         {
             using (var dir = new TempDirectory())
             using (var item = new FileCell(Path.Combine(dir.Value().FullName, "white space folder\\filename.txt")))
@@ -146,26 +133,6 @@ namespace Xive.Cell.Test
                 );
             }
         }
-
-        [Fact]
-        public void AllowBackslash()
-        {
-            using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"someFolder/filename.txt")))
-            {
-                item.Update(new InputOf("after holiday is before holiday"));
-                var create =  Path.Combine(dir.Value().FullName, $"someFolder/filename.txt");
-                var search = Path.Combine(dir.Value().FullName, "someFolder", "filename.txt");
-                Console.WriteLine(create);
-                Console.WriteLine(search);
-                Console.WriteLine("eqal:" + (search.Equals(create)).ToString());
-
-                Assert.True(
-                    File.Exists(Path.Combine(dir.Value().FullName, "someFolder", "filename.txt"))
-                );
-            }
-        }
-
 
         [Fact]
         public void FailsOnMissingFilename()
