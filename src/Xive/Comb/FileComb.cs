@@ -54,17 +54,16 @@ namespace Xive.Comb
             this.comb =
                 new ScalarOf<IHoneyComb>(() =>
                     {
-                        var fullPath = Path.Combine(root, name);
                         return
                             new SimpleComb(
-                                Path.Combine(root, name),
+                                new Normalized(Path.Combine(root, name)).AsString(),
                                 path => new FileCell(path),
                                 (cellName, cell) => xocumentWrap(
                                     new CellXocument(cell, cellName)
                                 )
                             );
                     });
-            this.name = name;
+            this.name = new Normalized(name).AsString();
 
         }
 
@@ -81,9 +80,10 @@ namespace Xive.Comb
                             "*",
                             SearchOption.AllDirectories))
                     {
+                        var truncated = new Normalized(file).AsString().Replace(this.comb.Value().Name() + "/", "");
                         patch.Add("item")
                             .Add("name")
-                            .Set(file.Replace(this.comb.Value().Name() + Path.DirectorySeparatorChar, ""))
+                            .Set(truncated)
                             .Up()
                             .Add("size")
                             .Set(new FileInfo(file).Length)

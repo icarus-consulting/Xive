@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Xive.Comb;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Hive
@@ -34,7 +35,7 @@ namespace Xive.Hive
     public sealed class FileHive : IHive
     {
         private readonly string scope;
-        private readonly string root;
+        private readonly IText root;
         private readonly Func<IHoneyComb, IHoneyComb> wrap;
 
         /// <summary>
@@ -60,21 +61,25 @@ namespace Xive.Hive
         public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap)
         {
             this.scope = scope;
-            this.root = root;
+            this.root = new Normalized(root);
             this.wrap = combWrap;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return Combs(xpath, new MutexCatalog(this.scope, HQ()));
+            return
+                new Mapped<string, IHoneyComb>(
+                    name => this.wrap(Comb(name)),
+                    new SimpleCatalog(this.scope, HQ()).List(xpath)
+                );
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
             return
                 new Mapped<string, IHoneyComb>(
                     name => this.wrap(Comb(name)),
-                    catalog.List(xpath)
+                    catalogWrap(new SimpleCatalog(this.scope, HQ())).List(xpath)
                 );
         }
 
@@ -85,7 +90,7 @@ namespace Xive.Hive
 
         public IHive Shifted(string scope)
         {
-            return new FileHive(scope, this.root, this.wrap);
+            return new FileHive(scope, this.root.AsString(), this.wrap);
         }
 
         public string Scope()
@@ -97,8 +102,8 @@ namespace Xive.Hive
         {
             return
                 new FileComb(
-                    Path.Combine(this.root),
-                    $"{this.scope}{Path.DirectorySeparatorChar}{name}"
+                    Path.Combine(this.root.AsString()),
+                    $"{this.scope}/{name}"
                 );
         }
     }

@@ -31,42 +31,55 @@ namespace Xive.Hive
     /// <summary>
     /// A hive that accesses cells systemwide exclusively.
     /// </summary>
-    public sealed class MutexHive : IHive
+    public sealed class SyncHive : IHive
     {
         private readonly IHive hive;
+        private readonly ISyncValve syncValve;
 
         /// <summary>
         /// A hive that accesses cells systemwide exclusively.
         /// </summary>
-        public MutexHive(IHive hive)
+        public SyncHive(IHive hive) : this(hive, new ProcessSyncValve())
+        { }
+
+        /// <summary>
+        /// A hive that accesses cells processwide exclusively.
+        /// </summary>
+        public SyncHive(IHive hive, ISyncValve syncValve)
         {
             this.hive = hive;
+            this.syncValve = syncValve;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
             return
                 new Mapped<IHoneyComb, IHoneyComb>(
-                    (comb) => new MutexComb(comb), hive.Combs(xpath)
+                    (comb) => new SyncComb(comb, this.syncValve),
+                    this.hive.Combs(xpath, catalog => new SyncCatalog(hive, catalog, this.syncValve))
                 );
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
             return
                 new Mapped<IHoneyComb, IHoneyComb>(
-                    (comb) => new MutexComb(comb), hive.Combs(xpath, catalog)
+                    (comb) => new SyncComb(comb, this.syncValve),
+                    this.hive.Combs(
+                        xpath,
+                        catalog => new SyncCatalog(hive, catalogWrap(catalog), this.syncValve)
+                    )
                 );
         }
 
         public IHoneyComb HQ()
         {
-            return new MutexComb(hive.HQ());
+            return new SyncComb(hive.HQ(), this.syncValve);
         }
 
         public IHive Shifted(string scope)
         {
-            return new MutexHive(this.hive.Shifted(scope));
+            return new SyncHive(this.hive.Shifted(scope), this.syncValve);
         }
 
         public string Scope()

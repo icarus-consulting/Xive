@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
@@ -10,15 +11,15 @@ namespace Xive.Hive
     /// </summary>
     public sealed class SimpleCache : ICache
     {
-        private readonly IDictionary<string, MemoryStream> binMemory;
-        private readonly IDictionary<string, XNode> xmlMemory;
+        private readonly ConcurrentDictionary<string, MemoryStream> binMemory;
+        private readonly ConcurrentDictionary<string, XNode> xmlMemory;
 
         /// <summary>
         /// A simple cache.
         /// </summary>
         public SimpleCache() : this(
-            new Dictionary<string, MemoryStream>(),
-            new Dictionary<string, XNode>()
+            new ConcurrentDictionary<string, MemoryStream>(),
+            new ConcurrentDictionary<string, XNode>()
         )
         { }
 
@@ -28,8 +29,8 @@ namespace Xive.Hive
         /// <param name="binaries">A pre-filled cache of binaries</param>
         /// <param name="xmls">A pre-filled cache of xml nodes</param>
         public SimpleCache(
-            IDictionary<string, MemoryStream> binaries,
-            IDictionary<string, XNode> xmls
+            ConcurrentDictionary<string, MemoryStream> binaries,
+            ConcurrentDictionary<string, XNode> xmls
         )
         {
             this.binMemory = binaries;
@@ -47,18 +48,19 @@ namespace Xive.Hive
             name = new Normalized(name).AsString();
             if (binary.Length == 0)
             {
-                this.binMemory.Remove(name);
+                MemoryStream devNull;
+                this.binMemory.TryRemove(name, out devNull);
             }
             else
             {
-                this.binMemory[name] = binary;
+                this.binMemory.AddOrUpdate(name, binary, (currentName, currentContent) => binary);
             }
         }
 
         public void Update(string name, XNode xNode)
         {
             name = new Normalized(name).AsString();
-            this.xmlMemory[name] = xNode;
+            this.xmlMemory.AddOrUpdate(name, xNode, (currentName, currentContent) => xNode);
         }
 
         public MemoryStream Binary(string name, Func<MemoryStream> ifAbsent)

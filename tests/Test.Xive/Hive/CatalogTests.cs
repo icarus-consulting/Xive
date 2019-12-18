@@ -32,6 +32,8 @@ using System.Threading.Tasks;
 using System;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.List;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Xive.Hive.Test
 {
@@ -44,7 +46,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new MutexCatalog(
+                new SimpleCatalog(
                     "my-hive",
                     new SimpleComb(
                         "hq",
@@ -67,7 +69,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new MutexCatalog(
+                new SimpleCatalog(
                     "my-hive",
                     new SimpleComb(
                         "hq",
@@ -90,7 +92,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new MutexCatalog(
+                new SimpleCatalog(
                     "my-hive",
                     new SimpleComb(
                         "hq",
@@ -101,7 +103,7 @@ namespace Xive.Hive.Test
 
             catalog.Create("123");
             catalog.Update(
-                "123", 
+                "123",
                 new Directives()
                     .Add("todo")
                     .Set("code some stuff")
@@ -118,24 +120,35 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
+                var locks = new ConcurrentDictionary<string, Mutex>();
+                var valve = new ProcessSyncValve(locks);
                 var hive =
-                    new MutexHive(
+                    new SyncHive(
                        new FileHive(
                            "machine",
                            dir.Value().FullName
-                       )
+                       ),
+                       valve
                     );
-                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                try
                 {
-                    using (var xoc = hive.HQ().Xocument("catalog.xml"))
+                    Parallel.For(0, Environment.ProcessorCount << 4, i =>
                     {
-                        xoc.Modify(
-                            new Directives().Xpath("/catalog")
-                            .Add("machine").Attr("id", $"123{i.ToString()}").Set("someContent")
-                        );
-                    }
-                    Assert.NotEmpty(hive.Combs("'*'"));
-                });
+                        using (var xoc = hive.HQ().Xocument("catalog.xml"))
+                        {
+                            xoc.Modify(
+                                new Directives().Xpath("/catalog")
+                                .Add("machine").Attr("id", $"123{i.ToString()}").Set("someContent")
+                            );
+                        }
+                        Assert.NotEmpty(hive.Combs("'*'"));
+                    });
+                }
+                catch (Exception ex)
+                {
+                    var keys = locks.Keys;
+                    throw;
+                }
             }
         }
 
@@ -145,7 +158,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var hive =
-                    new MutexHive(
+                    new SyncHive(
                         new CachedHive(
                            new FileHive(
                                "machine",

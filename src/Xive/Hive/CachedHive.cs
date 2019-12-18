@@ -34,9 +34,7 @@ namespace Xive.Hive
     public sealed class CachedHive : IHive
     {
         private readonly ICache cache;
-        private readonly IList<string> blacklist;
         private readonly IHive origin;
-        private readonly int maxBytes;
 
         /// <summary>
         /// A cached hive.
@@ -87,13 +85,21 @@ namespace Xive.Hive
                             comb,
                             this.cache
                         ),
-                        this.origin.Combs(xpath, CachedCatalog())
+                        this.origin.Combs(xpath, catalog => CachedCatalog())
                     );
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
-            throw new InvalidOperationException($"Using a cached hive while providing a custom catalog is not supported.");
+            return
+                new Mapped<IHoneyComb, IHoneyComb>(
+                    comb =>
+                        new CachedComb(
+                            comb,
+                            this.cache
+                        ),
+                        this.origin.Combs(xpath, (catalog) => CachedCatalog())
+                    );
         }
 
         public IHoneyComb HQ()
@@ -122,12 +128,9 @@ namespace Xive.Hive
         private ICatalog CachedCatalog()
         {
             return
-                new MutexCatalog(
+                new SimpleCatalog(
                     this.origin.Scope(),
-                    new CachedComb(
-                        this.origin.HQ(),
-                        this.cache
-                    )
+                    this.HQ()
                 );
         }
     }

@@ -32,13 +32,13 @@ using Yaapii.Xambly;
 
 namespace Xive.Comb.Test
 {
-    public class MutexCombTests
+    public class SyncCombTests
     {
         [Fact]
         public void WorksInParallelWithCell()
         {
             var comb =
-                new MutexComb(
+                new SyncComb(
                     new RamComb("my-comb")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
@@ -56,7 +56,26 @@ namespace Xive.Comb.Test
         public void WorksInParallelWithXocument()
         {
             var comb =
-                new MutexComb(
+                new SyncComb(
+                    new RamComb("my-comb")
+                );
+            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+            {
+                var content = Guid.NewGuid().ToString();
+                using (var xoc = comb.Xocument("synced"))
+                {
+                    xoc.Node();
+                    xoc.Modify(new Directives().Xpath("/synced").Set(content));
+                    Assert.Equal(content, xoc.Value("/synced/text()", ""));
+                }
+            });
+        }
+
+        [Fact]
+        public void DoesNotBlockItself()
+        {
+            var comb =
+                new SyncComb(
                     new RamComb("my-comb")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
@@ -75,7 +94,7 @@ namespace Xive.Comb.Test
         public void XocumentAndCellDoNotConflict()
         {
             var comb =
-                new MutexComb(
+                new SyncComb(
                     new RamComb("my-comb")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
@@ -108,8 +127,8 @@ namespace Xive.Comb.Test
                 accesses--;
                 return new byte[0];
             });
-            var comb1 = new MutexComb(new RamComb("my-comb"));
-            var comb2 = new MutexComb(new RamComb("my-comb"));
+            var comb1 = new SyncComb(new RamComb("my-comb"));
+            var comb2 = new SyncComb(new RamComb("my-comb"));
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var content = Guid.NewGuid().ToString();
@@ -129,7 +148,7 @@ namespace Xive.Comb.Test
             using (var file = new TempDirectory())
             {
                 var comb =
-                    new MutexComb(
+                    new SyncComb(
                         new FileComb(
                             "myFileComb",
                             file.Value().FullName
@@ -152,7 +171,7 @@ namespace Xive.Comb.Test
         public void WorksWithRamCell()
         {
             var comb =
-                new MutexComb(
+                new SyncComb(
                     new RamComb("myRamComb")
                 );
 

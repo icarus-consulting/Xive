@@ -66,7 +66,7 @@ namespace Xive.Hive.Test
                     cache
                 );
 
-            new MutexCatalog(hive).Create("123");
+            new SimpleCatalog(hive).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -107,7 +107,7 @@ namespace Xive.Hive.Test
                     cache
                 );
 
-            new MutexCatalog(hive).Create("123");
+            new SimpleCatalog(hive).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -148,7 +148,7 @@ namespace Xive.Hive.Test
                     cache
                 );
 
-            new MutexCatalog(hive.Shifted("A")).Create("123");
+            new SimpleCatalog(hive.Shifted("A")).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -223,7 +223,7 @@ namespace Xive.Hive.Test
                     cache
                 );
 
-            new MutexCatalog(hive).Create("123");
+            new SimpleCatalog(hive).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -264,7 +264,7 @@ namespace Xive.Hive.Test
                     cache
                 ).Shifted("hello");
 
-            new MutexCatalog(hive).Create("123");
+            new SimpleCatalog(hive).Create("123");
 
             var cell =
                 new FirstOf<IHoneyComb>(
@@ -290,8 +290,8 @@ namespace Xive.Hive.Test
                     cache
                 );
 
-            new MutexCatalog(hive.Shifted("A")).Create("something");
-            new MutexCatalog(hive.Shifted("B")).Create("another thing");
+            new SimpleCatalog(hive.Shifted("A")).Create("something");
+            new SimpleCatalog(hive.Shifted("B")).Create("another thing");
 
             Assert.Contains(
                 "another thing",
@@ -314,8 +314,8 @@ namespace Xive.Hive.Test
                         cache
                     );
 
-                new MutexCatalog(hive.Shifted("A")).Create("something");
-                new MutexCatalog(hive.Shifted("B")).Create("another thing");
+                new SimpleCatalog(hive.Shifted("A")).Create("something");
+                new SimpleCatalog(hive.Shifted("B")).Create("another thing");
 
                 Assert.Contains(
                     "another thing",
@@ -337,8 +337,8 @@ namespace Xive.Hive.Test
                         cache
                     );
 
-                new MutexCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
-                new MutexCatalog(hive.Shifted("scope-2")).Create("ambiguous-item");
+                new SimpleCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
+                new SimpleCatalog(hive.Shifted("scope-2")).Create("ambiguous-item");
 
                 using (
                     var cell =
@@ -375,8 +375,8 @@ namespace Xive.Hive.Test
                         cache
                     );
 
-                new MutexCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
-                new MutexCatalog(hive.Shifted("scope-2")).Create("ambiguous-item");
+                new SimpleCatalog(hive.Shifted("scope-1")).Create("ambiguous-item");
+                new SimpleCatalog(hive.Shifted("scope-2")).Create("ambiguous-item");
 
                 using (
                     var xoc =
@@ -404,13 +404,13 @@ namespace Xive.Hive.Test
         public void WorksParallelWithRamHive()
         {
             var hive =
-                new MutexHive(
+                new SyncHive(
                     new CachedHive(
                         new RamHive()
                     )
                 );
             var machine = "Dr.Robotic";
-            new MutexCatalog(hive).Create(machine);
+            new SimpleCatalog(hive).Create(machine);
             for (var i = 0; i < 2; i++)
             {
                 var id = "item";

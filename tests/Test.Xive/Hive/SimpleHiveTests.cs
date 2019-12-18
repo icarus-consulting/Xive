@@ -41,7 +41,7 @@ namespace Xive.Hive.Test
                     comb => new RamComb(comb, mem)
                 ).HQ();
 
-            Assert.Equal($"person{Path.DirectorySeparatorChar}HQ", hq.Name());
+            Assert.Equal($"person/HQ", hq.Name());
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace Xive.Hive.Test
                     comb => new RamComb(comb, mem)
                 ).HQ();
 
-            var catalog = new MutexCatalog("person", hq);
+            var catalog = new SimpleCatalog("person", hq);
             catalog.Create("Alfred");
 
             Assert.Contains("Alfred", catalog.List("@id='Alfred'"));

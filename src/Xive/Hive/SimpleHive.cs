@@ -64,40 +64,40 @@ namespace Xive.Hive
 
         public IHoneyComb HQ()
         {
-            return this.comb($"{this.scope.AsString()}{Path.DirectorySeparatorChar}HQ");
+            return this.comb($"{this.scope.AsString()}/HQ");
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
             lock (scope)
             {
-                return Combs(
-                    xpath, 
-                    new MutexCatalog(this.scope.AsString(), this.HQ())
-                );
+                return
+                    new Mapped<string, IHoneyComb>(
+                        comb => this.comb($"{this.scope.AsString()}/{comb}"),
+                        new SimpleCatalog(this.scope.AsString(), this.HQ()).List(xpath)
+                    );
             }
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
             lock (scope)
             {
                 return
                     new Mapped<string, IHoneyComb>(
-                        comb =>
-                        {
-                            return this.comb($"{this.scope.AsString()}{Path.DirectorySeparatorChar}{comb}");
-                        },
-                        catalog.List(xpath)
+                        comb => this.comb($"{this.scope.AsString()}/{comb}"),
+                        catalogWrap(
+                            new SimpleCatalog(this.scope.AsString(), this.HQ())
+                        ).List(xpath)
                     );
             }
         }
 
         public IHive Shifted(string scope)
         {
-            return 
+            return
                 new SimpleHive(
-                    new StrictCoordinate(scope), 
+                    new StrictCoordinate(scope),
                     this.comb
                 );
         }

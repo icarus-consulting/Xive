@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using Yaapii.Atoms;
 
@@ -45,7 +46,7 @@ namespace Xive.Hive
             return this.hive.Value().Combs(xpath);
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalog)
         {
             return this.hive.Value().Combs(xpath, catalog);
         }

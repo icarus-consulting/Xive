@@ -20,7 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.IO;
 using Xive.Cell;
 using Xive.Xocument;
 
@@ -29,16 +28,24 @@ namespace Xive.Comb
     /// <summary>
     /// A comb that accesses cells systemwide exclusively.
     /// </summary>
-    public sealed class MutexComb : IHoneyComb
+    public sealed class SyncComb : IHoneyComb
     {
         private readonly IHoneyComb comb;
+        private readonly ISyncValve syncValve;
 
         /// <summary>
         /// A comb that accesses cells systemwide exclusively.
         /// </summary>
-        public MutexComb(IHoneyComb comb)
+        public SyncComb(IHoneyComb comb) : this(comb, new ProcessSyncValve())
+        { }
+
+        /// <summary>
+        /// A comb that accesses cells systemwide exclusively.
+        /// </summary>
+        public SyncComb(IHoneyComb comb, ISyncValve syncValve)
         {
             this.comb = comb;
+            this.syncValve = syncValve;
         }
 
         public string Name()
@@ -51,22 +58,17 @@ namespace Xive.Comb
 
         public ICell Cell(string name)
         {
-            lock (comb)
-            {
-                return new MutexCell(comb.Cell(name));
-            }
+            return new SyncCell(comb.Cell(name), this.syncValve);
         }
 
         public IXocument Xocument(string name)
         {
-            lock(comb)
-            {
-                return 
-                    new MutexXocument(
-                        comb.Name() + Path.DirectorySeparatorChar + name,
-                        this.comb.Xocument(name)
-                    );
-            }
+            return 
+                new SyncXocument(
+                    $"{comb.Name()}/{name}",
+                    this.comb.Xocument(name),
+                    this.syncValve
+                );
         }
     }
 }
