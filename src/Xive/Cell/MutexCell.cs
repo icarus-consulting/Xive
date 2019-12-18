@@ -123,7 +123,7 @@ namespace Xive.Cell
                 if (this.mtx.Count == 0)
                 {
                     var hash =
-                        $"Local/" +
+                        $"" +
                             new TextOf(
                                 new BytesBase64(
                                     new Md5DigestOf(

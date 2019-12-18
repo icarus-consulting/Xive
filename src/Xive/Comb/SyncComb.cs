@@ -20,60 +20,55 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Diagnostics;
-using System.Threading;
-using Yaapii.Atoms;
+using Xive.Cell;
+using Xive.Xocument;
 
-namespace Xive.Cell
+namespace Xive.Comb
 {
     /// <summary>
-    /// A cell that is synced in context of the owning process.
+    /// A comb that accesses cells systemwide exclusively.
     /// </summary>
-    public sealed class SyncCell : ICell
+    public sealed class SyncComb : IHoneyComb
     {
-        private readonly ISyncValve locks;
-        private readonly ICell origin;
-        private readonly int[] locked;
+        private readonly IHoneyComb comb;
+        private readonly ISyncValve syncValve;
 
-        public SyncCell(ICell origin) : this(origin, new ProcessSyncValve())
+        /// <summary>
+        /// A comb that accesses cells systemwide exclusively.
+        /// </summary>
+        public SyncComb(IHoneyComb comb) : this(comb, new ProcessSyncValve())
         { }
 
-        public SyncCell(ICell origin, ISyncValve locks)
+        /// <summary>
+        /// A comb that accesses cells systemwide exclusively.
+        /// </summary>
+        public SyncComb(IHoneyComb comb, ISyncValve syncValve)
         {
-            this.locks = locks;
-            this.origin = origin;
-            this.locked = new int[1] { 0 };
+            this.comb = comb;
+            this.syncValve = syncValve;
         }
 
         public string Name()
         {
-            return this.origin.Name();
-        }
-
-        public byte[] Content()
-        {
-            this.locks.Mutex(this.origin.Name()).WaitOne();
-            this.locked[0]++;
-            return origin.Content();
-        }
-
-        public void Dispose()
-        {
-            lock (this.locks.Mutex(origin.Name()))
+            lock (comb)
             {
-                for (int i = 0; i < this.locked[0]; i++)
-                {
-                    this.locks.Mutex(origin.Name()).ReleaseMutex();
-                }
+                return comb.Name();
             }
-            
         }
 
-        public void Update(IInput content)
+        public ICell Cell(string name)
         {
-            this.locks.Mutex(this.origin.Name()).WaitOne();
-            this.locked[0]++;
-            origin.Update(content);
+            return new SyncCell(comb.Cell(name), this.syncValve);
+        }
+
+        public IXocument Xocument(string name)
+        {
+            return 
+                new SyncXocument(
+                    $"{comb.Name()}/{name}",
+                    this.comb.Xocument(name),
+                    this.syncValve
+                );
         }
     }
 }

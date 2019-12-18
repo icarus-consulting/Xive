@@ -22,85 +22,67 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Threading;
 using Xive.Comb;
-using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Hive
 {
     /// <summary>
-    /// A hive that exists physically as files.
+    /// A hive that accesses cells systemwide exclusively.
     /// </summary>
-    public sealed class FileHive : IHive
+    public sealed class SyncHive : IHive
     {
-        private readonly string scope;
-        private readonly IText root;
-        private readonly Func<IHoneyComb, IHoneyComb> wrap;
+        private readonly IHive hive;
+        private readonly ISyncValve syncValve;
 
         /// <summary>
-        /// A hive that exists physically as files.
+        /// A hive that accesses cells systemwide exclusively.
         /// </summary>
-        public FileHive(string root) : this(
-            "X", root
-        )
+        public SyncHive(IHive hive) : this(hive, new ProcessSyncValve())
         { }
 
         /// <summary>
-        /// A hive that exists physically as files.
+        /// A hive that accesses cells processwide exclusively.
         /// </summary>
-        public FileHive(string scope, string root) : this(
-            scope, root, comb => comb
-        )
-        { }
-
-        /// <summary>
-        /// A hive that exists physically as files.
-        /// With this ctor, you can tell the hive how to build its catalog.
-        /// </summary>
-        public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap)
+        public SyncHive(IHive hive, ISyncValve syncValve)
         {
-            this.scope = scope;
-            this.root = new Normalized(root);
-            this.wrap = combWrap;
+            this.hive = hive;
+            this.syncValve = syncValve;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return Combs(xpath, new SimpleCatalog(this.scope, HQ()));
+            return
+                new Mapped<IHoneyComb, IHoneyComb>(
+                    (comb) => new SyncComb(comb, this.syncValve),
+                    this.hive.Combs(xpath, new SyncCatalog(hive, this.syncValve))
+                );
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
         {
             return
-                new Mapped<string, IHoneyComb>(
-                    name => this.wrap(Comb(name)),
-                    catalog.List(xpath)
+                new Mapped<IHoneyComb, IHoneyComb>(
+                    (comb) => new SyncComb(comb, this.syncValve),
+                    this.hive.Combs(xpath, catalog)
                 );
         }
 
         public IHoneyComb HQ()
         {
-            return this.wrap(Comb("HQ"));
+            return new SyncComb(hive.HQ(), this.syncValve);
         }
 
         public IHive Shifted(string scope)
         {
-            return new FileHive(scope, this.root.AsString(), this.wrap);
+            return new SyncHive(this.hive.Shifted(scope), this.syncValve);
         }
 
         public string Scope()
         {
-            return this.scope;
+            return this.hive.Scope();
         }
 
-        private IHoneyComb Comb(string name)
-        {
-            return
-                new FileComb(
-                    Path.Combine(this.root.AsString()),
-                    $"{this.scope}/{name}"
-                );
-        }
     }
 }

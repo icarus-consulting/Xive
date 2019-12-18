@@ -30,27 +30,28 @@ using Yaapii.Atoms.Text;
 
 namespace Xive.Cell.Test
 {
-    public class MutexCellTest
+    public class SyncCellTest
     {
         [Fact]
         public void AccessIsExclusive()
         {
             var accesses = 0;
             var cell =
-                    new FkCell(
-                        (content) => { },
-                        () =>
-                        {
-                            accesses++;
-                            Assert.Equal(1, accesses);
-                            accesses--;
-                            return new byte[0];
-                        }
-                    );
+                new FkCell(
+                    (content) => { },
+                    () =>
+                    {
+                        accesses++;
+                        Assert.Equal(1, accesses);
+                        accesses--;
+                        return new byte[0];
+                    }
+                );
 
+            var valve = new ProcessSyncValve();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                using (var mutexed = new MutexCell(cell))
+                using (var mutexed = new SyncCell(cell, valve))
                 {
                     mutexed.Content();
                 }
@@ -61,10 +62,11 @@ namespace Xive.Cell.Test
         public void WorksParallel()
         {
             var cell = new RamCell();
+            var gate = new ProcessSyncValve();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var mutexed = new MutexCell(cell))
+                using (var mutexed = new SyncCell(cell, gate))
                 {
                     mutexed.Update(new InputOf(content));
                     Assert.Equal(content, new TextOf(mutexed.Content()).AsString());
@@ -75,18 +77,21 @@ namespace Xive.Cell.Test
         [Fact]
         public void DoesNotBlockItself()
         {
-            Parallel.For(0, Environment.ProcessorCount << 8, (current) =>
+            var cell = new RamCell();
+            var gate = new ProcessSyncValve();
+            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var mutexed = new MutexCell(new RamCell()))
+                using (var mutexed = new SyncCell(cell, gate))
                 {
                     mutexed.Update(new InputOf(content));
-                    using (var again = new MutexCell(new RamCell()))
+                    using (var again = new SyncCell(cell, gate))
                     {
                         again.Update(new InputOf(content));
-                        using (var andAgain = new MutexCell(new RamCell()))
+                        using (var andAgain = new SyncCell(cell, gate))
                         {
                             andAgain.Update(new InputOf(content));
+                            System.Threading.Thread.Sleep(1);
                         }
                     }
                     Assert.Equal(content, new TextOf(mutexed.Content()).AsString());
@@ -98,7 +103,8 @@ namespace Xive.Cell.Test
         public void WorksWithRamCell()
         {
             var cell = new RamCell();
-            using (var mutexed = new MutexCell(cell))
+            var gate = new ProcessSyncValve();
+            using (var mutexed = new SyncCell(cell, gate))
             {
                 mutexed.Update(new InputOf("its so hot outside"));
                 Assert.Equal(
@@ -114,9 +120,10 @@ namespace Xive.Cell.Test
             using (var file = new TempFile())
             {
                 var path = file.Value();
+                var gate = new ProcessSyncValve();
                 Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
                 {
-                    using (var cell = new MutexCell(new FileCell(path)))
+                    using (var cell = new SyncCell(new FileCell(path), gate))
                     {
                         cell.Update(new InputOf("Ram cell Input"));
                         Assert.Equal("Ram cell Input", new TextOf(cell.Content()).AsString());

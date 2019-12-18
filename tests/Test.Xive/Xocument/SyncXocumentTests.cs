@@ -30,16 +30,17 @@ using Yaapii.Xambly;
 
 namespace Xive.Xocument.Test
 {
-    public sealed class MutexXocumentTests
+    public sealed class SyncXocumentTests
     {
         [Fact]
         public void DeliversParallel()
         {
             var accesses = 0;
+            var syncGate = new ProcessSyncValve();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var xoc =
-                    new MutexXocument("synced",
+                    new SyncXocument("synced",
                         new FkXocument(() =>
                         {
                             accesses++;
@@ -49,7 +50,8 @@ namespace Xive.Xocument.Test
                                 new XDocument(
                                     new XElement("synced", new XText("here"))
                                 );
-                        })
+                        }),
+                        syncGate
                     );
                 using (xoc)
                 {
@@ -62,36 +64,14 @@ namespace Xive.Xocument.Test
         public void WorksParallel()
         {
             var cell = new RamCell();
+            var syncGate = new ProcessSyncValve();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var mutexed = new MutexXocument(cell.Name(), new CellXocument(cell, "xoc")))
+                using (var synced = new SyncXocument(cell.Name(), new CellXocument(cell, "xoc"), syncGate))
                 {
-                    mutexed.Modify(new Directives().Xpath("/xoc").Set(content));
-                    Assert.Equal(content, mutexed.Value("/xoc/text()", ""));
-                }
-            });
-        }
-
-        [Fact]
-        public void DoesNotBlockItself()
-        {
-            var cell = new RamCell();
-            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
-            {
-                var content = Guid.NewGuid().ToString();
-                using (var mutexed = new MutexXocument(cell.Name(), new CellXocument(cell, "xoc")))
-                {
-                    mutexed.Modify(new Directives().Xpath("/xoc").Set(content));
-                    using (var again = new MutexXocument(cell.Name(), new CellXocument(cell, "xoc")))
-                    {
-                        again.Modify(new Directives().Xpath("/xoc").Set(content));
-                        using (var andAgain = new MutexXocument(cell.Name(), new CellXocument(cell, "xoc")))
-                        {
-                            andAgain.Modify(new Directives().Xpath("/xoc").Set(content));
-                            Assert.Equal(content, andAgain.Value("/xoc/text()", ""));
-                        }
-                    }
+                    synced.Modify(new Directives().Xpath("/xoc").Set(content));
+                    Assert.Equal(content, synced.Value("/xoc/text()", ""));
                 }
             });
         }

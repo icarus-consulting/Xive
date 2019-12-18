@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Test.Yaapii.Xive;
 using Xunit;
@@ -33,16 +34,17 @@ using Yaapii.Xambly;
 
 namespace Xive.Hive.Test
 {
-    public class MutexHiveTest
+    public class SyncHiveTest
     {
         [Fact]
         public void CreatesCatalogInParallel()
         {
-            var hive = new MutexHive(new RamHive("testRamHive"));
+            var valve = new ProcessSyncValve();
+            var hive = new SyncHive(new RamHive("testRamHive"), valve);
 
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                var catalog = new MutexCatalog(hive);
+                var catalog = new SyncCatalog(hive, valve);
                 catalog.Create("123");
             });
         }
@@ -50,8 +52,9 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversCombsInParallel()
         {
-            var hive = new MutexHive(new RamHive("product"));
-            new MutexCatalog(hive).Create("2CV");
+            var valve = new ProcessSyncValve();
+            var hive = new SyncHive(new RamHive("product"), valve);
+            new SyncCatalog(hive, valve).Create("2CV");
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
@@ -63,11 +66,12 @@ namespace Xive.Hive.Test
         [Fact]
         public void DoesNotBlockItself()
         {
-            var hive = new MutexHive(new RamHive("product"));
-            new MutexCatalog(hive).Create("2CV");
+            var valve = new ProcessSyncValve();
+            var hive = new SyncHive(new RamHive("product"), valve);
+            new SyncCatalog(hive, valve).Create("2CV");
             using (var xoc = hive.Shifted("machine").HQ().Xocument("catalog.xml"))
             {
-                for(int i=0;i<256;i++)
+                for (int i = 0; i < 256; i++)
                 {
                     xoc.Modify(
                         new Directives()
@@ -105,7 +109,7 @@ namespace Xive.Hive.Test
         public void Shifts()
         {
             var hive =
-                new MutexHive(
+                new SyncHive(
                     new RamHive("person")
                 );
 
@@ -118,9 +122,11 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQInParallelAfterShift()
         {
+            var valve = new ProcessSyncValve();
             var hive =
-                new MutexHive(
-                    new RamHive("person")
+                new SyncHive(
+                    new RamHive("person"),
+                    valve
                 ).Shifted("still-parallel");
 
             var first = true;
@@ -128,10 +134,10 @@ namespace Xive.Hive.Test
             {
                 if (!first)
                 {
-                    new MutexCatalog(hive).Remove("X");
+                    new SyncCatalog(hive, valve).Remove("X");
                     first = false;
                 }
-                new MutexCatalog(hive).Create("X");
+                new SyncCatalog(hive, valve).Create("X");
             });
         }
 
@@ -139,12 +145,15 @@ namespace Xive.Hive.Test
         public void DeliversHQInParallel()
         {
             var hive =
-                new MutexHive(
+                new SyncHive(
                     new RamHive("person")
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
-                hive.HQ();
+                using (var xoc = hive.HQ().Xocument("test"))
+                {
+                    xoc.Node().ToString();
+                }
             });
         }
 
@@ -153,7 +162,10 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new MutexHive(new FileHive("product", dir.Value().FullName));
+                var hive = 
+                    new SyncHive(
+                        new FileHive("product", dir.Value().FullName)
+                    );
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
                     hive.Scope();
@@ -166,8 +178,12 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new MutexHive(new FileHive("product", dir.Value().FullName));
-                var catalog = new MutexCatalog(hive);
+                var valve = new ProcessSyncValve();
+                var hive = 
+                    new SyncHive(
+                        new FileHive("product", dir.Value().FullName)
+                    );
+                var catalog = new SyncCatalog(hive, valve);
                 catalog.Create("2CV");
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
@@ -181,14 +197,15 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksParallel()
         {
-            var hive = new MutexHive(new RamHive());
+            var valve = new ProcessSyncValve();
+            var hive = new SyncHive(new RamHive(), valve);
             var comb = "Dr.Robotic";
             new ParallelFunc(() =>
                 {
                     var id = "Item_" + new Random().Next(1, 5);
                     var content = Guid.NewGuid().ToString();
 
-                    new MutexCatalog(hive).Create("Dr.Robotic");
+                    new SyncCatalog(hive, valve).Create("Dr.Robotic");
 
                     using (var item =
                         new FirstOf<IHoneyComb>(
@@ -209,11 +226,14 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksParallelWithFileHive()
         {
+            Debug.WriteLine("This is Thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             using (var dir = new TempDirectory())
             {
+                var valve = new ProcessSyncValve();
                 var hive =
-                    new MutexHive(
-                        new FileHive(dir.Value().FullName)
+                    new SyncHive(
+                        new FileHive(dir.Value().FullName),
+                        valve
                     );
 
                 var machine = "Dr.Robotic";
@@ -222,7 +242,7 @@ namespace Xive.Hive.Test
                     var id = "Item_" + new Random().Next(1, 5);
                     try
                     {
-                        new MutexCatalog(
+                        new SimpleCatalog(
                             hive.Shifted("to-the-left")
                         ).Create("Dr.Robotic");
                     }
@@ -252,11 +272,13 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksParallelWithRamHive()
         {
+            var valve = new ProcessSyncValve();
             var hive =
-                new MutexHive(
+                new SyncHive(
                     new CachedHive(
                         new RamHive()
-                    )
+                    ),
+                    valve
                 );
 
             var machine = "Dr.Robotic";
@@ -265,8 +287,9 @@ namespace Xive.Hive.Test
                     var id = "Item_" + new Random().Next(1, 5);
                     try
                     {
-                        new MutexCatalog(
-                            hive.Shifted("to-the-left")
+                        new SyncCatalog(
+                            hive.Shifted("to-the-left"),
+                            valve
                         ).Create(machine);
                     }
                     catch (InvalidOperationException)
