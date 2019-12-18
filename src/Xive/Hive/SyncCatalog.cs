@@ -111,7 +111,6 @@ namespace Xive.Hive
                 {
                     this.valve.Mutex($"{name}/catalog.xml").ReleaseMutex();
                 }
-                Debug.WriteLine("Unblocked from " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             }
         }
 
@@ -119,7 +118,6 @@ namespace Xive.Hive
         {
             var name = this.hive.HQ().Name();
             this.valve.Mutex($"{name}/catalog.xml").WaitOne();
-            Debug.WriteLine("Blocked from " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             this.locked[0]++;
         }
 
@@ -128,7 +126,6 @@ namespace Xive.Hive
 
             if (this.locked[0] > 0)
             {
-                //Dispose();
                 throw new AbandonedMutexException($"A mutex has not been released for catalog '{this.hive.HQ().Name()}'. Did you forget to put it into a using block before calling its methods?");
             }
 
