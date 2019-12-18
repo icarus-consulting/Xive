@@ -68,7 +68,6 @@ namespace Xive.Cell
                     }
                     var full = new Normalized(Path.GetFullPath(pth)).AsString();
                     Validate(full);
-
                     return full;
                 });
         }

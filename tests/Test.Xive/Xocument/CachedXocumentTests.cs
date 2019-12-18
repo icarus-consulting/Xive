@@ -46,14 +46,14 @@ namespace Xive.Xocument.Test
             var cache = new SimpleCache();
 
             new CachedXocument(
-                "buffered.xml",
+                "speedup/buffered.xml",
                 new SimpleXocument("buffered"),
                 cache
             ).Node();
 
             Assert.Equal(
                 "<buffered />",
-                cache.Xml("buffered.xml", () => new XElement("not-this")).ToString()
+                cache.Xml("speedup\\buffered.xml", () => new XElement("not-this")).ToString()
             );
         }
 
@@ -64,7 +64,7 @@ namespace Xive.Xocument.Test
             var cache = new BlacklistCache("some/*/is/*/buffered.xml");
             var xoc =
                 new CachedXocument(
-                    "some/path/where/a/file/is/placed/buffered.xml",
+                    "some/path/where/a/file\\is/placed/buffered.xml",
                     new FkXocument(() =>
                     {
                         reads++;
@@ -86,7 +86,7 @@ namespace Xive.Xocument.Test
             var cache = new SimpleCache();
             var xoc =
                 new CachedXocument(
-                    "buffered.xml",
+                    "speedup/buffered.xml",
                     new FkXocument(() =>
                     {
                         reads++;
@@ -117,10 +117,10 @@ namespace Xive.Xocument.Test
             {
                 var xoc =
                     new CachedXocument(
-                        "encoded.xml",
+                        "chars/encoded.xml",
                         new CellXocument(
                             item,
-                            "encoded.xml"
+                            "chars\\encoded.xml"
                         ),
                         cache
                     );
@@ -147,10 +147,10 @@ namespace Xive.Xocument.Test
         public void PreventsTypeSwitching()
         {
             var cache = new SimpleCache();
-            cache.Binary("cached.xml", () => new MemoryStream());
+            cache.Binary("cash\\cached.xml", () => new MemoryStream());
             var xoc =
                 new CachedXocument(
-                    "cached.xml",
+                    "cash/cached.xml",
                     new FkXocument(),
                     cache
                 );
@@ -166,7 +166,7 @@ namespace Xive.Xocument.Test
             var cache = new SimpleCache();
             var xoc =
                 new CachedXocument(
-                    "buffered.xml",
+                    "update-me/buffered.xml",
                     new SimpleXocument("buffered"),
                     cache
                 );
@@ -181,7 +181,7 @@ namespace Xive.Xocument.Test
                 "10 Minutes",
                 new XMLCursor(
                     cache.Xml(
-                        "buffered.xml", 
+                        "update-me\\buffered.xml", 
                         () => new XElement("not-this")
                     )
                 ).Values("/buffered/text()")[0]
