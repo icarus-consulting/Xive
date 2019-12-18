@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Xive.Hive;
+using Yaapii.Atoms;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
@@ -35,7 +36,7 @@ namespace Xive.Xocument
     /// </summary>
     public sealed class CachedXocument : IXocument
     {
-        private readonly string name;
+        private readonly IText name;
         private readonly IXocument origin;
         private readonly ICache cache;
 
@@ -48,7 +49,7 @@ namespace Xive.Xocument
         /// <param name="xmlMemory"></param>
         public CachedXocument(string name, IXocument origin, ICache cache)
         {
-            this.name = name;
+            this.name = new Normalized(name);
             this.origin = origin;
             this.cache = cache;
         }
@@ -56,7 +57,7 @@ namespace Xive.Xocument
         public void Modify(IEnumerable<IDirective> dirs)
         {
             this.origin.Modify(dirs);
-            this.cache.Update(this.name, this.origin.Node());
+            this.cache.Update(this.name.AsString(), this.origin.Node());
         }
 
         public IList<IXML> Nodes(string xpath)
@@ -78,7 +79,7 @@ namespace Xive.Xocument
         {
             return
                 this.cache.Xml(
-                    this.name,
+                    this.name.AsString(),
                     () => this.origin.Node()
                 );
         }

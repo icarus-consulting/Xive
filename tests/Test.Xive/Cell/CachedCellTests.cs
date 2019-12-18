@@ -77,7 +77,7 @@ namespace Xive.Cell.Test
                             return new byte[0];
                         }
                     ),
-                    "a/file/which/is/blacklisted/data.dat",
+                    "a/file\\which/is\\blacklisted/data.dat",
                     cache
                 );
 
@@ -99,14 +99,14 @@ namespace Xive.Cell.Test
                             new InputOf("Some content")
                         ).AsBytes()
                 ),
-                "cached",
+                "cached/cell",
                 cache
             ).Content();
 
             Assert.Equal(
                 "Some content",
                 new TextOf(
-                    new InputOf(cache.Binary("cached", () => new MemoryStream()))
+                    new InputOf(cache.Binary("cached\\cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -121,7 +121,7 @@ namespace Xive.Cell.Test
                         content => { },
                         () => new BytesOf(new InputOf("Old content")).AsBytes()
                     ),
-                    "cached",
+                    "cached/cell",
                     cache
                 );
             cell.Content();
@@ -131,7 +131,7 @@ namespace Xive.Cell.Test
                 "New content",
                 new TextOf(
                     new InputOf(
-                        cache.Binary("cached", () => new MemoryStream())
+                        cache.Binary("cached\\cell", () => new MemoryStream())
                     )
                 ).AsString()
             );
@@ -141,12 +141,12 @@ namespace Xive.Cell.Test
         public void PreventsTypeSwitching()
         {
             var cache = new SimpleCache();
-            cache.Xml("cached", () => new XElement("irrelevant"));
+            cache.Xml("cached/xml", () => new XElement("irrelevant"));
 
             var binCell =
                 new CachedCell(
                     new FkCell(),
-                    "cached",
+                    "cached\\xml",
                     cache
                 );
 
@@ -165,14 +165,14 @@ namespace Xive.Cell.Test
                         (update) => { },
                         () => new byte[128]
                     ),
-                    "cached",
+                    "cached\\xml",
                     cache
                 );
             cell.Content();
 
             Assert.NotEqual(
                 128,
-                cache.Binary("cached", () => new MemoryStream()).Length
+                cache.Binary("cached/xml", () => new MemoryStream()).Length
             );
         }
 
@@ -183,7 +183,7 @@ namespace Xive.Cell.Test
             var cell =
                 new CachedCell(
                     new FkCell(),
-                    "cached",
+                    "cached\\cell",
                     cache
                 );
             cell.Update(
@@ -192,7 +192,7 @@ namespace Xive.Cell.Test
 
             Assert.Equal(
                 0,
-                cache.Binary("cached", () => new MemoryStream()).Length
+                cache.Binary("cached/cell", () => new MemoryStream()).Length
             );
         }
 
@@ -203,7 +203,7 @@ namespace Xive.Cell.Test
             var cell =
                 new CachedCell(
                     new RamCell(),
-                    "cached",
+                    "cached/bytes",
                     cache
                 );
             cell.Update(
