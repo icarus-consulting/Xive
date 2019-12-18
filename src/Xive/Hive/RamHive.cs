@@ -145,15 +145,19 @@ namespace Xive.Hive
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return Combs(xpath, new MutexCatalog(this.scope, HQ()));
+            return
+                new Mapped<string, IHoneyComb>(
+                    name => this.wrap(Comb(name)),
+                    new SimpleCatalog(this.scope, HQ()).List(xpath)
+                );
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
             return
                 new Mapped<string, IHoneyComb>(
                     name => this.wrap(Comb(name)),
-                    catalog.List(xpath)
+                    catalogWrap(new SimpleCatalog(this.scope, HQ())).List(xpath)
                 );
         }
 

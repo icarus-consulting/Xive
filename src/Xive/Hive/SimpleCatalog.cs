@@ -37,15 +37,13 @@ namespace Xive.Hive
     {
         private readonly IScalar<IHoneyComb> hq;
         private readonly IScalar<string> itemName;
-        private readonly Func<ICell, IXocument> xocument;
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
         public SimpleCatalog(IHive hive) : this(
             new ScalarOf<string>(() => hive.Scope()),
-            new ScalarOf<IHoneyComb>(() => hive.HQ()),
-            cell => new CellXocument(cell, "catalog")
+            new ScalarOf<IHoneyComb>(() => hive.HQ())
         )
         { }
 
@@ -53,30 +51,18 @@ namespace Xive.Hive
         /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
         public SimpleCatalog(string itemName, IHoneyComb hq) : this(
-            itemName, 
-            hq, 
-            cell => new CellXocument(cell, "catalog")
-        )
-        { }
-
-        /// <summary>
-        /// A catalog to manage a list of combs in a hive processwide exclusively.
-        /// </summary>
-        public SimpleCatalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
             new ScalarOf<string>(itemName),
-            new ScalarOf<IHoneyComb>(hq),
-            xocument
+            new ScalarOf<IHoneyComb>(hq)
         )
         { }
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
-        internal SimpleCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
+        internal SimpleCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq)
         {
             this.hq = hq;
             this.itemName = itemName;
-            this.xocument = xocument;
         }
 
         public void Update(string id, IEnumerable<IDirective> content)
@@ -100,7 +86,7 @@ namespace Xive.Hive
         {
             using (var xoc = this.Xocument())
             {
-                return xoc.Values($"//{this.itemName.Value()}[{xpath}]/@id");
+                return xoc.Values($"/catalog/{this.itemName.Value()}[{xpath}]/@id");
             }
         }
 

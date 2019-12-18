@@ -205,7 +205,11 @@ namespace Xive.Hive.Test
                     var id = "Item_" + new Random().Next(1, 5);
                     var content = Guid.NewGuid().ToString();
 
-                    new SyncCatalog(hive, valve).Create("Dr.Robotic");
+                    new SyncCatalog(
+                        hive,
+                        new SimpleCatalog(hive), 
+                        valve
+                    ).Create("Dr.Robotic");
 
                     using (var item =
                         new FirstOf<IHoneyComb>(
@@ -226,13 +230,14 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksParallelWithFileHive()
         {
-            Debug.WriteLine("This is Thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             using (var dir = new TempDirectory())
             {
                 var valve = new ProcessSyncValve();
                 var hive =
                     new SyncHive(
-                        new FileHive(dir.Value().FullName),
+                        new CachedHive(
+                            new FileHive(dir.Value().FullName)
+                        ),
                         valve
                     );
 
@@ -242,8 +247,10 @@ namespace Xive.Hive.Test
                     var id = "Item_" + new Random().Next(1, 5);
                     try
                     {
-                        new SimpleCatalog(
-                            hive.Shifted("to-the-left")
+                        new SyncCatalog(
+                            hive.Shifted("to-the-left"),
+                            new SimpleCatalog(hive.Shifted("to-the-left")),
+                            valve
                         ).Create("Dr.Robotic");
                     }
                     catch (InvalidOperationException)
@@ -263,7 +270,7 @@ namespace Xive.Hive.Test
                     }
                     return true;
                 },
-                Environment.ProcessorCount << 4,
+                1, //Environment.ProcessorCount << 4,
                 10000
             ).Invoke();
             }
@@ -287,9 +294,8 @@ namespace Xive.Hive.Test
                     var id = "Item_" + new Random().Next(1, 5);
                     try
                     {
-                        new SyncCatalog(
-                            hive.Shifted("to-the-left"),
-                            valve
+                        new SimpleCatalog(
+                            hive.Shifted("to-the-left")
                         ).Create(machine);
                     }
                     catch (InvalidOperationException)

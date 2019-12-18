@@ -20,13 +20,9 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
 using System.Collections.Generic;
-using Xive.Xocument;
-using Yaapii.Atoms;
-using Yaapii.Atoms.Enumerable;
-using Yaapii.Atoms.Error;
-using Yaapii.Atoms.Scalar;
+using System.Diagnostics;
+using System.Threading;
 using Yaapii.Xambly;
 
 namespace Xive.Hive
@@ -36,132 +32,106 @@ namespace Xive.Hive
     /// </summary>
     public sealed class SyncCatalog : ICatalog
     {
-        private readonly IScalar<IHoneyComb> hq;
-        private readonly IScalar<string> itemName;
-        private readonly Func<ICell, IXocument> xocument;
-        private readonly ISyncValve syncValve;
+        private readonly IHive hive;
+        private readonly ICatalog catalog;
+        private readonly ISyncValve valve;
+        private readonly int[] locked;
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
-        public SyncCatalog(IHive hive) : this(hive, new ProcessSyncValve())
-        { }
-
-        /// <summary>
-        /// A catalog to manage a list of combs in a hive processwide exclusively.
-        /// </summary>
-        public SyncCatalog(IHive hive, ISyncValve syncValve) : this(
-            new ScalarOf<string>(() => hive.Scope()),
-            new ScalarOf<IHoneyComb>(() => hive.HQ()),
-            cell => new CellXocument(cell, "catalog"),
-            syncValve
-        )
-        { }
-
-        /// <summary>
-        /// A catalog to manage a list of combs in a hive processwide exclusively.
-        /// </summary>
-        public SyncCatalog(string itemName, IHoneyComb hq, ISyncValve syncValve) : this(itemName, hq, cell => new CellXocument(cell, "catalog"), syncValve)
-        { }
-
-        /// <summary>
-        /// A catalog to manage a list of combs in a hive processwide exclusively.
-        /// </summary>
-        public SyncCatalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument, ISyncValve syncValve) : this(
-            new ScalarOf<string>(itemName),
-            new ScalarOf<IHoneyComb>(hq),
-            xocument,
-            syncValve
-        )
-        { }
-
-        /// <summary>
-        /// A catalog to manage a list of combs in a hive processwide exclusively.
-        /// </summary>
-        internal SyncCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument, ISyncValve syncValve)
+        public SyncCatalog(IHive hive, ICatalog origin, ISyncValve syncValve)
         {
-            this.hq = hq;
-            this.itemName = itemName;
-            this.xocument = xocument;
-            this.syncValve = syncValve;
+            this.hive = hive;
+            this.catalog = origin;
+            this.valve = syncValve;
+            this.locked = new int[1] { 0 };
         }
 
         public void Update(string id, IEnumerable<IDirective> content)
         {
-            if (!Exists(id))
+            try
             {
-                Create(id);
+                Block();
+                this.catalog.Update(id, content);
             }
-
-            using (var xoc = this.Xocument())
+            finally
             {
-                xoc.Modify(
-                    new Directives()
-                        .Xpath($"/catalog/{this.itemName.Value()}[@id='{id}']")
-                        .Append(content)
-                );
+                Dispose();
             }
         }
 
         public IEnumerable<string> List(string xpath)
         {
-            using (var xoc = this.Xocument())
+            try
             {
-                return xoc.Values($"//{this.itemName.Value()}[{xpath}]/@id");
+                Block();
+                return this.catalog.List(xpath);
+            }
+            finally
+            {
+                Dispose();
             }
         }
 
         public void Remove(string id)
         {
-            new FailWhen(
-                () => !Exists(id),
-                new InvalidOperationException($"{this.itemName.Value()} '{id}' does not exist")
-            ).Go();
-
-            using (var xoc = this.Xocument())
+            try
             {
-                xoc.Modify(
-                    new Directives()
-                        .Xpath($"/catalog/{this.itemName.Value()}[@id='{id}']")
-                        .Remove()
-                );
+                Block();
+                this.catalog.Remove(id);
+            }
+            finally
+            {
+                Dispose();
             }
         }
 
         public void Create(string id)
         {
-            using (var xoc = this.Xocument())
+            try
             {
-                if (xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count == 0)
+                Block();
+                this.catalog.Create(id);
+            }
+            finally
+            {
+                Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (this.catalog)
+            {
+                var name = this.hive.HQ().Name();
+                var locks = this.locked[0];
+                this.locked[0] = 0;
+                for (int i = 0; i < locks; i++)
                 {
-                    xoc.Modify(
-                        new Directives()
-                            .Xpath("/catalog")
-                            .Add(this.itemName.Value())
-                            .Attr("id", id)
-                    );
+                    this.valve.Mutex($"{name}/catalog.xml").ReleaseMutex();
                 }
+                Debug.WriteLine("Unblocked from " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             }
         }
 
-        private bool Exists(string id)
+        private void Block()
         {
-            using (var xoc = Xocument())
+            var name = this.hive.HQ().Name();
+            this.valve.Mutex($"{name}/catalog.xml").WaitOne();
+            Debug.WriteLine("Blocked from " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+            this.locked[0]++;
+        }
+
+        ~SyncCatalog()
+        {
+
+            if (this.locked[0] > 0)
             {
-                return xoc.Nodes($"/catalog/{this.itemName.Value()}[@id='{id}']").Count > 0;
+                //Dispose();
+                throw new AbandonedMutexException($"A mutex has not been released for catalog '{this.hive.HQ().Name()}'. Did you forget to put it into a using block before calling its methods?");
             }
-        }
 
-        private IXocument Xocument()
-        {
-            var hq = this.hq.Value();
-            var name = $"{hq.Name()}/catalog.xml";
-            return 
-                new SyncXocument(
-                    name, 
-                    this.hq.Value().Xocument("catalog.xml"), 
-                    this.syncValve
-                );
         }
     }
 }

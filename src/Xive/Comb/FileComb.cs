@@ -80,9 +80,10 @@ namespace Xive.Comb
                             "*",
                             SearchOption.AllDirectories))
                     {
+                        var truncated = new Normalized(file).AsString().Replace(this.comb.Value().Name() + "/", "");
                         patch.Add("item")
                             .Add("name")
-                            .Set(file.Replace(this.comb.Value().Name() + "/", ""))
+                            .Set(truncated)
                             .Up()
                             .Add("size")
                             .Set(new FileInfo(file).Length)

@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 
 namespace Xive
@@ -70,6 +71,6 @@ namespace Xive
         /// </summary>
         /// <param name="xpath">A xpath which will be resolved in the file HQ/catalog.xml, querying the item nodes.</param>
         /// <returns></returns>
-        IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog);
+        IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap);
     }
 }

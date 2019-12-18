@@ -39,7 +39,7 @@ namespace Xive.Hive.Test
         {
             var memory = new Dictionary<string, MemoryStream>();
             var hive = new RamHive("in-memory", memory);
-            var catalog = new MutexCatalog("in-memory", hive.HQ());
+            var catalog = new SimpleCatalog("in-memory", hive.HQ());
             catalog.Create("123");
 
             Assert.NotEmpty(catalog.List("@id='123'"));
@@ -50,11 +50,11 @@ namespace Xive.Hive.Test
         {
             var mem = new Dictionary<string, MemoryStream>();
             var hive = new RamHive(mem);
-            var catalog = new MutexCatalog(hive);
+            var catalog = new SimpleCatalog(hive);
             catalog.Create("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new MutexCatalog(shifted);
+            var twilightCatalog = new SimpleCatalog(shifted);
 
             Assert.Empty(twilightCatalog.List("@id='123'"));
         }
@@ -64,11 +64,11 @@ namespace Xive.Hive.Test
         {
             var mem = new Dictionary<string, MemoryStream>();
             var hive = new RamHive(mem);
-            var catalog = new MutexCatalog(hive);
+            var catalog = new SimpleCatalog(hive);
             catalog.Create("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new MutexCatalog(shifted);
+            var twilightCatalog = new SimpleCatalog(shifted);
             twilightCatalog.Create("789");
 
             Assert.Contains("twilight-zone/hq/catalog.xml", mem.Keys);
@@ -97,7 +97,7 @@ namespace Xive.Hive.Test
             IHive hive = new RamHive();
 
             var shifted = hive.Shifted("prepend-this");
-            new MutexCatalog(shifted).Create("an-entry");
+            new SimpleCatalog(shifted).Create("an-entry");
 
             Assert.StartsWith("prepend-this",
                 new FirstOf<IHoneyComb>(
@@ -129,7 +129,7 @@ namespace Xive.Hive.Test
         public void RemembersCombs()
         {
             var hive = new RamHive("animal");
-            var catalog = new MutexCatalog(hive);
+            var catalog = new SimpleCatalog(hive);
             catalog.Create("123");
             catalog.Create("456");
 
@@ -154,7 +154,7 @@ namespace Xive.Hive.Test
         public void RemembersXocument()
         {
             var hive = new RamHive("animal");
-            var catalog = new MutexCatalog(hive);
+            var catalog = new SimpleCatalog(hive);
             catalog.Create("123");
             catalog.Create("456");
 

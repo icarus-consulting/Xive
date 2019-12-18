@@ -56,16 +56,19 @@ namespace Xive.Hive
             return
                 new Mapped<IHoneyComb, IHoneyComb>(
                     (comb) => new SyncComb(comb, this.syncValve),
-                    this.hive.Combs(xpath, new SyncCatalog(hive, this.syncValve))
+                    this.hive.Combs(xpath, catalog => new SyncCatalog(hive, catalog, this.syncValve))
                 );
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, ICatalog catalog)
+        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
             return
                 new Mapped<IHoneyComb, IHoneyComb>(
                     (comb) => new SyncComb(comb, this.syncValve),
-                    this.hive.Combs(xpath, catalog)
+                    this.hive.Combs(
+                        xpath,
+                        catalog => new SyncCatalog(hive, catalogWrap(catalog), this.syncValve)
+                    )
                 );
         }
 
