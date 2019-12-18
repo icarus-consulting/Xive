@@ -21,7 +21,6 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using Yaapii.Xambly;
 
@@ -36,6 +35,18 @@ namespace Xive.Hive
         private readonly ICatalog catalog;
         private readonly ISyncValve valve;
         private readonly int[] locked;
+
+        /// <summary>
+        /// A catalog to manage a list of combs in a hive processwide exclusively.
+        /// </summary>
+        public SyncCatalog(IHive hive) : this(hive, new SimpleCatalog(hive), new ProcessSyncValve())
+        { }
+
+        /// <summary>
+        /// A catalog to manage a list of combs in a hive processwide exclusively.
+        /// </summary>
+        public SyncCatalog(IHive hive, ISyncValve syncValve) : this(hive, new SimpleCatalog(hive), syncValve)
+        { }
 
         /// <summary>
         /// A catalog to manage a list of combs in a hive processwide exclusively.
