@@ -262,7 +262,7 @@ namespace Xive.Comb.Test
             using (var dir = new TempDirectory())
             {
                 var comb = new FileComb(dir.Value().FullName, "combName");
-                var name = @"folder/something.tmp";
+                var name = "folder/something.tmp";
 
                 using (var cell = comb.Cell(name))
                 {
@@ -292,8 +292,8 @@ namespace Xive.Comb.Test
             {
                 var hive = new FileHive(dir.Value().FullName);
                 var program = hive.Shifted("program");
-                new MutexCatalog(program).Create("programid");
-                new MutexCatalog(program).Create("anotherProgramId");
+                new SimpleCatalog(program).Create("programid");
+                new SimpleCatalog(program).Create("anotherProgramId");
 
                 var comb = new FirstOf<IHoneyComb>(program.Combs("@id='programid'")).Value();
 

@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using Xive.Xocument;
 using Yaapii.Atoms;
-using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Error;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
@@ -32,48 +31,38 @@ using Yaapii.Xambly;
 namespace Xive.Hive
 {
     /// <summary>
-    /// A catalog to manage a list of combs in a hive.
+    /// A catalog to manage a list of combs in a hive processwide exclusively.
     /// </summary>
-    public sealed class MutexCatalog : ICatalog
+    public sealed class SimpleCatalog : ICatalog
     {
         private readonly IScalar<IHoneyComb> hq;
         private readonly IScalar<string> itemName;
-        private readonly Func<ICell, IXocument> xocument;
 
         /// <summary>
-        /// A catalog to manage a list of combs in a hive.
+        /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
-        public MutexCatalog(IHive hive) : this(
+        public SimpleCatalog(IHive hive) : this(
             new ScalarOf<string>(() => hive.Scope()),
-            new ScalarOf<IHoneyComb>(() => hive.HQ()),
-            cell => new CellXocument(cell, "catalog")
+            new ScalarOf<IHoneyComb>(() => hive.HQ())
         )
         { }
 
         /// <summary>
-        /// A catalog to manage a list of combs in a hive.
+        /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
-        public MutexCatalog(string itemName, IHoneyComb hq) : this(itemName, hq, cell => new CellXocument(cell, "catalog"))
-        { }
-
-        /// <summary>
-        /// A catalog to manage a list of combs in a hive.
-        /// </summary>
-        public MutexCatalog(string itemName, IHoneyComb hq, Func<ICell, IXocument> xocument) : this(
+        public SimpleCatalog(string itemName, IHoneyComb hq) : this(
             new ScalarOf<string>(itemName),
-            new ScalarOf<IHoneyComb>(hq),
-            xocument
+            new ScalarOf<IHoneyComb>(hq)
         )
         { }
 
         /// <summary>
-        /// A catalog to manage a list of combs in a hive.
+        /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
-        internal MutexCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq, Func<ICell, IXocument> xocument)
+        internal SimpleCatalog(IScalar<string> itemName, IScalar<IHoneyComb> hq)
         {
             this.hq = hq;
             this.itemName = itemName;
-            this.xocument = xocument;
         }
 
         public void Update(string id, IEnumerable<IDirective> content)
@@ -97,7 +86,7 @@ namespace Xive.Hive
         {
             using (var xoc = this.Xocument())
             {
-                return xoc.Values($"//{this.itemName.Value()}[{xpath}]/@id");
+                return xoc.Values($"/catalog/{this.itemName.Value()}[{xpath}]/@id");
             }
         }
 
@@ -146,7 +135,7 @@ namespace Xive.Hive
         {
             var hq = this.hq.Value();
             var name = $"{hq.Name()}/catalog.xml";
-            return new MutexXocument(name, this.hq.Value().Xocument("catalog.xml"));
+            return this.hq.Value().Xocument("catalog.xml");
         }
     }
 }

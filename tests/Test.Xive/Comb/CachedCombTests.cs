@@ -62,8 +62,8 @@ namespace Xive.Comb.Test
                     cache
                 );
 
-            comb.Cell("adalbert").Content();
-            comb.Cell("adalbert").Content();
+            comb.Cell("adalbert/item.txt").Content();
+            comb.Cell("adalbert\\item.txt").Content();
 
             Assert.Equal(1, reads);
         }
@@ -92,7 +92,7 @@ namespace Xive.Comb.Test
                 );
 
             comb.Cell("hello/mister/adalbert.dat").Content();
-            comb.Cell("hello/mister/adalbert.dat").Content();
+            comb.Cell("hello\\mister\\adalbert.dat").Content();
 
             Assert.Equal(2, reads);
         }
@@ -118,7 +118,7 @@ namespace Xive.Comb.Test
                 );
 
             comb.Xocument("files/with/names.xml").Node();
-            comb.Xocument("files/with/names.xml").Node();
+            comb.Xocument("files\\with\\names.xml").Node();
 
             Assert.Equal(2, reads);
         }
@@ -143,8 +143,8 @@ namespace Xive.Comb.Test
                     cache
                 );
 
-            comb.Xocument("names.xml").Node();
-            comb.Xocument("names.xml").Node();
+            comb.Xocument("my/names.xml").Node();
+            comb.Xocument("my\\names.xml").Node();
 
             Assert.Equal(1, reads);
         }
@@ -201,13 +201,13 @@ namespace Xive.Comb.Test
                     cache
                 );
 
-            comb.Xocument("test").Node();
+            comb.Xocument("test\\slash").Node();
 
             Assert.Equal(
                 "some data",
                 new XMLCursor(
                     cache.Xml(
-                        "my-comb/test", 
+                        "my-comb/test/slash", 
                         () => new XElement("not-this")
                     )
                 ).Values("/test/text()")[0]
@@ -237,13 +237,13 @@ namespace Xive.Comb.Test
                     cache
                 );
 
-            comb.Cell("my-cell").Content();
-            comb.Cell("my-cell").Update(new InputOf("New content"));
+            comb.Cell("my/cell").Content();
+            comb.Cell("my\\cell").Update(new InputOf("New content"));
 
             Assert.Equal(
                 "New content",
                 new TextOf(
-                    new InputOf(cache.Binary("my-comb/my-cell", () => new MemoryStream()))
+                    new InputOf(cache.Binary("my-comb/my/cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -270,14 +270,14 @@ namespace Xive.Comb.Test
                     cache
                 );
 
-            comb.Xocument("xoc.xml").Node();
-            comb.Xocument("xoc.xml").Modify(new EnumerableOf<IDirective>());
+            comb.Xocument("xockt/xoc.xml").Node();
+            comb.Xocument("xockt\\xoc.xml").Modify(new EnumerableOf<IDirective>());
 
           
             Assert.Equal(
                 "new",
                 new XMLCursor(
-                    cache.Xml("my-comb/xoc.xml", () => new XElement("not-this"))
+                    cache.Xml("my-comb/xockt/xoc.xml", () => new XElement("not-this"))
                 ).Values("/root/text()")[0]
             );
         }

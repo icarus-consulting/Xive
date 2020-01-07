@@ -68,10 +68,9 @@ namespace Xive.Cell
                     {
                         throw new ArgumentException($"Cannot work with path '{pth}' because it is not rooted.");
                     }
-                  
-                    Validate(pth);
-
-                    return pth;
+                    var full = new Normalized(Path.GetFullPath(pth)).AsString();
+                    Validate(full);
+                    return full;
                 });
         }
 

@@ -76,7 +76,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var hive = new FileHive("product", dir.Value().FullName);
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
                 Assert.NotEmpty(
                     hive.Combs("@id='2CV'")
                 );
@@ -92,7 +92,7 @@ namespace Xive.Hive.Test
                     new CachedHive(
                         new FileHive("cockpit", dir.Value().FullName)
                     );
-                new MutexCatalog(hive).Create("log");
+                new SimpleCatalog(hive).Create("log");
 
                 string a;
                 string b;
@@ -115,7 +115,7 @@ namespace Xive.Hive.Test
             {
                 IHive hive = new FileHive(dir.Value().FullName);
                 var shifted = hive.Shifted("prepend-this");
-                new MutexCatalog(shifted).Create("an-entry");
+                new SimpleCatalog(shifted).Create("an-entry");
 
                 Assert.StartsWith("prepend-this",
                     new FirstOf<IHoneyComb>(
@@ -132,7 +132,7 @@ namespace Xive.Hive.Test
             {
                 IHive hive = new FileHive(dir.Value().FullName);
                 hive = hive.Shifted("product");
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
 
                 using (var cell =
                     new FirstOf<IHoneyComb>(
@@ -163,7 +163,7 @@ namespace Xive.Hive.Test
             {
                 IHive hive = new FileHive(dir.Value().FullName);
                 hive = hive.Shifted("product");
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
                 Assert.True(
                     Directory.Exists(
                         new Normalized(
@@ -185,10 +185,10 @@ namespace Xive.Hive.Test
             {
                 IHive hive = new FileHive(dir.Value().FullName);
                 hive.Shifted("product");
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
 
                 hive = hive.Shifted("machine");
-                new MutexCatalog(hive).Create("DrRobotic");
+                new SimpleCatalog(hive).Create("DrRobotic");
                 Assert.NotEmpty(
                     hive.Combs("@id='DrRobotic'")
                 );
@@ -201,7 +201,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var hive = new FileHive("product", dir.Value().FullName);
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
 
                 using (var cell = new FirstOf<IHoneyComb>(hive.Combs("@id='2CV'")).Value().Cell("Some-testing-item"))
                 {
@@ -221,7 +221,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var hive = new FileHive("product", dir.Value().FullName);
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
 
                 using (var cell =
                     new FirstOf<IHoneyComb>(
@@ -250,7 +250,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var hive = new FileHive("product", dir.Value().FullName);
-                new MutexCatalog(hive).Create("2CV");
+                new SimpleCatalog(hive).Create("2CV");
 
                 using (var cell =
                     new FirstOf<IHoneyComb>(

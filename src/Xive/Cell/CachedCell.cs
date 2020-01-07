@@ -33,7 +33,7 @@ namespace Xive.Cell
     public sealed class CachedCell : ICell
     {
         private readonly ICell origin;
-        private readonly string name;
+        private readonly IText name;
         private readonly ICache cache;
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace Xive.Cell
         public CachedCell(ICell origin, string name, ICache cache)
         {
             this.origin = origin;
-            this.name = name;
+            this.name = new Normalized(name);
             this.cache = cache;
         }
 
         public string Name()
         {
-            return this.name;
+            return this.name.AsString();
         }
 
         public byte[] Content()
@@ -56,7 +56,7 @@ namespace Xive.Cell
             byte[] result = new byte[0];
             var stream =
                 this.cache.Binary(
-                    this.name,
+                    this.name.AsString(),
                     () => new MemoryStream(this.origin.Content())
                 );
             stream.Seek(0, SeekOrigin.Begin);
@@ -73,7 +73,7 @@ namespace Xive.Cell
             copy.Seek(0, SeekOrigin.Begin);
             this.origin.Update(new InputOf(copy));
             copy.Seek(0, SeekOrigin.Begin);
-            this.cache.Update(this.name, copy);
+            this.cache.Update(this.name.AsString(), copy);
         }
 
         public void Dispose()

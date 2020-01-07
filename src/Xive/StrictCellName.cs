@@ -32,7 +32,6 @@ namespace Xive
     /// </summary>
     public sealed class StrictCellName : IText
     {
-        private readonly string text;
         private readonly IScalar<string> validated;
 
         /// <summary>
@@ -40,19 +39,19 @@ namespace Xive
         /// </summary>
         public StrictCellName(string name)
         {
-            this.text = name;
             this.validated =
                 new ScalarOf<string>(() =>
                     {
-                        if (text.Contains(" ") || text.Contains("\r") || text.Contains("\n"))
+                        name = new Normalized(name).AsString();
+                        if (name.Contains(" ") || name.Contains("\r") || name.Contains("\n"))
                         {
-                            throw new ArgumentException($"Can't use '{text}' as name because it contains whitespaces");
+                            throw new ArgumentException($"Can't use '{name}' as name because it contains whitespaces");
                         }
-                        if (text.Contains("&") || text.Contains("<") || text.Contains(">"))
+                        if (name.Contains("&") || name.Contains("<") || name.Contains(">"))
                         {
-                            throw new ArgumentException($"Can't use '{ text }' as name because it contains illegal chars (&,< or >)");
+                            throw new ArgumentException($"Can't use '{ name }' as name because it contains illegal chars (&,< or >)");
                         }
-                        return text;
+                        return name;
                     }
                 );
         }
@@ -64,7 +63,7 @@ namespace Xive
 
         public bool Equals(IText other)
         {
-            return this.text.Equals(other.AsString());
+            return this.validated.Value().Equals(other.AsString());
         }
     }
 }

@@ -57,7 +57,8 @@ namespace Xive.Comb
 
         public ICell Cell(string name)
         {
-            return this.cell(this.name.Value() + "/" + name);
+            return 
+                this.cell($"{this.name.Value()}/{name}");
         }
 
         public string Name()
