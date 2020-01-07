@@ -17,7 +17,7 @@ skip_branch_with_pr: true
 # Automatically register private account and/or project AppVeyor NuGet feeds.
 nuget:
   account_feed: true
-  build_script:
+build_script:
     - sh: chmod +x build.sh
     - sh: ./build.sh
     - ps: .\build.ps1
