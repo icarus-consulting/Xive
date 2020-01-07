@@ -2,9 +2,12 @@
 #     CI Build Configuration for master branch pre-release   #
 #------------------------------------------------------------#
 version: 1.0.{build}
-image: Visual Studio 2017
+image:
+  - Visual Studio 2017
+  - Ubuntu
 configuration: Release
 environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
   GITHUB_TOKEN:
     secure: tvoyJ/iv8Y+9VaKvOFvxegvQFBNqPkhiwghS8lQDsrt7B/1MWU4e8uOHQzfTU580
   CODECOV_TOKEN:
@@ -14,8 +17,10 @@ skip_branch_with_pr: true
 # Automatically register private account and/or project AppVeyor NuGet feeds.
 nuget:
   account_feed: true
-build_script:
-- ps: .\build.ps1
+  build_script:
+    - sh: chmod +x build.sh
+    - sh: ./build.sh
+    - ps: .\build.ps1
 test: off
 artifacts:
 - path: '.\artifacts\**\*.nupkg'

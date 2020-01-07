@@ -139,7 +139,10 @@ Task("Upload-Coverage")
 .WithCriteria(() => isAppVeyor)
 .Does(() =>
 {
-    Codecov("coverage.xml", codecovToken);
+	if(IsRunningOnWindows())
+	{  
+    	Codecov("coverage.xml", codecovToken);
+	}
 });
 
 ///////////////////////////////////////////////////////////////////////////////
