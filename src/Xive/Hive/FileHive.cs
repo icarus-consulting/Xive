@@ -64,10 +64,7 @@ namespace Xive.Hive
             this.scope = scope;
             this.root = new Normalized(root);
             this.wrap = combWrap;
-            this.root = new Solid<string>(() =>
-            {
-                return new Normalized(root).AsString();
-            });
+           
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
