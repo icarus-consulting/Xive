@@ -27,6 +27,7 @@ using Xive.Comb;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
 {
@@ -62,10 +63,13 @@ namespace Xive.Hive
         public FileHive(string scope, string root, Func<IHoneyComb, IHoneyComb> combWrap)
         {
             this.scope = scope;
-            this.root = new Normalized(root);
             this.wrap = combWrap;
-           
-        }
+            this.root = new TextOf( new Solid<string>(() =>
+            {
+                return new Normalized(root).AsString();
+
+            }));
+            }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
