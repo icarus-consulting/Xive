@@ -61,7 +61,9 @@ namespace Xive.Cell
             this.path = 
                 new Solid<string>(() =>
                 {
-                    var pth = path.Value();
+                    var pth = new Normalized(
+                            path.Value()
+                        ).AsString();
                     if (!Path.IsPathRooted(pth))
                     {
                         throw new ArgumentException($"Cannot work with path '{pth}' because it is not rooted.");
@@ -116,7 +118,7 @@ namespace Xive.Cell
         {
             if ((Path.GetFileName(path) + String.Empty).Length == 0)
             {
-                throw new ArgumentException($"Cannot work with path '{path}' because it is not a file.");
+                throw new ArgumentException($"Cannot work with path '{path}' because it is empty.");
             }
 
             var dir = new StrictCoordinate(Path.GetDirectoryName(path)).AsString();
@@ -127,7 +129,7 @@ namespace Xive.Cell
         {
             lock (this)
             {
-                var dir = Path.GetDirectoryName(this.path.Value());
+                var dir = this.DirectoryName();
                 if (!Directory.Exists(dir))
                 {
                     Directory.CreateDirectory(dir);
@@ -144,6 +146,16 @@ namespace Xive.Cell
             }
         }
 
+        private string DirectoryName()
+        {
+            return
+                new Normalized(
+                    Path.GetDirectoryName(
+                        this.path.Value()
+                    )
+                ).AsString();
+                
+        }
         private void Cleanup()
         {
             lock (this)

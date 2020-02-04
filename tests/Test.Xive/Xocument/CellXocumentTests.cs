@@ -101,9 +101,9 @@ namespace Xive.Xocument.Test
                     item,
                     "flash.xml"
                 ).Node();
-
+                
                 Assert.Equal(
-                    "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>\r\n<flash />",
+                    "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>"+Environment.NewLine+"<flash />",
                     new TextOf(
                         new InputOf(new FileInfo(file))
                     ).AsString()

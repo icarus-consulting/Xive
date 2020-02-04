@@ -177,7 +177,7 @@ namespace Xive.Comb.Test
             Assert.Equal(
                 "some data",
                 new TextOf(
-                    new InputOf(cache.Binary("my-comb\\my-cell", () => new MemoryStream()))
+                    new InputOf(cache.Binary("my-comb/my-cell", () => new MemoryStream()))
                 ).AsString()
             );
         }
@@ -273,6 +273,7 @@ namespace Xive.Comb.Test
             comb.Xocument("xockt/xoc.xml").Node();
             comb.Xocument("xockt\\xoc.xml").Modify(new EnumerableOf<IDirective>());
 
+          
             Assert.Equal(
                 "new",
                 new XMLCursor(

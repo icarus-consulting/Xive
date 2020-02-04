@@ -56,7 +56,9 @@ namespace Xive.Comb
                     {
                         return
                             new SimpleComb(
-                                new Normalized(Path.Combine(root, name)).AsString(),
+                                new Normalized(
+                                    Path.Combine(root, name)
+                                ).AsString(),
                                 path => new FileCell(path),
                                 (cellName, cell) => xocumentWrap(
                                     new CellXocument(cell, cellName)

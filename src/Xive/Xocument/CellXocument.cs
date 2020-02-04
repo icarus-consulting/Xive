@@ -54,6 +54,7 @@ namespace Xive.Xocument
             {
                 lock (cell)
                 {
+                    name = new Normalized(name).AsString();
                     return
                         new SimpleXocument(
                             new ScalarOf<XNode>(() =>
