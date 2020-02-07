@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Xive.Cache;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -37,8 +38,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversComb()
         {
-            var memory = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive("in-memory", memory);
+            var hive = new RamHive("in-memory");
             var catalog = new SimpleCatalog("in-memory", hive.HQ());
             catalog.Create("123");
 
@@ -48,8 +48,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftsScope()
         {
-            var mem = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive(mem);
+            var hive = new RamHive();
             var catalog = new SimpleCatalog(hive);
             catalog.Create("123");
 
@@ -62,7 +61,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DistinguishesScope()
         {
-            var mem = new Dictionary<string, MemoryStream>();
+            var mem = new SimpleMemories();
             var hive = new RamHive(mem);
             var catalog = new SimpleCatalog(hive);
             catalog.Create("123");
@@ -71,15 +70,14 @@ namespace Xive.Hive.Test
             var twilightCatalog = new SimpleCatalog(shifted);
             twilightCatalog.Create("789");
 
-            Assert.Contains("twilight-zone/hq/catalog.xml", mem.Keys);
+            Assert.Contains("twilight-zone/hq/catalog.xml", mem.XML().Knowledge());
         }
 
         [Fact]
         public void DeliversHQCell()
         {
-            var mem = new Dictionary<string, MemoryStream>();
             string expected = "Four headquarters are one head";
-            var hive = new RamHive("in-memory", mem);
+            var hive = new RamHive("in-memory");
             hive.HQ().Cell("catalog.xml").Update(new InputOf(expected));
             Assert.Equal(
                 expected,
@@ -109,8 +107,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQXocument()
         {
-            var mem = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive("in-memory", mem);
+            var hive = new RamHive("in-memory");
             hive.HQ().Xocument("catalog.xml")
                 .Modify(
                     new Directives()

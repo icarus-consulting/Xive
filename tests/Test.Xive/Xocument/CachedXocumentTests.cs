@@ -43,7 +43,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void FillsCacheWithContent()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
 
             new CachedXocument(
                 "speedup/buffered.xml",
@@ -83,7 +83,7 @@ namespace Xive.Xocument.Test
         public void ReadsContentFromCache()
         {
             var reads = 0;
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var xoc =
                 new CachedXocument(
                     "speedup/buffered.xml",
@@ -110,7 +110,7 @@ namespace Xive.Xocument.Test
             var encoding = Encoding.GetEncoding(name);
             var inBytes = encoding.GetBytes("Can or can't I dö prüpär äncöding?");
 
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
 
             using (var dir = new TempDirectory())
             using (var item = new FileCell(Path.Combine(dir.Value().FullName, "encoded.xml")))
@@ -146,7 +146,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void PreventsTypeSwitching()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var content = new InputOf("add some data so that cache memorizes").Stream();
             var memory = new MemoryStream();
             content.CopyTo(memory);
@@ -167,7 +167,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void UpdatesCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var xoc =
                 new CachedXocument(
                     "update-me/buffered.xml",

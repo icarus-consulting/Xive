@@ -42,7 +42,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void ReadsBinaryOnce()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -126,7 +126,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void ReadsXmlOnce()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -152,7 +152,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void FillsBinCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -185,7 +185,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void FillsXmlCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var comb =
                 new CachedComb(
                     new SimpleComb(
@@ -217,7 +217,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void UpdatesBinaryCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             int reads = 0;
             var comb =
                 new CachedComb(
@@ -251,7 +251,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void UpdatesXmlCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var contents = new string[] { "<root>old</root>", "<root>new</root>" };
             var index = 0;
             var comb =

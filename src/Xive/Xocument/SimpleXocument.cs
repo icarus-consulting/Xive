@@ -73,9 +73,12 @@ namespace Xive.Xocument
         public SimpleXocument(string rootName, Action<XNode> update) : this(
             new Sticky<XNode>(() =>
             {
+                rootName = new Normalized(rootName).AsString();
                 if (rootName.ToLower().EndsWith(".xml"))
                 {
                     rootName = rootName.Substring(0, rootName.Length - 4);
+                    rootName = rootName.Substring(rootName.LastIndexOf("/"));
+                    rootName = rootName.TrimStart('/');
                 }
                 return
                     new XDocument(

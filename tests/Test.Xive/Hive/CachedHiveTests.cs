@@ -40,7 +40,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ReadsBinaryOnce()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -81,7 +81,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ConsidersMaxBytes()
         {
-            var cache = new LimitedCache(0, new SimpleCache());
+            var cache = new LimitedCache(0, new SimpleMemory());
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -122,7 +122,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ConsidersMaxBytesOnShifted()
         {
-            var cache = new LimitedCache(0, new SimpleCache());
+            var cache = new LimitedCache(0, new SimpleMemory());
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -163,7 +163,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ConsidersMaxBytesOnHQ()
         {
-            var cache = new LimitedCache(0, new SimpleCache());
+            var cache = new LimitedCache(0, new SimpleMemory());
             int reads = 0;
             var hive =
                 new CachedHive(
@@ -279,7 +279,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftingRamHiveIncludesScope()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
 
             var hive =
                 new CachedHive(
@@ -303,7 +303,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var cache = new SimpleCache();
+                var cache = new SimpleMemory();
 
                 var hive =
                     new CachedHive(
@@ -326,7 +326,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var cache = new SimpleCache();
+                var cache = new SimpleMemory();
 
                 var hive =
                     new CachedHive(
@@ -364,7 +364,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var cache = new SimpleCache();
+                var cache = new SimpleMemory();
 
                 var hive =
                     new CachedHive(

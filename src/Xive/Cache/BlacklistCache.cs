@@ -13,25 +13,25 @@ namespace Xive.Hive
     /// <summary>
     /// A cache that accepts a blacklist and only caches if the requested item is not in the list.
     /// </summary>
-    public sealed class BlacklistCache : IMemory
+    public sealed class BlacklistCache : ICache
     {
         private readonly IScalar<string[]> patterns;
         private readonly StickyFunc<string, bool> blacklisted;
-        private readonly IMemory origin;
+        private readonly ICache origin;
 
         /// <summary>
         /// A cache that accepts a blacklist and only caches if the requested item is not in the list.
         /// </summary>
         public BlacklistCache(params string[] blacklisted) : this(
             new ListOf<string>(blacklisted),
-            new SimpleCache()
+            new SimpleMemory()
         )
         { }
 
         /// <summary>
         /// A cache that accepts a blacklist and only caches if the requested item is not in the list.
         /// </summary>
-        public BlacklistCache(IList<string> blacklist, IMemory origin)
+        public BlacklistCache(IList<string> blacklist, ICache origin)
         {
             this.patterns =
                 new Sticky<string[]>(() =>

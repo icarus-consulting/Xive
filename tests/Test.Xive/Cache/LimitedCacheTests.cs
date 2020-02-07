@@ -14,7 +14,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void DoesNotCacheOversized()
         {
-            var cache = new LimitedCache(0, new SimpleCache());
+            var cache = new LimitedCache(0, new SimpleMemory());
 
             Assert.NotEqual(
                 cache.Binary("a", () => new MemoryStream(new BytesOf(new Random().Next().ToString()).AsBytes())),
@@ -25,7 +25,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void CachesValidSize()
         {
-            var cache = new LimitedCache(2048, new SimpleCache());
+            var cache = new LimitedCache(2048, new SimpleMemory());
 
             Assert.Equal(
                 cache.Binary("a", () => new MemoryStream(new BytesOf(new Random().Next().ToString()).AsBytes())),
@@ -36,7 +36,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void Updates()
         {
-            var cache = new LimitedCache(2048, new SimpleCache());
+            var cache = new LimitedCache(2048, new SimpleMemory());
             var bytes = new BytesOf("updated").AsBytes();
             cache.Update("content", new MemoryStream(bytes));
 
@@ -49,7 +49,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void DoesNotUpdateOversized()
         {
-            var cache = new LimitedCache(2, new SimpleCache());
+            var cache = new LimitedCache(2, new SimpleMemory());
             var bytes = new BytesOf("updated").AsBytes();
             cache.Update("content", new MemoryStream(bytes));
 

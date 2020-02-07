@@ -16,7 +16,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void CachesBinaries()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
 
             Assert.Equal(
                 cache.Binary(
@@ -36,7 +36,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void CachesXml()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
 
             Assert.Equal(
                 cache.Xml(
@@ -53,7 +53,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void UpdatesCacheWithXNode()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var node = new XElement("node", new XText("someNiceNode"));
             cache.Update(
                 "test",
@@ -71,7 +71,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void UpdatesCacheWithBinary()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var binary = new MemoryStream(new BytesOf("nice binary things").AsBytes());
             cache.Update(
                 "test",
@@ -89,7 +89,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void RejectsCrossUsageOfXML()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             cache.Xml("test", () => new XElement("a"));
             Assert.Throws<InvalidOperationException>(() => 
                 cache.Binary("test", () => new MemoryStream())
@@ -99,7 +99,7 @@ namespace Xive.Test.Cache
         [Fact]
         public void RejectsCrossUsageOfBinary()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var content = new InputOf("add some data so that cache memorizes").Stream();
             var memory = new MemoryStream();
             content.CopyTo(memory);

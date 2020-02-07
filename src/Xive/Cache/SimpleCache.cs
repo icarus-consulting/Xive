@@ -8,7 +8,7 @@ namespace Xive.Hive
     /// <summary>
     /// A simple cache.
     /// </summary>
-    public sealed class SimpleCache : IMemory
+    public sealed class SimpleMemory : ICache
     {
         private readonly ConcurrentDictionary<string, MemoryStream> binMemory;
         private readonly ConcurrentDictionary<string, XNode> xmlMemory;
@@ -17,7 +17,7 @@ namespace Xive.Hive
         /// <summary>
         /// A simple cache.
         /// </summary>
-        public SimpleCache() : this(
+        public SimpleMemory() : this(
             new ConcurrentDictionary<string, MemoryStream>(),
             new ConcurrentDictionary<string, XNode>(),
             new ConcurrentDictionary<string, IProps>()
@@ -29,7 +29,7 @@ namespace Xive.Hive
         /// </summary>
         /// <param name="binaries">A pre-filled cache of binaries</param>
         /// <param name="xmls">A pre-filled cache of xml nodes</param>
-        public SimpleCache(
+        public SimpleMemory(
             ConcurrentDictionary<string, MemoryStream> binaries,
             ConcurrentDictionary<string, XNode> xmls,
             ConcurrentDictionary<string, IProps> propsMemory

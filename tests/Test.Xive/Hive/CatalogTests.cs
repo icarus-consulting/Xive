@@ -37,22 +37,16 @@ using System.Collections.Concurrent;
 
 namespace Xive.Hive.Test
 {
-    public sealed class CatalogTests
+    public sealed class SimpleCatalogTests
     {
         [Theory]
         [InlineData("123")]
         [InlineData("456")]
         public void AddsEntry(string id)
         {
-            var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new SimpleCatalog(
-                    "my-hive",
-                    new SimpleComb(
-                        "hq",
-                        cell => new RamCell(cell, memory),
-                        (cellName, cell) => new CellXocument(cell, cellName)
-                    )
+                new SimpleCatalog("my-scope",
+                    new RamComb("hq")
                 );
 
             catalog.Create("123");
@@ -67,15 +61,9 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemovesEntry()
         {
-            var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new SimpleCatalog(
-                    "my-hive",
-                    new SimpleComb(
-                        "hq",
-                        cell => new RamCell(cell, memory),
-                        (cellName, cell) => new CellXocument(cell, cellName)
-                    )
+                new SimpleCatalog("my-scope",
+                    new RamComb("hq")
                 );
 
             catalog.Update("123", new Directives());
@@ -90,15 +78,9 @@ namespace Xive.Hive.Test
         [Fact]
         public void UpdatesEntry()
         {
-            var memory = new Dictionary<string, MemoryStream>();
             var catalog =
-                new SimpleCatalog(
-                    "my-hive",
-                    new SimpleComb(
-                        "hq",
-                        cell => new RamCell(cell, memory),
-                        (cellName, cell) => new CellXocument(cell, cellName)
-                    )
+                new SimpleCatalog("my-scope",
+                    new RamComb("hq")
                 );
 
             catalog.Create("123");

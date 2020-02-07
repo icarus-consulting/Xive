@@ -21,54 +21,20 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
-using System.IO;
-using System.Xml.Linq;
-using Xive.Cell;
-using Xive.Hive;
-using Xive.Xocument;
+using Yaapii.Xambly;
 
-namespace Xive.Comb
+namespace Xive
 {
-    /// <summary>
-    /// A comb that is cached in memory.
-    /// </summary>
-    public sealed class CachedComb : IHoneyComb
+    public interface IIndex
     {
-        private readonly ICache cache;
-        private readonly IHoneyComb comb;
+        void Add(string id);
+        bool Has(string id);
+        IEnumerable<string> Find(params IIndexFilter[] filters);
+        void Remove(string id);
+    }
 
-        /// <summary>
-        /// A comb that is cached in memory.
-        /// </summary>
-        public CachedComb(IHoneyComb comb, ICache cache)
-        {
-            this.comb = comb;
-            this.cache = cache;
-        }
+    public interface IIndexFilter
+    {
 
-        public ICell Cell(string name)
-        {
-            return
-                new CachedCell(
-                    this.comb.Cell(name),
-                    $"{this.comb.Name()}/{name}",
-                    this.cache
-                );
-        }
-
-        public string Name()
-        {
-            return this.comb.Name();
-        }
-
-        public IXocument Xocument(string name)
-        {
-            return
-                new CachedXocument(
-                    $"{this.comb.Name()}/{name}",
-                    this.comb.Xocument(name),
-                    this.cache
-                );
-        }
     }
 }

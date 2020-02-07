@@ -40,7 +40,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ReadsOnce()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             int reads = 0;
             var cell =
                 new CachedCell(
@@ -90,7 +90,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void FillsCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             new CachedCell(
                 new FkCell(
                     content => { },
@@ -114,7 +114,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UpdatesCache()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             var cell =
                 new CachedCell(
                     new FkCell(
@@ -140,7 +140,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void PreventsTypeSwitching()
         {
-            var cache = new SimpleCache();
+            var cache = new SimpleMemory();
             cache.Xml("cached/xml", () => new XElement("irrelevant"));
 
             var binCell =
@@ -158,7 +158,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ReadSkipsCacheWhenOversized()
         {
-            var cache = new LimitedCache(64, new SimpleCache());
+            var cache = new LimitedCache(64, new SimpleMemory());
             var cell =
                 new CachedCell(
                     new FkCell(
@@ -179,7 +179,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UpdateSkipsCacheWhenOversized()
         {
-            var cache = new LimitedCache(64, new SimpleCache());
+            var cache = new LimitedCache(64, new SimpleMemory());
             var cell =
                 new CachedCell(
                     new FkCell(),
@@ -199,7 +199,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void UnderMaxAndThenOverMaxWorks()
         {
-            var cache = new LimitedCache(3, new SimpleCache());
+            var cache = new LimitedCache(3, new SimpleMemory());
             var cell =
                 new CachedCell(
                     new RamCell(),

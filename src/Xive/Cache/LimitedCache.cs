@@ -7,15 +7,15 @@ namespace Xive.Hive
     /// <summary>
     /// A cache that does only cache when items are smaller than the given bytes size.
     /// </summary>
-    public sealed class LimitedCache : IMemory
+    public sealed class LimitedCache : ICache
     {
         private readonly int maxBytes;
-        private readonly IMemory origin;
+        private readonly ICache origin;
 
         /// <summary>
         /// A cache that does only cache when items are smaller than the given bytes size.
         /// </summary>
-        public LimitedCache(int maxBytes, IMemory origin)
+        public LimitedCache(int maxBytes, ICache origin)
         {
             this.maxBytes = maxBytes;
             this.origin = origin;

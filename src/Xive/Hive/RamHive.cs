@@ -22,8 +22,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using Xive.Cache;
 using Xive.Comb;
+using Xive.Props;
 using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Hive
@@ -35,7 +36,7 @@ namespace Xive.Hive
     {
         private readonly string scope;
         private readonly Func<IHoneyComb, IHoneyComb> wrap;
-        private readonly IDictionary<string, MemoryStream> memory;
+        private readonly IMemories mem;
 
         /// <summary>
         /// A hive that lives in memory.
@@ -55,7 +56,7 @@ namespace Xive.Hive
         public RamHive(string name) : this(
             name,
             comb => comb,
-            new Dictionary<string, MemoryStream>()
+            new SimpleMemories()
         )
         { }
 
@@ -67,7 +68,7 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="memory">An external memory for the hive</param>
         /// <param name="combWrap">Wrap the comb if needed.</param>
-        public RamHive(Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory) : this(
+        public RamHive(Func<IHoneyComb, IHoneyComb> combWrap, IMemories memory) : this(
             "X",
             combWrap,
             memory
@@ -83,7 +84,7 @@ namespace Xive.Hive
         public RamHive(Func<IHoneyComb, IHoneyComb> combWrap) : this(
             "X",
             combWrap,
-            new Dictionary<string, MemoryStream>()
+            new SimpleMemories()
         )
         { }
 
@@ -96,7 +97,7 @@ namespace Xive.Hive
         public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap) : this(
             name,
             combWrap,
-            new Dictionary<string, MemoryStream>()
+            new SimpleMemories()
         )
         { }
 
@@ -107,7 +108,7 @@ namespace Xive.Hive
         /// </summary>
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public RamHive(IDictionary<string, MemoryStream> memory) : this(
+        public RamHive(IMemories memory) : this(
             "X",
             comb => comb,
             memory
@@ -121,7 +122,7 @@ namespace Xive.Hive
         /// </summary>
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
-        public RamHive(string name, IDictionary<string, MemoryStream> memory) : this(
+        public RamHive(string name, IMemories memory) : this(
             name,
             comb => comb,
             memory
@@ -136,11 +137,11 @@ namespace Xive.Hive
         /// <param name="name">Unique name of the hive</param>
         /// <param name="catalog">How the hive should build its catalog: (hiveName, comb) => new SomeCatalog(hiveName, comb)</param>
         /// <param name="memory">An external memory for the hive</param>
-        public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IDictionary<string, MemoryStream> memory)
+        public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap, IMemories memory)
         {
             this.scope = name;
             this.wrap = combWrap;
-            this.memory = memory;
+            this.mem = memory;
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
@@ -168,7 +169,7 @@ namespace Xive.Hive
 
         public IHive Shifted(string scope)
         {
-            return new RamHive(scope, this.wrap, this.memory);
+            return new RamHive(scope, this.wrap, this.mem);
         }
 
         public string Scope()
@@ -178,7 +179,9 @@ namespace Xive.Hive
 
         private IHoneyComb Comb(string name)
         {
-            return new RamComb($"{this.scope}/{name}", this.memory);
+            var props = new SimpleProps(new RamComb($"{this.scope}/HQ", this.mem), name); 
+            this.mem.Props().Update(name, props); //prepare props, they are inside HQ/catalog.xml - the comb itself does not have access to the HQ.
+            return new RamComb($"{this.scope}/{name}", this.mem);
         }
     }
 }

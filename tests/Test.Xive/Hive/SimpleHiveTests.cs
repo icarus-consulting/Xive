@@ -20,12 +20,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Collections.Generic;
-using System.IO;
+using Xive.Comb;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
-using Xive.Comb;
 
 namespace Xive.Hive.Test
 {
@@ -34,11 +32,10 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQ()
         {
-            var mem = new Dictionary<string, MemoryStream>();
             var hq =
                 new SimpleHive(
                     "person", 
-                    comb => new RamComb(comb, mem)
+                    comb => new RamComb(comb)
                 ).HQ();
 
             Assert.Equal($"person/HQ", hq.Name());
@@ -47,11 +44,10 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemembersHQ()
         {
-            var mem = new Dictionary<string, MemoryStream>();
             var hq =
                 new SimpleHive(
                     "person",
-                    comb => new RamComb(comb, mem)
+                    comb => new RamComb(comb)
                 ).HQ();
 
             hq.Cell("my-cell").Update(new InputOf("larva"));
@@ -69,11 +65,10 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversComb()
         {
-            var mem = new Dictionary<string, MemoryStream>();
             var hq =
                 new SimpleHive(
                     "person",
-                    comb => new RamComb(comb, mem)
+                    comb => new RamComb(comb)
                 ).HQ();
 
             var catalog = new SimpleCatalog("person", hq);
