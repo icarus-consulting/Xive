@@ -20,8 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Collections.Generic;
-using System.IO;
 using Xive.Cache;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -43,6 +41,28 @@ namespace Xive.Hive.Test
             catalog.Create("123");
 
             Assert.NotEmpty(catalog.List("@id='123'"));
+        }
+
+        [Fact]
+        public void DeliversProps()
+        {
+            var hive = new RamHive("in-memory");
+            var catalog = new SimpleCatalog("in-memory", hive.HQ());
+            catalog.Create("123");
+
+            new FirstOf<IHoneyComb>(
+                hive.Combs("'*'")
+            ).Value()
+            .Props()
+            .Refined("prop", "eller");
+
+            Assert.Equal(
+                "eller",
+                new FirstOf<IHoneyComb>(hive.Combs("'*'"))
+                    .Value()
+                    .Props()
+                    .Value("prop")
+            );
         }
 
         [Fact]

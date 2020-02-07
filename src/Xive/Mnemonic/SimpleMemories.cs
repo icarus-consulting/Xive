@@ -10,7 +10,7 @@ namespace Xive.Cache
         private readonly IMemory<MemoryStream> dataMem;
         private readonly IMemory<IProps> propsMem;
 
-        public SimpleMemories() : this(new XmlMemory(), new DataMemory(), new PropsMemory())
+        public SimpleMemories() : this(new XmlRam(), new DataRam(), new PropsRam())
         { }
 
         public SimpleMemories(IMemory<XNode> xmlMem, IMemory<MemoryStream> dataMem, IMemory<IProps> propsMem)

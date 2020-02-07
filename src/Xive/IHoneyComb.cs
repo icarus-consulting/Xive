@@ -56,5 +56,12 @@ namespace Xive
         /// <param name="name">Unique name of the cell</param>
         /// <returns>The cell</returns>
         ICell Cell(string name);
+
+        /// <summary>
+        /// Get props.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        IProps Props();
     }
 }

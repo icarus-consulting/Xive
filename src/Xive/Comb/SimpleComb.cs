@@ -70,6 +70,11 @@ namespace Xive.Comb
             return this.name.Value();
         }
 
+        public IProps Props()
+        {
+            throw new NotImplementedException();
+        }
+
         public IXocument Xocument(string name)
         {
             return this.xocument(name, this.Cell(name));

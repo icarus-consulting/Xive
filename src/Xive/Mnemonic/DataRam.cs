@@ -9,20 +9,20 @@ namespace Xive.Cache
     /// <summary>
     /// Memory for XML nodes.
     /// </summary>
-    public sealed class DataMemory : IMemory<MemoryStream>
+    public sealed class DataRam : IMemory<MemoryStream>
     {
         private readonly ConcurrentDictionary<string, MemoryStream> mem;
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public DataMemory() : this(new ConcurrentDictionary<string, MemoryStream>())
+        public DataRam() : this(new ConcurrentDictionary<string, MemoryStream>())
         { }
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public DataMemory(ConcurrentDictionary<string, MemoryStream> mem)
+        public DataRam(ConcurrentDictionary<string, MemoryStream> mem)
         {
             this.mem = mem;
         }
@@ -46,7 +46,15 @@ namespace Xive.Cache
         public void Update(string name, MemoryStream content)
         {
             name = new Normalized(name).AsString();
-            this.mem.AddOrUpdate(name, content, (currentName, currentContent) => content);
+            if (content.Length == 0)
+            {
+                MemoryStream removed;
+                this.mem.TryRemove(name, out removed);
+            }
+            else
+            {
+                this.mem.AddOrUpdate(name, content, (currentName, currentContent) => content);
+            }
         }
     }
 }

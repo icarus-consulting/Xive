@@ -70,5 +70,10 @@ namespace Xive.Comb
                     this.syncValve
                 );
         }
+
+        public IProps Props()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

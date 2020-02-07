@@ -10,20 +10,20 @@ namespace Xive.Cache
     /// <summary>
     /// Memory for XML props.
     /// </summary>
-    internal sealed class PropsMemory : IMemory<IProps>
+    internal sealed class PropsRam : IMemory<IProps>
     {
         private readonly IScalar<ConcurrentDictionary<string, IProps>> mem;
 
         /// <summary>
         /// Memory for props.
         /// </summary>
-        internal PropsMemory() : this(new ConcurrentDictionary<string, IProps>())
+        internal PropsRam() : this(new ConcurrentDictionary<string, IProps>())
         { }
 
         /// <summary>
         /// Memory for props.
         /// </summary>
-        internal PropsMemory(string scope, string id, IProps props) : this(new Solid<ConcurrentDictionary<string, IProps>>(() =>
+        internal PropsRam(string scope, string id, IProps props) : this(new Solid<ConcurrentDictionary<string, IProps>>(() =>
             {
                 var mem = new ConcurrentDictionary<string, IProps>();
                 mem.AddOrUpdate(scope, props, (n, p) => props);
@@ -35,13 +35,13 @@ namespace Xive.Cache
         /// <summary>
         /// Memory for props.
         /// </summary>
-        internal PropsMemory(ConcurrentDictionary<string, IProps> mem) : this(new ScalarOf<ConcurrentDictionary<string, IProps>>(mem))
+        internal PropsRam(ConcurrentDictionary<string, IProps> mem) : this(new ScalarOf<ConcurrentDictionary<string, IProps>>(mem))
         { }
 
         /// <summary>
         /// Memory for props.
         /// </summary>
-        internal PropsMemory(IScalar<ConcurrentDictionary<string, IProps>> mem)
+        internal PropsRam(IScalar<ConcurrentDictionary<string, IProps>> mem)
         {
             this.mem = mem;
         }

@@ -49,6 +49,11 @@ namespace Xive.Comb
             return this.comb.Value().Name();
         }
 
+        public IProps Props()
+        {
+            return this.comb.Value().Props();
+        }
+
         public IXocument Xocument(string name)
         {
             return this.comb.Value().Xocument(name);

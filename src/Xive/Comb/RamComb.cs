@@ -24,6 +24,8 @@ using System;
 using Xive.Cache;
 using Xive.Cell;
 using Xive.Xocument;
+using Yaapii.Atoms;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Comb
 {
@@ -33,7 +35,7 @@ namespace Xive.Comb
     public sealed class RamComb : IHoneyComb
     {
         private readonly string name;
-        private readonly IMemories memory;
+        private readonly IScalar<IMemories> memory;
         private readonly Func<IXocument, IXocument> xocumentWrap;
         private readonly Func<ICell, ICell> cellWrap;
 
@@ -78,7 +80,15 @@ namespace Xive.Comb
         public RamComb(string name, Func<ICell, ICell> cellWrap, Func<IXocument, IXocument> xocumentWrap, IMemories mem)
         {
             this.name = name;
-            this.memory = mem;
+            this.memory = 
+                new Solid<IMemories>(() =>
+                {
+                    if(!mem.Props().Knows(name))
+                    {
+                        mem.Props().Update(name, new RamProps());
+                    }
+                    return mem;
+                });
             this.xocumentWrap = xocumentWrap;
             this.cellWrap = cellWrap;
         }
@@ -91,7 +101,7 @@ namespace Xive.Comb
         public IProps Props()
         {
             return 
-                this.memory
+                this.memory.Value()
                     .Props()
                     .Content(
                         name, 
@@ -102,7 +112,7 @@ namespace Xive.Comb
 
         public IXocument Xocument(string name)
         {
-            return this.xocumentWrap(new RamXocument($"{this.name}/{name}", this.memory));
+            return this.xocumentWrap(new MemorizedXocument($"{this.name}/{name}", this.memory.Value()));
         }
 
         public ICell Cell(string name)
@@ -142,7 +152,7 @@ namespace Xive.Comb
             //{
                 result = 
                     this.cellWrap(
-                        new RamCell($"{this.name}/{name}", this.memory)
+                        new RamCell($"{this.name}/{name}", this.memory.Value())
                     );
             //}
             return result;

@@ -8,13 +8,13 @@ using Yaapii.Xml;
 
 namespace Xive.Xocument
 {
-    public sealed class RamXocument : IXocument
+    public sealed class MemorizedXocument : IXocument
     {
         private readonly IMemories memories;
         private readonly Sticky<XNode> node;
         private readonly string name;
 
-        public RamXocument(string name, IMemories memories)
+        public MemorizedXocument(string name, IMemories memories)
         {
             this.memories = memories;
             this.node =

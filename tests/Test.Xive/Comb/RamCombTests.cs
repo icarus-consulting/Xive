@@ -74,6 +74,22 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
+        public void RemembersProps()
+        {
+            var memory = new SimpleMemories();
+            new RamComb("my-comb", memory)
+                .Props()
+                .Refined("beer", "astra");
+
+            Assert.Equal(
+                "astra",
+                new RamComb("my-comb", memory)
+                    .Props()
+                    .Value("beer")
+            );
+        }
+
+        [Fact]
         public void DeliversXocument()
         {
             var memory = new SimpleMemories();

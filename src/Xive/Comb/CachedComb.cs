@@ -61,6 +61,11 @@ namespace Xive.Comb
             return this.comb.Name();
         }
 
+        public IProps Props()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public IXocument Xocument(string name)
         {
             return
