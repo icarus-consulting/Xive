@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using Xive.Hive;
 using Xunit;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
@@ -99,34 +100,14 @@ namespace Xive.Test.Cache
         public void RejectsCrossUsageOfBinary()
         {
             var cache = new SimpleCache();
-            cache.Binary("test", () => new MemoryStream());
+            var content = new InputOf("add some data so that cache memorizes").Stream();
+            var memory = new MemoryStream();
+            content.CopyTo(memory);
+            memory.Seek(0, SeekOrigin.Begin);
+            cache.Binary("test", () => memory);
             Assert.Throws<InvalidOperationException>(() =>
                 cache.Xml("test", () => new XElement("a"))
             );
-        }
-
-        [Fact]
-        public void KnowsWhatItHas()
-        {
-            var cache = new SimpleCache();
-            cache.Binary("Cheezeburger", () => new MemoryStream());
-            Assert.True(cache.Has("Cheezeburger"));
-        }
-
-        [Fact]
-        public void IgnoresBackslashes()
-        {
-            var cache = new SimpleCache();
-            cache.Update("someName/file.txt", new MemoryStream(new BytesOf("hello").AsBytes()));
-            Assert.True(cache.Has("someName\\file.txt"));
-        }
-
-        [Fact]
-        public void IsCaseInsensitive()
-        {
-            var cache = new SimpleCache();
-            cache.Update("someName/file.txt", new MemoryStream(new BytesOf("hello").AsBytes()));
-            Assert.True(cache.Has("SOMEname\\file.TXT"));
         }
     }
 }

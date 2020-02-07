@@ -21,9 +21,6 @@
 //SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Xml.Linq;
 using Xive.Comb;
 using Xive.Test;
@@ -57,7 +54,7 @@ namespace Xive.Hive.Test
                                     () =>
                                     {
                                         reads++;
-                                        return new byte[0];
+                                        return new byte[1];
                                     }
                                 ),
                             (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)

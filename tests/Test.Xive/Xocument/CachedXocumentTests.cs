@@ -147,7 +147,11 @@ namespace Xive.Xocument.Test
         public void PreventsTypeSwitching()
         {
             var cache = new SimpleCache();
-            cache.Binary("cash\\cached.xml", () => new MemoryStream());
+            var content = new InputOf("add some data so that cache memorizes").Stream();
+            var memory = new MemoryStream();
+            content.CopyTo(memory);
+            memory.Seek(0, SeekOrigin.Begin);
+            cache.Binary("cash\\cached.xml", () => memory);
             var xoc =
                 new CachedXocument(
                     "cash/cached.xml",

@@ -5,6 +5,7 @@ using System.Text;
 using Xive.Hive;
 using Xunit;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.IO;
 
 namespace Xive.Test.Cache
 {

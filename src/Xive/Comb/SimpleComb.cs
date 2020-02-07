@@ -55,6 +55,10 @@ namespace Xive.Comb
             this.xocument = xocument;
         }
 
+        //public IProps Props()
+        //{
+        //}
+
         public ICell Cell(string name)
         {
             return 

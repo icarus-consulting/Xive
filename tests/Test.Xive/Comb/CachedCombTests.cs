@@ -54,7 +54,7 @@ namespace Xive.Comb.Test
                                 () =>
                                 {
                                     reads++;
-                                    return new byte[0];
+                                    return new byte[1];
                                 }
                             ),
                         (xocName, cell) => new FkXocument()
@@ -83,7 +83,7 @@ namespace Xive.Comb.Test
                                 () =>
                                 {
                                     reads++;
-                                    return new byte[0];
+                                    return new byte[1];
                                 }
                             ),
                         (xocName, cell) => new FkXocument()
@@ -229,7 +229,7 @@ namespace Xive.Comb.Test
                                 () =>
                                 {
                                     reads++;
-                                    return new EmptyBytes().AsBytes();
+                                    return new byte[0];
                                 }
                             ),
                         (xocName, cell) => new FkXocument()

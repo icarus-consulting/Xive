@@ -38,7 +38,7 @@ namespace Xive.Xocument
     {
         private readonly IText name;
         private readonly IXocument origin;
-        private readonly ICache cache;
+        private readonly IMemory cache;
 
         /// <summary>
         /// A Xocument whose data is cached.
@@ -47,7 +47,7 @@ namespace Xive.Xocument
         /// <param name="name"></param>
         /// <param name="origin"></param>
         /// <param name="xmlMemory"></param>
-        public CachedXocument(string name, IXocument origin, ICache cache)
+        public CachedXocument(string name, IXocument origin, IMemory cache)
         {
             this.name = new Normalized(name);
             this.origin = origin;

@@ -7,24 +7,31 @@ namespace Xive.Hive
     /// <summary>
     /// A cache that does only cache when items are smaller than the given bytes size.
     /// </summary>
-    public sealed class LimitedCache : ICache
+    public sealed class LimitedCache : IMemory
     {
         private readonly int maxBytes;
-        private readonly ICache origin;
+        private readonly IMemory origin;
 
         /// <summary>
         /// A cache that does only cache when items are smaller than the given bytes size.
         /// </summary>
-        public LimitedCache(int maxBytes, ICache origin)
+        public LimitedCache(int maxBytes, IMemory origin)
         {
             this.maxBytes = maxBytes;
             this.origin = origin;
         }
 
+        public IProps Props(string name, Func<IProps> ifAbsent)
+        {
+            return this.origin.Props(name, ifAbsent);
+        }
+
         public MemoryStream Binary(string name, Func<MemoryStream> ifAbsent)
         {
+            var exists = true;
+            this.origin.Binary(name, () => { exists = false; return new MemoryStream(); });
             MemoryStream result;
-            if (!this.origin.Has(name))
+            if (!exists)
             {
                 result = ifAbsent();
                 if (result.Length <= this.maxBytes)
@@ -59,11 +66,6 @@ namespace Xive.Hive
         public XNode Xml(string name, Func<XNode> ifAbsent)
         {
             return this.origin.Xml(name, ifAbsent);
-        }
-
-        public bool Has(string name)
-        {
-            return this.origin.Has(name);
         }
     }
 }

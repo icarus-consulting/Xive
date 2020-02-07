@@ -34,6 +34,12 @@ namespace Xive
         string Name();
 
         /// <summary>
+        /// Props for this capsule.
+        /// </summary>
+        /// <returns></returns>
+        //IProps Props();
+
+        /// <summary>
         /// Get cell content as a Xocument by its unique name.
         /// It is not needed to seperately create a cell - just acquire it, 
         /// the Comb will build it if necessary.

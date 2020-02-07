@@ -13,11 +13,11 @@ namespace Xive.Hive
     /// <summary>
     /// A cache that accepts a blacklist and only caches if the requested item is not in the list.
     /// </summary>
-    public sealed class BlacklistCache : ICache
+    public sealed class BlacklistCache : IMemory
     {
         private readonly IScalar<string[]> patterns;
         private readonly StickyFunc<string, bool> blacklisted;
-        private readonly ICache origin;
+        private readonly IMemory origin;
 
         /// <summary>
         /// A cache that accepts a blacklist and only caches if the requested item is not in the list.
@@ -31,7 +31,7 @@ namespace Xive.Hive
         /// <summary>
         /// A cache that accepts a blacklist and only caches if the requested item is not in the list.
         /// </summary>
-        public BlacklistCache(IList<string> blacklist, ICache origin)
+        public BlacklistCache(IList<string> blacklist, IMemory origin)
         {
             this.patterns =
                 new Sticky<string[]>(() =>
@@ -45,6 +45,11 @@ namespace Xive.Hive
                 });
             this.blacklisted = new StickyFunc<string, bool>((name) => this.IsBlacklisted(name));
             this.origin = origin;
+        }
+
+        public IProps Props(string name, Func<IProps> ifAbsent)
+        {
+            return this.origin.Props(name, ifAbsent);
         }
 
         public MemoryStream Binary(string name, Func<MemoryStream> ifAbsent)
@@ -89,11 +94,6 @@ namespace Xive.Hive
                 result = ifAbsent();
             }
             return result;
-        }
-
-        public bool Has(string name)
-        {
-            return this.origin.Has(name);
         }
 
         private bool IsBlacklisted(string name)

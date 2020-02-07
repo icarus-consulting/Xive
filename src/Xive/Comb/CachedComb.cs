@@ -34,13 +34,13 @@ namespace Xive.Comb
     /// </summary>
     public sealed class CachedComb : IHoneyComb
     {
-        private readonly ICache cache;
+        private readonly IMemory cache;
         private readonly IHoneyComb comb;
 
         /// <summary>
         /// A comb that is cached in memory.
         /// </summary>
-        public CachedComb(IHoneyComb comb, ICache cache)
+        public CachedComb(IHoneyComb comb, IMemory cache)
         {
             this.comb = comb;
             this.cache = cache;

@@ -34,12 +34,12 @@ namespace Xive.Cell
     {
         private readonly ICell origin;
         private readonly IText name;
-        private readonly ICache cache;
+        private readonly IMemory cache;
 
         /// <summary>
         /// A cell whose content is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, ICache cache)
+        public CachedCell(ICell origin, string name, IMemory cache)
         {
             this.origin = origin;
             this.name = new Normalized(name);

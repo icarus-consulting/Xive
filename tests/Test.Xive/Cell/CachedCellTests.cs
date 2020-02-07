@@ -49,7 +49,7 @@ namespace Xive.Cell.Test
                         () =>
                         {
                             reads++;
-                            return new byte[0];
+                            return new byte[1];
                         }
                     ),
                     "cached",

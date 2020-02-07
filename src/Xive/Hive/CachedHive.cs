@@ -33,7 +33,7 @@ namespace Xive.Hive
     /// <param name="origin"></param>
     public sealed class CachedHive : IHive
     {
-        private readonly ICache cache;
+        private readonly IMemory cache;
         private readonly IHive origin;
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Xive.Hive
         /// By using this ctor, the contents of the hive will live in the injected memories.
         /// </summary>
         /// <param name="origin"></param>
-        public CachedHive(IHive origin, ICache cache)
+        public CachedHive(IHive origin, IMemory cache)
         {
             this.cache = cache;
             this.origin = origin;

@@ -8,17 +8,19 @@ namespace Xive.Hive
     /// <summary>
     /// A simple cache.
     /// </summary>
-    public sealed class SimpleCache : ICache
+    public sealed class SimpleCache : IMemory
     {
         private readonly ConcurrentDictionary<string, MemoryStream> binMemory;
         private readonly ConcurrentDictionary<string, XNode> xmlMemory;
+        private readonly ConcurrentDictionary<string, IProps> propsMemory;
 
         /// <summary>
         /// A simple cache.
         /// </summary>
         public SimpleCache() : this(
             new ConcurrentDictionary<string, MemoryStream>(),
-            new ConcurrentDictionary<string, XNode>()
+            new ConcurrentDictionary<string, XNode>(),
+            new ConcurrentDictionary<string, IProps>()
         )
         { }
 
@@ -29,17 +31,18 @@ namespace Xive.Hive
         /// <param name="xmls">A pre-filled cache of xml nodes</param>
         public SimpleCache(
             ConcurrentDictionary<string, MemoryStream> binaries,
-            ConcurrentDictionary<string, XNode> xmls
+            ConcurrentDictionary<string, XNode> xmls,
+            ConcurrentDictionary<string, IProps> propsMemory
         )
         {
             this.binMemory = binaries;
             this.xmlMemory = xmls;
+            this.propsMemory = propsMemory;
         }
 
-        public bool Has(string name)
+        public IProps Props(string name, Func<IProps> ifAbsent)
         {
-            name = new Normalized(name).AsString();
-            return this.xmlMemory.ContainsKey(name) || this.binMemory.ContainsKey(name);
+            return this.propsMemory.GetOrAdd(name, (key) => ifAbsent());
         }
 
         public void Update(string name, MemoryStream binary)
@@ -64,6 +67,7 @@ namespace Xive.Hive
 
         public MemoryStream Binary(string name, Func<MemoryStream> ifAbsent)
         {
+            MemoryStream result = new MemoryStream();
             name = new Normalized(name).AsString();
             if (!binMemory.ContainsKey(name))
             {
@@ -75,9 +79,18 @@ namespace Xive.Hive
                             + " Caching only works with consistent usage of contents."
                         );
                 }
-                binMemory[name] = ifAbsent();
+                var data = ifAbsent();
+                if (data.Length > 0)
+                {
+                    binMemory[name] = data;
+                    result = data;
+                }
             }
-            return this.binMemory[name];
+            else
+            {
+                result = binMemory[name];
+            }
+            return result;
         }
 
         public XNode Xml(string name, Func<XNode> ifAbsent)
