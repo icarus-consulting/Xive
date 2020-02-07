@@ -35,7 +35,7 @@ namespace Xive.Comb
     public sealed class RamComb : IHoneyComb
     {
         private readonly string name;
-        private readonly IScalar<IMemories> memory;
+        private readonly IMemories memory;
         private readonly Func<IXocument, IXocument> xocumentWrap;
         private readonly Func<ICell, ICell> cellWrap;
 
@@ -80,15 +80,7 @@ namespace Xive.Comb
         public RamComb(string name, Func<ICell, ICell> cellWrap, Func<IXocument, IXocument> xocumentWrap, IMemories mem)
         {
             this.name = name;
-            this.memory = 
-                new Solid<IMemories>(() =>
-                {
-                    if(!mem.Props().Knows(name))
-                    {
-                        mem.Props().Update(name, new RamProps());
-                    }
-                    return mem;
-                });
+            this.memory = mem;
             this.xocumentWrap = xocumentWrap;
             this.cellWrap = cellWrap;
         }
@@ -100,19 +92,16 @@ namespace Xive.Comb
 
         public IProps Props()
         {
-            return 
-                this.memory.Value()
-                    .Props()
-                    .Content(
-                        name, 
-                        () => throw new ApplicationException($"cannot find props for '{name}' in memory. Props should have been created before the comb is created."
-                    )
-                );
+            var root = this.name.Substring(0, this.name.LastIndexOf("/"));
+            var id = this.name.Substring(this.name.LastIndexOf("/" + 1));
+            return
+                this.memory
+                    .Props(root, id);
         }
 
         public IXocument Xocument(string name)
         {
-            return this.xocumentWrap(new MemorizedXocument($"{this.name}/{name}", this.memory.Value()));
+            return this.xocumentWrap(new MemorizedXocument($"{this.name}/{name}", this.memory));
         }
 
         public ICell Cell(string name)
@@ -152,7 +141,7 @@ namespace Xive.Comb
             //{
                 result = 
                     this.cellWrap(
-                        new RamCell($"{this.name}/{name}", this.memory.Value())
+                        new RamCell($"{this.name}/{name}", this.memory)
                     );
             //}
             return result;

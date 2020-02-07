@@ -179,8 +179,6 @@ namespace Xive.Hive
 
         private IHoneyComb Comb(string name)
         {
-            var props = new SimpleProps(new RamComb($"{this.scope}/HQ", this.mem), name); 
-            this.mem.Props().Update(name, props); //prepare props, they are inside HQ/catalog.xml - the comb itself does not have access to the HQ.
             return new RamComb($"{this.scope}/{name}", this.mem);
         }
     }

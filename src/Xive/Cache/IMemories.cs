@@ -6,7 +6,7 @@ namespace Xive.Cache
 {
     public interface IMemories
     {
-        IMemory<IProps> Props();
+        IProps Props(string scope, string id);
         IMemory<XNode> XML();
         IMemory<MemoryStream> Data();
     }

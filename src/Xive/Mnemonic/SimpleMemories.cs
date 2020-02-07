@@ -1,6 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Concurrent;
+using System.IO;
 using System.Xml.Linq;
 using Xive.Hive;
+using Xive.Props;
+using Xive.Xocument;
 
 namespace Xive.Cache
 {
@@ -8,21 +12,29 @@ namespace Xive.Cache
     {
         private readonly IMemory<XNode> xmlMem;
         private readonly IMemory<MemoryStream> dataMem;
-        private readonly IMemory<IProps> propsMem;
+        private readonly ConcurrentDictionary<string, IProps> propsMem;
 
-        public SimpleMemories() : this(new XmlRam(), new DataRam(), new PropsRam())
+        public SimpleMemories() : this(new XmlRam(), new DataRam())
         { }
 
-        public SimpleMemories(IMemory<XNode> xmlMem, IMemory<MemoryStream> dataMem, IMemory<IProps> propsMem)
+        public SimpleMemories(IMemory<XNode> xmlMem, IMemory<MemoryStream> dataMem)
         {
             this.xmlMem = xmlMem;
             this.dataMem = dataMem;
-            this.propsMem = propsMem;
+            this.propsMem = new ConcurrentDictionary<string, IProps>();
         }
 
-        public IMemory<IProps> Props()
+        public IProps Props(string scope, string id)
         {
-            return this.propsMem;
+            return
+                this.propsMem.GetOrAdd(
+                    $"{scope}/{id}",
+                    key =>
+                    new XocumentProps(
+                        new MemorizedXocument($"{scope}/hq/catalog.xml", this),
+                        id
+                    )
+                );
         }
 
         public IMemory<XNode> XML()

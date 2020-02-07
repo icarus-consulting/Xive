@@ -15,9 +15,9 @@ namespace Xive.Cache
             this.origin = origin;
         }
 
-        public IMemory<IProps> Props()
+        public IProps Props(string scope, string id)
         {
-            return new LayeredMemory<IProps>(this.layer, this.origin.Props());
+            return this.origin.Props(scope, id);
         }
 
         public IMemory<XNode> XML()
