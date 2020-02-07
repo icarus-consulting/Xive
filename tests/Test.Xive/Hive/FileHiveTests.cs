@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using Test.Yaapii.Xive;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -234,28 +233,6 @@ namespace Xive.Hive.Test
                         ).AsString()
                     );
                 }
-            }
-        }
-
-        [Fact]
-        public void FailsOnEmptyDirectory()
-        {
-            using (var dir = new TempDirectory())
-            {
-                Assert.Throws<ArgumentException>(() =>
-                    new FileHive("product", "").Combs("@id='karre'")
-                );
-            }
-        }
-
-        [Fact]
-        public void FailsOnMissingRootPath()
-        {
-            using (var dir = new TempDirectory())
-            {
-                Assert.Throws<ArgumentException>(() =>
-                    new FileHive("product", "dir").Combs("@id='karre'")
-                );
             }
         }
 

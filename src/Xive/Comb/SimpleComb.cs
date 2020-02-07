@@ -20,64 +20,92 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
-using System.IO;
+using Xive.Cache;
+using Xive.Cell;
+using Xive.Xocument;
 using Yaapii.Atoms;
-using Yaapii.Atoms.Scalar;
 
 namespace Xive.Comb
 {
     /// <summary>
-    /// A simple comb that is dumb: You need to tell it,
-    /// how to create items.
+    /// A simple comb.
     /// </summary>
-    public class SimpleComb : IHoneyComb
+    public sealed class SimpleComb : IHoneyComb
     {
-        private readonly IScalar<string> name;
-        private readonly Func<string, ICell> cell;
-        private readonly Func<string, ICell, IXocument> xocument;
+        private readonly IText name;
+        private readonly IMemories memory;
 
         /// <summary>
-        /// A simple comb that is dumb: You need to tell it,
-        /// how to create cells and how to create a xocument.
+        /// A comb which exists in memory.
+        /// By using this ctor, every RamComb with the same name will have the same contents.
         /// </summary>
-        public SimpleComb(string name, Func<string, ICell> cell, Func<string, ICell, IXocument> xocument) : this(new ScalarOf<string>(name), cell, xocument)
-        { }
-
-        /// <summary>
-        /// A simple comb that is dumb: You need to tell it,
-        /// how to create cells and how to create a xocument.
-        /// </summary>
-        public SimpleComb(IScalar<string> name, Func<string, ICell> cell, Func<string, ICell, IXocument> xocument)
+        public SimpleComb(string name, IMemories mem)
         {
-            this.name = name;
-            this.cell = cell;
-            this.xocument = xocument;
-        }
-
-        //public IProps Props()
-        //{
-        //}
-
-        public ICell Cell(string name)
-        {
-            return 
-                this.cell($"{this.name.Value()}/{name}");
+            this.name = new Normalized(name);
+            this.memory = mem;
         }
 
         public string Name()
         {
-            return this.name.Value();
+            return this.name.AsString();
         }
 
         public IProps Props()
         {
-            throw new NotImplementedException();
+            var id = this.name.AsString().Substring(this.name.AsString().LastIndexOf("/") + 1);
+            var root = string.Empty;
+            if (this.name.AsString().Contains("/"))
+            {
+                root = this.name.AsString().Substring(0, this.name.AsString().LastIndexOf("/"));
+            }
+            return
+                this.memory
+                    .Props(root, id);
         }
 
         public IXocument Xocument(string name)
         {
-            return this.xocument(name, this.Cell(name));
+            return new MemorizedXocument($"{this.name.AsString()}/{name}", this.memory);
+        }
+
+        public ICell Cell(string name)
+        {
+            ICell result;
+            //if (name.Equals("_guts.xml"))
+            //{
+            //    var itemName = new Normalized(this.name).AsString();
+            //    var patch = new Directives().Add("items");
+            //    new Each<string>(
+            //        (key) =>
+            //            patch.Add("item")
+            //            .Add("name")
+            //            .Set(key.Substring((itemName + "/").Length))
+            //            .Up()
+            //            .Add("size")
+            //            .Set(this.cellMemory[key].Length)
+            //            .Up()
+            //            .Up(),
+            //        new Filtered<string>(
+            //           (path) => path.Substring(0, itemName.Length) == itemName,
+            //           this.memory.Keys
+            //       )
+            //    ).Invoke();
+
+            //    result =
+            //            new RamCell(
+            //                "_guts.xml",
+            //                new MemoryStream(
+            //                    new BytesOf(
+            //                        new Xambler(patch).Dom().ToString()
+            //                    ).AsBytes()
+            //                )
+            //           );
+            //}
+            //else
+            //{
+            result = new RamCell($"{this.name}/{name}", this.memory);
+            //}
+            return result;
         }
     }
 }

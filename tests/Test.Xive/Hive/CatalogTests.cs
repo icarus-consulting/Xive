@@ -20,20 +20,15 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Collections.Generic;
-using Xunit;
-using Yaapii.Xambly;
-using Xive.Cell;
-using Xive.Comb;
-using Xive.Xocument;
-using System.IO;
-using Yaapii.Atoms.IO;
-using System.Threading.Tasks;
 using System;
-using Yaapii.Atoms.Scalar;
-using Yaapii.Atoms.List;
-using System.Threading;
 using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+using Xive.Comb;
+using Xunit;
+using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
+using Yaapii.Xambly;
 
 namespace Xive.Hive.Test
 {

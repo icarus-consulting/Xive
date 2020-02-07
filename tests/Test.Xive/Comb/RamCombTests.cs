@@ -20,12 +20,11 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using Xive.Cache;
+using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
-using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -36,7 +35,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersCell()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             new RamComb("my-comb", memory)
                 .Cell("my-cell")
                 .Update(new InputOf("larva"));
@@ -56,7 +55,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersXocument()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             new RamComb("my-comb", memory)
                 .Xocument("xoctor.xml")
                 .Modify(
@@ -76,7 +75,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersProps()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             new RamComb("my-comb", memory)
                 .Props()
                 .Refined("beer", "astra");
@@ -92,7 +91,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void DeliversXocument()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("some.xml"))
             {
@@ -106,7 +105,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersSubPathXocument()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/dir/some.xml"))
             {
@@ -124,7 +123,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void XocumentRootSkipsSubDir()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/some.xml"))
             {
@@ -138,7 +137,7 @@ namespace Xive.Comb.Test
         [Fact(Skip ="Guts are not supported at the moment")]
         public void ReturnsGutsCaseAndSeparatorInsensitive()
         {
-            var memory = new SimpleMemories();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub\\DIR/some.xml"))
             {

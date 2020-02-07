@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using Xive.Cache;
 using Xive.Comb;
+using Xive.Mnemonic;
 using Xive.Props;
 using Yaapii.Atoms.Enumerable;
 
@@ -56,7 +57,7 @@ namespace Xive.Hive
         public RamHive(string name) : this(
             name,
             comb => comb,
-            new SimpleMemories()
+            new RamMemories()
         )
         { }
 
@@ -84,7 +85,7 @@ namespace Xive.Hive
         public RamHive(Func<IHoneyComb, IHoneyComb> combWrap) : this(
             "X",
             combWrap,
-            new SimpleMemories()
+            new RamMemories()
         )
         { }
 
@@ -97,7 +98,7 @@ namespace Xive.Hive
         public RamHive(string name, Func<IHoneyComb, IHoneyComb> combWrap) : this(
             name,
             combWrap,
-            new SimpleMemories()
+            new RamMemories()
         )
         { }
 
@@ -179,7 +180,7 @@ namespace Xive.Hive
 
         private IHoneyComb Comb(string name)
         {
-            return new RamComb($"{this.scope}/{name}", this.mem);
+            return new SimpleComb($"{this.scope}/{name}", this.mem);
         }
     }
 }

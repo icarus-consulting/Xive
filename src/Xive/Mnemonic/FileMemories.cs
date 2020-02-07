@@ -5,11 +5,17 @@ using Xive.Hive;
 
 namespace Xive.Mnemonic
 {
-    public sealed class MemoriesInFiles : IMemories
+    /// <summary>
+    /// Memories in Files.
+    /// </summary>
+    public sealed class FileMemories : IMemories
     {
         private readonly SimpleMemories mem;
 
-        public MemoriesInFiles(string root)
+        /// <summary>
+        /// Memories in Files.
+        /// </summary>
+        public FileMemories(string root)
         {
             this.mem =
                 new SimpleMemories(

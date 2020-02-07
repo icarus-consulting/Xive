@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using Xive.Cache;
+using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -81,7 +82,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DistinguishesScope()
         {
-            var mem = new SimpleMemories();
+            var mem = new RamMemories();
             var hive = new RamHive(mem);
             var catalog = new SimpleCatalog(hive);
             catalog.Create("123");

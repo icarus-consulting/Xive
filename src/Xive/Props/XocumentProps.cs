@@ -48,7 +48,7 @@ namespace Xive.Props
                     }
                     if (!exists)
                     {
-                        throw new ArgumentException($"Cannot access properties of non existing item '{id}'");
+                        catalog.Modify(new Directives().Xpath("/catalog").Add("item").Attr("id", id));
                     }
                 }
                 return new RamProps(props);

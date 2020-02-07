@@ -37,244 +37,244 @@ namespace Xive.Hive.Test
 {
     public sealed class CachedHiveTests
     {
-        [Fact]
-        public void ReadsBinaryOnce()
-        {
-            var cache = new SimpleMemory();
-            int reads = 0;
-            var hive =
-                new CachedHive(
-                    new SimpleHive("phonebook",
-                        combName =>
-                        new SimpleComb(
-                            "my-comb",
-                            cellname =>
-                                new FkCell(
-                                    content => { },
-                                    () =>
-                                    {
-                                        reads++;
-                                        return new byte[1];
-                                    }
-                                ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
-                        )
-                    ),
-                    cache
-                );
+        //[Fact]
+        //public void ReadsBinaryOnce()
+        //{
+        //    var cache = new SimpleMemory();
+        //    int reads = 0;
+        //    var hive =
+        //        new CachedHive(
+        //            new SimpleHive("phonebook",
+        //                combName =>
+        //                new SimpleComb(
+        //                    "my-comb",
+        //                    cellname =>
+        //                        new FkCell(
+        //                            content => { },
+        //                            () =>
+        //                            {
+        //                                reads++;
+        //                                return new byte[1];
+        //                            }
+        //                        ),
+        //                    (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
+        //                )
+        //            ),
+        //            cache
+        //        );
 
-            new SimpleCatalog(hive).Create("123");
+        //    new SimpleCatalog(hive).Create("123");
 
-            var cell =
-                new FirstOf<IHoneyComb>(
-                    hive.Combs("@id='123'")
-                )
-                .Value()
-                .Cell("adalbert");
+        //    var cell =
+        //        new FirstOf<IHoneyComb>(
+        //            hive.Combs("@id='123'")
+        //        )
+        //        .Value()
+        //        .Cell("adalbert");
 
-            cell.Content();
-            cell.Content();
+        //    cell.Content();
+        //    cell.Content();
 
-            Assert.Equal(1, reads);
-        }
+        //    Assert.Equal(1, reads);
+        //}
 
-        [Fact]
-        public void ConsidersMaxBytes()
-        {
-            var cache = new LimitedCache(0, new SimpleMemory());
-            int reads = 0;
-            var hive =
-                new CachedHive(
-                    new SimpleHive("phonebook",
-                        combName =>
-                        new SimpleComb(
-                            "my-comb",
-                            cellname =>
-                                new FkCell(
-                                    content => { },
-                                    () =>
-                                    {
-                                        reads++;
-                                        return new byte[20];
-                                    }
-                                ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
-                        )
-                    ),
-                    cache
-                );
+        //[Fact]
+        //public void ConsidersMaxBytes()
+        //{
+        //    var cache = new LimitedCache(0, new SimpleMemory());
+        //    int reads = 0;
+        //    var hive =
+        //        new CachedHive(
+        //            new SimpleHive("phonebook",
+        //                combName =>
+        //                new SimpleComb(
+        //                    "my-comb",
+        //                    cellname =>
+        //                        new FkCell(
+        //                            content => { },
+        //                            () =>
+        //                            {
+        //                                reads++;
+        //                                return new byte[20];
+        //                            }
+        //                        ),
+        //                    (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
+        //                )
+        //            ),
+        //            cache
+        //        );
 
-            new SimpleCatalog(hive).Create("123");
+        //    new SimpleCatalog(hive).Create("123");
 
-            var cell =
-                new FirstOf<IHoneyComb>(
-                    hive.Combs("@id='123'")
-                )
-                .Value()
-                .Cell("adalbert");
+        //    var cell =
+        //        new FirstOf<IHoneyComb>(
+        //            hive.Combs("@id='123'")
+        //        )
+        //        .Value()
+        //        .Cell("adalbert");
 
-            cell.Content();
-            cell.Content();
+        //    cell.Content();
+        //    cell.Content();
 
-            Assert.Equal(2, reads);
-        }
+        //    Assert.Equal(2, reads);
+        //}
 
-        [Fact]
-        public void ConsidersMaxBytesOnShifted()
-        {
-            var cache = new LimitedCache(0, new SimpleMemory());
-            int reads = 0;
-            var hive =
-                new CachedHive(
-                    new SimpleHive("phonebook",
-                        combName =>
-                        new SimpleComb(
-                            "my-comb",
-                            cellname =>
-                                new FkCell(
-                                    content => { },
-                                    () =>
-                                    {
-                                        reads++;
-                                        return new byte[20];
-                                    }
-                                ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
-                        )
-                    ),
-                    cache
-                );
+        //[Fact]
+        //public void ConsidersMaxBytesOnShifted()
+        //{
+        //    var cache = new LimitedCache(0, new SimpleMemory());
+        //    int reads = 0;
+        //    var hive =
+        //        new CachedHive(
+        //            new SimpleHive("phonebook",
+        //                combName =>
+        //                new SimpleComb(
+        //                    "my-comb",
+        //                    cellname =>
+        //                        new FkCell(
+        //                            content => { },
+        //                            () =>
+        //                            {
+        //                                reads++;
+        //                                return new byte[20];
+        //                            }
+        //                        ),
+        //                    (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
+        //                )
+        //            ),
+        //            cache
+        //        );
 
-            new SimpleCatalog(hive.Shifted("A")).Create("123");
+        //    new SimpleCatalog(hive.Shifted("A")).Create("123");
 
-            var cell =
-                new FirstOf<IHoneyComb>(
-                    hive.Shifted("A").Combs("@id='123'")
-                )
-                .Value()
-                .Cell("adalbert");
+        //    var cell =
+        //        new FirstOf<IHoneyComb>(
+        //            hive.Shifted("A").Combs("@id='123'")
+        //        )
+        //        .Value()
+        //        .Cell("adalbert");
 
-            cell.Content();
-            cell.Content();
+        //    cell.Content();
+        //    cell.Content();
 
-            Assert.Equal(2, reads);
-        }
+        //    Assert.Equal(2, reads);
+        //}
 
-        [Fact]
-        public void ConsidersMaxBytesOnHQ()
-        {
-            var cache = new LimitedCache(0, new SimpleMemory());
-            int reads = 0;
-            var hive =
-                new CachedHive(
-                    new SimpleHive("phonebook",
-                        combName =>
-                        new SimpleComb(
-                            "my-comb",
-                            cellname =>
-                                new FkCell(
-                                    content => { },
-                                    () =>
-                                    {
-                                        reads++;
-                                        return new byte[20];
-                                    }
-                                ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
-                        )
-                    ),
-                    cache
-                );
+        //[Fact]
+        //public void ConsidersMaxBytesOnHQ()
+        //{
+        //    var cache = new LimitedCache(0, new SimpleMemory());
+        //    int reads = 0;
+        //    var hive =
+        //        new CachedHive(
+        //            new SimpleHive("phonebook",
+        //                combName =>
+        //                new SimpleComb(
+        //                    "my-comb",
+        //                    cellname =>
+        //                        new FkCell(
+        //                            content => { },
+        //                            () =>
+        //                            {
+        //                                reads++;
+        //                                return new byte[20];
+        //                            }
+        //                        ),
+        //                    (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
+        //                )
+        //            ),
+        //            cache
+        //        );
 
-            var cell = hive.HQ().Cell("adalbert");
+        //    var cell = hive.HQ().Cell("adalbert");
 
-            cell.Content();
-            cell.Content();
+        //    cell.Content();
+        //    cell.Content();
 
-            Assert.Equal(2, reads);
-        }
+        //    Assert.Equal(2, reads);
+        //}
 
-        [Fact]
-        public void BlackListsBinaries()
-        {
-            var cache = new BlacklistCache("*dal*rt*");
-            int reads = 0;
-            var hive =
-                new CachedHive(
-                    new SimpleHive("phonebook",
-                        combName =>
-                        new SimpleComb(
-                            "my-comb",
-                            cellname =>
-                                new FkCell(
-                                    content => { },
-                                    () =>
-                                    {
-                                        reads++;
-                                        return new byte[0];
-                                    }
-                                ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
-                        )
-                    ),
-                    cache
-                );
+        //[Fact]
+        //public void BlackListsBinaries()
+        //{
+        //    var cache = new BlacklistCache("*dal*rt*");
+        //    int reads = 0;
+        //    var hive =
+        //        new CachedHive(
+        //            new SimpleHive("phonebook",
+        //                combName =>
+        //                new SimpleComb(
+        //                    "my-comb",
+        //                    cellname =>
+        //                        new FkCell(
+        //                            content => { },
+        //                            () =>
+        //                            {
+        //                                reads++;
+        //                                return new byte[0];
+        //                            }
+        //                        ),
+        //                    (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
+        //                )
+        //            ),
+        //            cache
+        //        );
 
-            new SimpleCatalog(hive).Create("123");
+        //    new SimpleCatalog(hive).Create("123");
 
-            var cell =
-                new FirstOf<IHoneyComb>(
-                    hive.Combs("@id='123'")
-                )
-                .Value()
-                .Cell("adalbert");
+        //    var cell =
+        //        new FirstOf<IHoneyComb>(
+        //            hive.Combs("@id='123'")
+        //        )
+        //        .Value()
+        //        .Cell("adalbert");
 
-            cell.Content();
-            cell.Content();
+        //    cell.Content();
+        //    cell.Content();
 
-            Assert.Equal(2, reads);
-        }
+        //    Assert.Equal(2, reads);
+        //}
 
-        [Fact]
-        public void BlackListsShiftedBinaries()
-        {
-            var cache = new BlacklistCache("*dal*rt*");
-            int reads = 0;
-            var hive =
-                new CachedHive(
-                    new SimpleHive("phonebook",
-                        combName =>
-                        new SimpleComb(
-                            "my-comb",
-                            cellname =>
-                                new FkCell(
-                                    content => { },
-                                    () =>
-                                    {
-                                        reads++;
-                                        return new byte[0];
-                                    }
-                                ),
-                            (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
-                        )
-                    ),
-                    cache
-                ).Shifted("hello");
+        //[Fact]
+        //public void BlackListsShiftedBinaries()
+        //{
+        //    var cache = new BlacklistCache("*dal*rt*");
+        //    int reads = 0;
+        //    var hive =
+        //        new CachedHive(
+        //            new SimpleHive("phonebook",
+        //                combName =>
+        //                new SimpleComb(
+        //                    "my-comb",
+        //                    cellname =>
+        //                        new FkCell(
+        //                            content => { },
+        //                            () =>
+        //                            {
+        //                                reads++;
+        //                                return new byte[0];
+        //                            }
+        //                        ),
+        //                    (x, c) => new CachedXocument(x, new SimpleXocument("catalog"), cache)
+        //                )
+        //            ),
+        //            cache
+        //        ).Shifted("hello");
 
-            new SimpleCatalog(hive).Create("123");
+        //    new SimpleCatalog(hive).Create("123");
 
-            var cell =
-                new FirstOf<IHoneyComb>(
-                    hive.Combs("@id='123'")
-                )
-                .Value()
-                .Cell("adalbert");
+        //    var cell =
+        //        new FirstOf<IHoneyComb>(
+        //            hive.Combs("@id='123'")
+        //        )
+        //        .Value()
+        //        .Cell("adalbert");
 
-            cell.Content();
-            cell.Content();
+        //    cell.Content();
+        //    cell.Content();
 
-            Assert.Equal(2, reads);
-        }
+        //    Assert.Equal(2, reads);
+        //}
 
         [Fact]
         public void ShiftingRamHiveIncludesScope()

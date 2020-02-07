@@ -27,5 +27,10 @@ namespace Xive
         {
             return this.name.Value().Equals(other.AsString());
         }
+
+        public override string ToString()
+        {
+            return this.name.Value().ToString();
+        }
     }
 }

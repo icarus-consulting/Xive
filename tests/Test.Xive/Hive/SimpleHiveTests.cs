@@ -38,7 +38,7 @@ namespace Xive.Hive.Test
                     comb => new RamComb(comb)
                 ).HQ();
 
-            Assert.Equal($"person/HQ", hq.Name());
+            Assert.Equal($"person/hq", hq.Name());
         }
 
         [Fact]

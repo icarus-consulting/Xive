@@ -22,7 +22,10 @@ namespace Xive.Mnemonic
             {
                 Update(name, ifAbsent());
             }
-            result = new MemoryStream(File.ReadAllBytes(Path(name)));
+            if (File.Exists(Path(name)))
+            {
+                result = new MemoryStream(File.ReadAllBytes(Path(name)));
+            }
             return result;
         }
 
@@ -66,13 +69,16 @@ namespace Xive.Mnemonic
             }
             else
             {
-                File.Delete(Path(name));
+                if (File.Exists(Path(name)))
+                {
+                    File.Delete(Path(name));
+                }
             }
         }
 
         private string Path(string name)
         {
-            return System.IO.Path.Combine(root, name);
+            return new Normalized(System.IO.Path.Combine(root, name)).AsString();
         }
     }
 }

@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xive.Cache;
 using Xive.Hive;
+using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;
 
@@ -47,7 +48,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell() : this(
             new Solid<string>(() => Guid.NewGuid().ToString()),
-            new Solid<IMemories>(() => new SimpleMemories())
+            new Solid<IMemories>(() => new RamMemories())
         )
         { }
 
@@ -73,7 +74,7 @@ namespace Xive.Cell
             new ScalarOf<string>(() => path),
             new Solid<IMemories>(() =>
             {
-                var mem = new SimpleMemories();
+                var mem = new RamMemories();
                 mem.Data().Update(path, new MemoryStream(content.AsBytes()));
                 return mem;
             })
@@ -90,7 +91,7 @@ namespace Xive.Cell
             path,
             new Solid<IMemories>(() =>
             {
-                var mem = new SimpleMemories();
+                var mem = new RamMemories();
                 mem.Data().Update(path.Value(), content);
                 return mem;
             })
@@ -107,7 +108,7 @@ namespace Xive.Cell
             new ScalarOf<string>(path),
             new Solid<IMemories>(() =>
             {
-                var mem = new SimpleMemories();
+                var mem = new RamMemories();
                 mem.Data().Update(path, content);
                 return mem;
             })
@@ -120,7 +121,7 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(string path) : this(path, new SimpleMemories())
+        public RamCell(string path) : this(path, new RamMemories())
         { }
 
         /// <summary>

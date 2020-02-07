@@ -8,15 +8,18 @@ using Xive.Xocument;
 
 namespace Xive.Cache
 {
+    /// <summary>
+    /// Simple Memories.
+    /// </summary>
     public sealed class SimpleMemories : IMemories
     {
         private readonly IMemory<XNode> xmlMem;
         private readonly IMemory<MemoryStream> dataMem;
         private readonly ConcurrentDictionary<string, IProps> propsMem;
 
-        public SimpleMemories() : this(new XmlRam(), new DataRam())
-        { }
-
+        /// <summary>
+        /// Simple Memories.
+        /// </summary>
         public SimpleMemories(IMemory<XNode> xmlMem, IMemory<MemoryStream> dataMem)
         {
             this.xmlMem = xmlMem;

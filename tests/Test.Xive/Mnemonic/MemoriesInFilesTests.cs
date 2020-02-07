@@ -15,14 +15,14 @@ namespace Xive.Test.Mnemonic
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new MemoriesInFiles(temp.Value().FullName);
-                var comb = new RamComb("beverage/HQ", mem);
+                var mem = new FileMemories(temp.Value().FullName);
+                var comb = new SimpleComb("beverage/HQ", mem);
                 new SimpleCatalog("beverage", comb).Create("fritz-kola");
 
                 mem.Props("beverage", "fritz-kola").Refined("light", "yes please");
 
-                mem = new MemoriesInFiles(temp.Value().FullName);
-                comb = new RamComb("beverage/HQ", mem);
+                mem = new FileMemories(temp.Value().FullName);
+                comb = new SimpleComb("beverage/HQ", mem);
                 Assert.Equal(
                     "yes please",
                     mem.Props("beverage", "fritz-kola").Value("light")
@@ -35,14 +35,14 @@ namespace Xive.Test.Mnemonic
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new MemoriesInFiles(temp.Value().FullName);
-                using (var xoc = new RamComb("beverage", mem).Xocument("coke.xml"))
+                var mem = new FileMemories(temp.Value().FullName);
+                using (var xoc = new SimpleComb("beverage", mem).Xocument("coke.xml"))
                 {
                     xoc.Modify(new Directives().Xpath("/coke").Add("light").Set("yes please"));
                 }
 
-                mem = new MemoriesInFiles(temp.Value().FullName);
-                using (var xoc = new RamComb("beverage", mem).Xocument("coke.xml"))
+                mem = new FileMemories(temp.Value().FullName);
+                using (var xoc = new SimpleComb("beverage", mem).Xocument("coke.xml"))
                 {
                     Assert.Equal(
                         "yes please",
@@ -57,14 +57,14 @@ namespace Xive.Test.Mnemonic
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new MemoriesInFiles(temp.Value().FullName);
-                using (var pepsi = new RamComb("beverage", mem).Cell("pepsi"))
+                var mem = new FileMemories(temp.Value().FullName);
+                using (var pepsi = new SimpleComb("beverage", mem).Cell("pepsi"))
                 {
                     pepsi.Update(new InputOf("Empty"));
                 }
 
-                mem = new MemoriesInFiles(temp.Value().FullName);
-                using (var pepsi = new RamComb("beverage", mem).Cell("pepsi"))
+                mem = new FileMemories(temp.Value().FullName);
+                using (var pepsi = new SimpleComb("beverage", mem).Cell("pepsi"))
                 {
                     Assert.Equal(
                         "Empty",

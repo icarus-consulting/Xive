@@ -37,8 +37,8 @@ namespace Xive.Test.Mnemonic
             using (var temp = new TempDirectory())
             {
                 var mem = new XmlInFiles(temp.Value().FullName);
-                mem.Content("childhood", () => new XDocument(new XElement("root", new XText("1980's"))));
-                mem.Update("childhood", new XDocument(new XElement("root", new XText("nothing"))));
+                mem.Content("childhood", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
+                mem.Update("childhood", new XDocument(new XElement("root", new XElement("years", new XText("nothing")))));
 
                 Assert.Equal(
                     "nothing",
@@ -47,7 +47,7 @@ namespace Xive.Test.Mnemonic
                             "childhood",
                             () => throw new ApplicationException("Assumed to have memory")
                         )
-                    ).Values("/root/text()")[0]
+                    ).Values("/root/years/text()")[0]
                 );
             }
         }
