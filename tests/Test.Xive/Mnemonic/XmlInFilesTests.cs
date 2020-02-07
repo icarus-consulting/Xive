@@ -17,13 +17,13 @@ namespace Xive.Test.Mnemonic
             using (var temp = new TempDirectory())
             {
                 var mem = new XmlInFiles(temp.Value().FullName);
-                mem.Content("childhood", () => new XDocument(new XElement("root", new XText("1980's"))));
+                mem.Content("childhood/puberty", () => new XDocument(new XElement("root", new XText("1990's"))));
 
                 Assert.Equal(
-                    "1980's",
+                    "1990's",
                     new XMLCursor(
                         mem.Content(
-                            "childhood",
+                            "childhood/puberty",
                             () => throw new ApplicationException("Assumed to have memory")
                         )
                     ).Values("/root/text()")[0]
@@ -48,6 +48,20 @@ namespace Xive.Test.Mnemonic
                             () => throw new ApplicationException("Assumed to have memory")
                         )
                     ).Values("/root/text()")[0]
+                );
+            }
+        }
+
+        [Fact]
+        public void DeliversKnowledge()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var mem = new XmlInFiles(temp.Value().FullName);
+                mem.Content("childhood", () => new XDocument(new XElement("root", new XText("1980's"))));
+                Assert.Contains(
+                    "childhood",
+                    mem.Knowledge()
                 );
             }
         }

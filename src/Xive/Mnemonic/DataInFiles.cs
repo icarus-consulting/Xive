@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Xive.Hive;
+using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Mnemonic
 {
@@ -28,9 +29,13 @@ namespace Xive.Mnemonic
         public IEnumerable<string> Knowledge()
         {
             IEnumerable<string> knowledge = new List<string>();
-            if(Directory.Exists(this.root))
+            if (Directory.Exists(this.root))
             {
-                knowledge = Directory.GetFiles(this.root, "*", SearchOption.AllDirectories);
+                knowledge =
+                    new Mapped<string, string>(
+                        path => path.Substring($"{this.root}/".Length),
+                        Directory.GetFiles(this.root, "*", SearchOption.AllDirectories)
+                    );
             }
             return knowledge;
         }
@@ -44,6 +49,13 @@ namespace Xive.Mnemonic
         {
             if (content.Length > 0)
             {
+                var path = Path(name);
+                var dir = System.IO.Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
                 using (FileStream f = File.Open(Path(name), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                 {
                     f.Seek(0, SeekOrigin.Begin);

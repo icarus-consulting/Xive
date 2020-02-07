@@ -61,6 +61,22 @@ namespace Xive.Test.Mnemonic
         }
 
         [Fact]
+        public void DeliversKnowledge()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var data = new MemoryStream();
+                new InputOf("1980's").Stream().CopyTo(data);
+                var mem = new DataInFiles(temp.Value().FullName);
+                mem.Content("childhood", () => data);
+                Assert.Contains(
+                    "childhood",
+                    mem.Knowledge()
+                );
+            }
+        }
+
+        [Fact]
         public void RemovesIfEmpty()
         {
             using (var temp = new TempDirectory())
