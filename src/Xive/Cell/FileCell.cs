@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.IO;
 using Xive.Cache;
 using Xive.Mnemonic;
@@ -34,15 +35,27 @@ namespace Xive.Cell
     public sealed class FileCell : ICell
     {
         private readonly Sticky<IMemories> mem;
-        private readonly string name;
-        private readonly string root;
+        private readonly IScalar<string> name;
 
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        public FileCell(string name) : this(name, new Sticky<IMemories>(() =>
+        public FileCell(string path) : this(
+            new Sticky<string>(() =>
             {
-                var root = Path.GetDirectoryName(name);
+                if(!Path.IsPathRooted(path))
+                {
+                    throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
+                }
+                return Path.GetFileName(path);
+            }),
+            new Sticky<IMemories>(() =>
+            {
+                if (!Path.IsPathRooted(path))
+                {
+                    throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
+                }
+                var root = Path.GetDirectoryName(path);
                 return new FileMemories(root);
             })
         )
@@ -51,7 +64,7 @@ namespace Xive.Cell
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        private FileCell(string name, Sticky<IMemories> mem)
+        private FileCell(IScalar<string> name, Sticky<IMemories> mem)
         {
             this.mem = mem;
             this.name = name;
@@ -59,7 +72,7 @@ namespace Xive.Cell
 
         public string Name()
         {
-            return this.name;
+            return this.name.Value();
         }
 
         public byte[] Content()
@@ -68,12 +81,11 @@ namespace Xive.Cell
                 this.mem
                     .Value()
                     .Data()
-                    .Content(this.name, () => new MemoryStream()).ToArray();
+                    .Content(this.name.Value(), () => new MemoryStream()).ToArray();
         }
 
         public void Update(IInput content)
         {
-            var name = new Normalized(Path.Combine(root, this.name)).AsString();
             var stream = content.Stream();
             if (stream.Length > 0)
             {
@@ -81,11 +93,11 @@ namespace Xive.Cell
                 content.Stream().CopyTo(memory);
                 memory.Seek(0, SeekOrigin.Begin);
                 content.Stream().Seek(0, SeekOrigin.Begin);
-                this.mem.Value().Data().Update(name, memory);
+                this.mem.Value().Data().Update(this.name.Value(), memory);
             }
             else
             {
-                this.mem.Value().Data().Update(name, new MemoryStream());
+                this.mem.Value().Data().Update(this.name.Value(), new MemoryStream());
             }
         }
 

@@ -8,12 +8,18 @@ using Yaapii.Xml;
 
 namespace Xive.Xocument
 {
+    /// <summary>
+    /// A xocument stored in memories.
+    /// </summary>
     public sealed class MemorizedXocument : IXocument
     {
         private readonly IMemories memories;
         private readonly Sticky<XNode> node;
         private readonly string name;
 
+        /// <summary>
+        /// A xocument stored in memories.
+        /// </summary>
         public MemorizedXocument(string name, IMemories memories)
         {
             this.memories = memories;

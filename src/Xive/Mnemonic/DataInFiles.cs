@@ -6,10 +6,16 @@ using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Mnemonic
 {
+    /// <summary>
+    /// Data stored in files.
+    /// </summary>
     public sealed class DataInFiles : IMemory<MemoryStream>
     {
         private readonly string root;
 
+        /// <summary>
+        /// Data stored in files.
+        /// </summary>
         public DataInFiles(string root)
         {
             this.root = root;
