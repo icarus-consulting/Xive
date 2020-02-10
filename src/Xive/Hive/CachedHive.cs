@@ -22,8 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using Xive.Comb;
-using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Hive
 {
@@ -78,46 +76,50 @@ namespace Xive.Hive
 
         public IEnumerable<IHoneyComb> Combs(string xpath)
         {
-            return
-                new Mapped<IHoneyComb, IHoneyComb>(
-                    comb =>
-                        new CachedComb(
-                            comb,
-                            this.cache
-                        ),
-                        this.origin.Combs(xpath, catalog => CachedCatalog())
-                    );
+            throw new NotImplementedException();
+            //return
+            //    new Mapped<IHoneyComb, IHoneyComb>(
+            //        comb =>
+            //            new CachedComb(
+            //                comb,
+            //                this.cache
+            //            ),
+            //            this.origin.Combs(xpath, catalog => CachedCatalog())
+            //        );
         }
 
         public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalogWrap)
         {
-            return
-                new Mapped<IHoneyComb, IHoneyComb>(
-                    comb =>
-                        new CachedComb(
-                            comb,
-                            this.cache
-                        ),
-                        this.origin.Combs(xpath, (catalog) => CachedCatalog())
-                    );
+            throw new NotImplementedException();
+            //return
+            //    new Mapped<IHoneyComb, IHoneyComb>(
+            //        comb =>
+            //            new CachedComb(
+            //                comb,
+            //                this.cache
+            //            ),
+            //            this.origin.Combs(xpath, (catalog) => CachedCatalog())
+            //        );
         }
 
         public IHoneyComb HQ()
         {
-            return
-                new CachedComb(
-                    this.origin.HQ(),
-                    this.cache
-                );
+            throw new NotImplementedException();
+            //return
+            //    new CachedComb(
+            //        this.origin.HQ(),
+            //        this.cache
+            //    );
         }
 
         public IHive Shifted(string scope)
         {
-            return
-                new CachedHive(
-                    this.origin.Shifted(scope),
-                    this.cache
-                );
+            throw new NotImplementedException();
+            //return
+            //    new CachedHive(
+            //        this.origin.Shifted(scope),
+            //        this.cache
+            //    );
         }
 
         public string Scope()
@@ -127,11 +129,12 @@ namespace Xive.Hive
 
         private ICatalog CachedCatalog()
         {
-            return
-                new SimpleCatalog(
-                    this.origin.Scope(),
-                    this.HQ()
-                );
+            throw new NotImplementedException();
+            //return
+            //    new SimpleCatalog(
+            //        this.origin.Scope(),
+            //        this.HQ()
+            //    );
         }
     }
 }

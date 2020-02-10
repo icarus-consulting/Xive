@@ -21,10 +21,8 @@
 //SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Xive.Cache;
-using Xive.Hive;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;

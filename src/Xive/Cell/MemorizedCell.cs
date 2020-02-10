@@ -22,24 +22,37 @@
 
 using System.IO;
 using Xive.Cache;
-using Xive.Hive;
 using Yaapii.Atoms;
-using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Cell
 {
     /// <summary>
-    /// A cell whose content is cached in memory.
+    /// A cell whose content is stored in memory.
     /// </summary>
     public sealed class MemorizedCell : ICell
     {
         private readonly IText name;
-        private readonly IMemories mem;
+        private readonly Sticky<IMemories> mem;
+
+        public MemorizedCell(string name, byte[] data, IMemories mem) : this(name, new Sticky<IMemories>(() =>
+            {
+                mem.Data().Update(name, new MemoryStream(data));
+                return mem;
+            })
+        )
+        { }
 
         /// <summary>
-        /// A cell whose content is cached in memory.
+        /// A cell whose content is stored in memory.
         /// </summary>
-        public MemorizedCell(string name, IMemories mem)
+        public MemorizedCell(string name, IMemories mem) : this(name, new Sticky<IMemories>(mem))
+        { }
+
+        /// <summary>
+        /// A cell whose content is stored in memory.
+        /// </summary>
+        private MemorizedCell(string name, Sticky<IMemories> mem)
         {
             this.name = new Normalized(name);
             this.mem = mem;
@@ -53,7 +66,7 @@ namespace Xive.Cell
         public byte[] Content()
         {
             return
-                this.mem.Data().Content(
+                this.mem.Value().Data().Content(
                     this.name.AsString(),
                     () => new MemoryStream()
                 ).ToArray();
@@ -66,7 +79,7 @@ namespace Xive.Cell
             stream.CopyTo(copy);
             stream.Seek(0, SeekOrigin.Begin);
             copy.Seek(0, SeekOrigin.Begin);
-            this.mem.Data().Update(this.name.AsString(), copy);
+            this.mem.Value().Data().Update(this.name.AsString(), copy);
         }
 
         public void Dispose()

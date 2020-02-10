@@ -20,17 +20,22 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.IO;
 using Xive.Cache;
 using Xive.Cell;
 using Xive.Xocument;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.Scalar;
+using Yaapii.Xambly;
 
 namespace Xive.Comb
 {
     /// <summary>
     /// A simple comb.
     /// </summary>
-    public sealed class SimpleComb : IHoneyComb
+    public sealed class MemorizedComb : IHoneyComb
     {
         private readonly IText name;
         private readonly IMemories memory;
@@ -39,7 +44,7 @@ namespace Xive.Comb
         /// A comb which exists in memory.
         /// By using this ctor, every RamComb with the same name will have the same contents.
         /// </summary>
-        public SimpleComb(string name, IMemories mem)
+        public MemorizedComb(string name, IMemories mem)
         {
             this.name = new Normalized(name);
             this.memory = mem;
@@ -53,7 +58,7 @@ namespace Xive.Comb
         public IProps Props()
         {
             var id = this.name.AsString().Substring(this.name.AsString().LastIndexOf("/") + 1);
-            var root = string.Empty;
+            var root = id;
             if (this.name.AsString().Contains("/"))
             {
                 root = this.name.AsString().Substring(0, this.name.AsString().LastIndexOf("/"));
@@ -71,41 +76,68 @@ namespace Xive.Comb
         public ICell Cell(string name)
         {
             ICell result;
-            //if (name.Equals("_guts.xml"))
-            //{
-            //    var itemName = new Normalized(this.name).AsString();
-            //    var patch = new Directives().Add("items");
-            //    new Each<string>(
-            //        (key) =>
-            //            patch.Add("item")
-            //            .Add("name")
-            //            .Set(key.Substring((itemName + "/").Length))
-            //            .Up()
-            //            .Add("size")
-            //            .Set(this.cellMemory[key].Length)
-            //            .Up()
-            //            .Up(),
-            //        new Filtered<string>(
-            //           (path) => path.Substring(0, itemName.Length) == itemName,
-            //           this.memory.Keys
-            //       )
-            //    ).Invoke();
-
-            //    result =
-            //            new RamCell(
-            //                "_guts.xml",
-            //                new MemoryStream(
-            //                    new BytesOf(
-            //                        new Xambler(patch).Dom().ToString()
-            //                    ).AsBytes()
-            //                )
-            //           );
-            //}
-            //else
-            //{
-            result = new RamCell($"{this.name}/{name}", this.memory);
-            //}
+            if (name.Equals("_guts.xml"))
+            {
+                var patch = new Directives().Add("data");
+                patch = WithData(patch);
+                patch = WithXml(patch);
+                result =
+                        new RamCell(
+                            "_guts.xml",
+                            new MemoryStream(
+                                new BytesOf(
+                                    new Xambler(patch).Dom().ToString()
+                                ).AsBytes()
+                            )
+                       );
+            }
+            else
+            {
+                result = new MemorizedCell($"{this.name}/{name}", this.memory);
+            }
             return result;
+        }
+
+        private Directives WithData(Directives patch)
+        {
+            new Each<string>(
+                (key) =>
+                    patch.Add("item")
+                    .Add("name")
+                    .Set(key.Substring((this.name.AsString() + "/").Length))
+                    .Up()
+                    .Add("size")
+                    .Set(
+                        this.memory
+                            .Data()
+                            .Content(key, () => new MemoryStream())
+                    )
+                    .Up()
+                    .Up(),
+                new Filtered<string>(
+                    (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
+                    this.memory.Data().Knowledge()
+                )
+            ).Invoke();
+            return patch;
+        }
+
+        private Directives WithXml(Directives patch)
+        {
+            new Each<string>(
+                (key) =>
+                    patch.Add("xml")
+                    .Add("name")
+                    .Set(key.Substring((this.name.AsString() + "/").Length))
+                    .Up()
+                    .Up()
+                    .Up(),
+                new Filtered<string>(
+                    (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
+                    this.memory.Data().Knowledge()
+                )
+            ).Invoke();
+            return patch;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Xive.Hive;
 using Yaapii.Atoms.Enumerable;
 
-namespace Xive.Cache
+namespace Xive.Mnemonic
 {
     public sealed class LayeredMemory<T> : IMemory<T>
     {

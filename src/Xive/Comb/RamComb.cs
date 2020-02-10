@@ -24,7 +24,7 @@ namespace Xive.Comb
         /// </summary>
         internal RamComb(string name, IMemories mem)
         {
-            this.core = new SimpleComb(name, mem);
+            this.core = new MemorizedComb(name, mem);
         }
 
         public ICell Cell(string name)

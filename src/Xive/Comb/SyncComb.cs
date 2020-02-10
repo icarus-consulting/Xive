@@ -73,7 +73,7 @@ namespace Xive.Comb
 
         public IProps Props()
         {
-            throw new System.NotImplementedException();
+            return this.comb.Props();
         }
     }
 }

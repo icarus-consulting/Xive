@@ -180,7 +180,7 @@ namespace Xive.Hive
 
         private IHoneyComb Comb(string name)
         {
-            return new SimpleComb($"{this.scope}/{name}", this.mem);
+            return new MemorizedComb($"{this.scope}/{name}", this.mem);
         }
     }
 }

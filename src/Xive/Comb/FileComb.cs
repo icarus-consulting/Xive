@@ -8,7 +8,7 @@ namespace Xive.Comb
     /// </summary>
     public sealed class FileComb : IHoneyComb
     {
-        private readonly SimpleComb core;
+        private readonly MemorizedComb core;
 
         /// <summary>
         /// A comb that is stored in a file.
@@ -21,7 +21,7 @@ namespace Xive.Comb
         /// </summary>
         internal FileComb(string name, IMemories mem)
         {
-            this.core = new SimpleComb(name, mem);
+            this.core = new MemorizedComb(name, mem);
         }
 
         public ICell Cell(string name)

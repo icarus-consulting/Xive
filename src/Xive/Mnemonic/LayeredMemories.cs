@@ -1,8 +1,9 @@
 ﻿using System.IO;
 using System.Xml.Linq;
+using Xive.Cache;
 using Xive.Hive;
 
-namespace Xive.Cache
+namespace Xive.Mnemonic
 {
     public sealed class LayeredMemories : IMemories
     {
