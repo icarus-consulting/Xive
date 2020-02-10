@@ -32,7 +32,7 @@ namespace Xive
     public interface IIndex
     {
         void Add(string id);
-        IList<IHoneyComb> Filtered(params IHiveFilter[] filters);
+        IList<IHoneyComb> List(params IHiveFilter[] filters);
         bool Has(string id);
         void Remove(string id);
     }

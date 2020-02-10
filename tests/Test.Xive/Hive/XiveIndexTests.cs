@@ -34,7 +34,7 @@ namespace Xive.Test.Hive
             mem.Props("test", "456").Refined("works", "false");
 
             Assert.Equal(
-                "test/456", idx.Filtered(new IndexFilterOf(props => props.Value("works", "") == "false"))[0].Name()
+                "test/456", idx.List(new IndexFilterOf(props => props.Value("works", "") == "false"))[0].Name()
             );
         }
     }

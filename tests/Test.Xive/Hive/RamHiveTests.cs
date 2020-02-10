@@ -44,7 +44,7 @@ namespace Xive.Hive.Test
                 "in-memory/123",
                  new MemorizedHive("in-memory", mem)
                     .Catalog()
-                    .Filtered()[0]
+                    .List()[0]
                     .Name()
             );
         }
@@ -57,13 +57,13 @@ namespace Xive.Hive.Test
             hive.Catalog()
                 .Add("123");
 
-            hive.Catalog().Filtered()[0]
+            hive.Catalog().List()[0]
             .Props()
             .Refined("prop", "eller");
 
             Assert.Equal(
                 "eller",
-                hive.Catalog().Filtered()[0]
+                hive.Catalog().List()[0]
                     .Props()
                     .Value("prop")
             );
@@ -78,7 +78,7 @@ namespace Xive.Hive.Test
                 .Add("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            Assert.Empty(shifted.Catalog().Filtered());
+            Assert.Empty(shifted.Catalog().List());
         }
 
         [Fact]

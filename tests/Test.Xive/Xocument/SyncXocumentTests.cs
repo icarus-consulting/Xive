@@ -23,7 +23,6 @@
 using System;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Xive.Cell;
 using Xive.Mnemonic;
 using Xive.Test;
 using Xunit;

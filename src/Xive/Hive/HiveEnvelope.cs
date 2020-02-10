@@ -46,7 +46,7 @@ namespace Xive.Hive
             return this.hive.Value().Catalog();
         }
 
-        public IHoneyComb Comb(string id, bool createIfAbsent = false)
+        public IHoneyComb Comb(string id, bool createIfAbsent = true)
         {
             return this.hive.Value().Comb(id, createIfAbsent);
         }

@@ -52,7 +52,7 @@ namespace Xive.Hive
             }
         }
 
-        public IList<IHoneyComb> Filtered(params IHiveFilter[] filters)
+        public IList<IHoneyComb> List(params IHiveFilter[] filters)
         {
             IList<IHoneyComb> filtered = new List<IHoneyComb>();
             var fltrs = new List<IHiveFilter>(filters);
