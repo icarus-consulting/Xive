@@ -20,21 +20,22 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+
+using System;
 using System.Collections.Generic;
-using Yaapii.Xambly;
 
 namespace Xive
 {
     public interface IIndex
     {
         void Add(string id);
+        IList<IHoneyComb> Filtered(params IIndexFilter[] filters);
         bool Has(string id);
-        IEnumerable<string> Find(params IIndexFilter[] filters);
         void Remove(string id);
     }
 
     public interface IIndexFilter
     {
-
+        bool Matches(IProps props);
     }
 }

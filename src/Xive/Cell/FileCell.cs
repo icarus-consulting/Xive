@@ -47,7 +47,12 @@ namespace Xive.Cell
                 {
                     throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
                 }
-                return Path.GetFileName(path);
+                var name = Path.GetFileName(path);
+                if(String.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted and have a file name.");
+                }
+                return name;
             }),
             new Sticky<IMemories>(() =>
             {
