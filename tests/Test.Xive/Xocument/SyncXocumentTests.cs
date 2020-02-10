@@ -63,17 +63,18 @@ namespace Xive.Xocument.Test
         [Fact]
         public void WorksParallel()
         {
-            var cell = new RamCell();
-            var syncGate = new ProcessSyncValve();
-            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
-            {
-                var content = Guid.NewGuid().ToString();
-                using (var synced = new SyncXocument(cell.Name(), new CellXocument(cell, "xoc"), syncGate))
-                {
-                    synced.Modify(new Directives().Xpath("/xoc").Set(content));
-                    Assert.Equal(content, synced.Value("/xoc/text()", ""));
-                }
-            });
+            throw new NotImplementedException();
+            //var cell = new RamCell();
+            //var syncGate = new ProcessSyncValve();
+            //Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
+            //{
+            //    var content = Guid.NewGuid().ToString();
+            //    using (var synced = new SyncXocument(cell.Name(), new RamXocument(cell, "xoc"), syncGate))
+            //    {
+            //        synced.Modify(new Directives().Xpath("/xoc").Set(content));
+            //        Assert.Equal(content, synced.Value("/xoc/text()", ""));
+            //    }
+            //});
         }
     }
 }

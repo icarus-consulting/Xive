@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Xambly;
@@ -27,32 +28,42 @@ using Yaapii.Xml;
 
 namespace Xive.Xocument.Test
 {
-    public sealed class SimpleXocumentTests
+    public sealed class MemorizedXocumentTests
     {
         [Theory]
         [InlineData("A")]
         [InlineData("B")]
         public void ReadsContent(string expected)
         {
-            Assert.Contains(
-                expected,
-                new SimpleXocument(
+            var mem = new RamMemories();
+            mem.XML()
+                .Update(
+                    "xml-xocks",
                     new XMLCursor(
                         new InputOf("<root><item>A</item><item>B</item></root>")
                     ).AsNode()
-                ).Values("//item/text()")
+                );
+
+            Assert.Contains(
+                expected,
+                new MemorizedXocument("xml-xocks", mem).Values("//item/text()")
             );
         }
 
         [Fact]
         public void ModifiesContent()
         {
-            var xoc =
-                new SimpleXocument(
+            var mem = new RamMemories();
+            mem.XML()
+                .Update(
+                    "xml-xocks",
                     new XMLCursor(
-                        new InputOf("<root><item>A</item><item>A</item></root>")
+                        new InputOf("<root><item>A</item></root>")
                     ).AsNode()
                 );
+
+            var xoc = new MemorizedXocument("xml-xocks", mem);
+
             xoc.Modify(
                     new Directives()
                         .Xpath("//item")
@@ -68,14 +79,16 @@ namespace Xive.Xocument.Test
         [Fact]
         public void FindsNodes()
         {
-            var xoc =
-                new SimpleXocument(
+            var mem = new RamMemories();
+            mem.XML()
+                .Update(
+                    "xml-xocks",
                     new XMLCursor(
-                        new InputOf(
-                            "<root><item>A</item><item>B</item></root>"
-                        )
+                        new InputOf("<root><item>A</item><item>B</item></root>")
                     ).AsNode()
                 );
+
+            var xoc = new MemorizedXocument("xml-xocks", mem);
 
             Assert.Equal(
                 1,
@@ -86,14 +99,16 @@ namespace Xive.Xocument.Test
         [Fact]
         public void HasNodeContent()
         {
-            var xoc =
-                new SimpleXocument(
+            var mem = new RamMemories();
+            mem.XML()
+                .Update(
+                    "xml-xocks",
                     new XMLCursor(
-                        new InputOf(
-                            "<root><item>A</item></root>"
-                        )
+                        new InputOf("<root><item>A</item><item>B</item></root>")
                     ).AsNode()
                 );
+
+            var xoc = new MemorizedXocument("xml-xocks", mem);
 
             Assert.Equal(
                 "A",

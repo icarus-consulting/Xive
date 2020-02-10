@@ -28,10 +28,16 @@ using Yaapii.Xml;
 
 namespace Xive.Xocument
 {
+    /// <summary>
+    /// Envelope for xocument.
+    /// </summary>
     public class XocumentEnvelope : IXocument
     {
         private readonly IScalar<IXocument> origin;
 
+        /// <summary>
+        /// Envelope for xocument.
+        /// </summary>
         public XocumentEnvelope(IScalar<IXocument> origin)
         {
             this.origin = origin;
