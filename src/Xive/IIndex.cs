@@ -26,15 +26,21 @@ using System.Collections.Generic;
 
 namespace Xive
 {
+    /// <summary>
+    /// Index of a hive.
+    /// </summary>
     public interface IIndex
     {
         void Add(string id);
-        IList<IHoneyComb> Filtered(params IIndexFilter[] filters);
+        IList<IHoneyComb> Filtered(params IHiveFilter[] filters);
         bool Has(string id);
         void Remove(string id);
     }
 
-    public interface IIndexFilter
+    /// <summary>
+    /// Filter the index of a hive.
+    /// </summary>
+    public interface IHiveFilter
     {
         bool Matches(IProps props);
     }

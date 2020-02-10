@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Xive.Cache;
+using Xive.Mnemonic;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
 using Yaapii.Xml;
@@ -14,7 +14,7 @@ namespace Xive.Xocument
     public sealed class MemorizedXocument : IXocument
     {
         private readonly IMemories memories;
-        private readonly Sticky<XNode> node;
+        private readonly Solid<XNode> node;
         private readonly string name;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Xive.Xocument
         {
             this.memories = memories;
             this.node =
-                new Sticky<XNode>(() =>
+                new Solid<XNode>(() =>
                 {
                     var node =
                         memories.XML().Content(name, () =>
@@ -34,8 +34,11 @@ namespace Xive.Xocument
                             {
                                 rootName = rootName.Substring(0, rootName.Length - 4);
                             }
-                            rootName = rootName.Substring(rootName.LastIndexOf("/"));
-                            rootName = rootName.TrimStart('/');
+                            if (rootName.Contains("/"))
+                            {
+                                rootName = rootName.Substring(rootName.LastIndexOf("/"));
+                                rootName = rootName.TrimStart('/');
+                            }
                             return
                                 new XDocument(
                                     new XElement(rootName)

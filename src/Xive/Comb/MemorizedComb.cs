@@ -23,6 +23,7 @@
 using System.IO;
 using Xive.Cache;
 using Xive.Cell;
+using Xive.Mnemonic;
 using Xive.Xocument;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;

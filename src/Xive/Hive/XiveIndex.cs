@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Xive.Cache;
 using Xive.Comb;
+using Xive.Mnemonic;
 using Xive.Xocument;
 using Yaapii.Atoms.List;
 using Yaapii.Xambly;
@@ -14,9 +15,9 @@ namespace Xive.Hive
     public sealed class XiveIndex : IIndex
     {
         private readonly string scope;
-        private readonly IXocument xoc;
         private readonly ISyncValve valve;
         private readonly IMemories mem;
+        private readonly List<string> idCache;
 
         /// <summary>
         /// The index of a xive, realized as a catalog xml document.
@@ -26,32 +27,66 @@ namespace Xive.Hive
             this.mem = mem;
             this.valve = valve;
             this.scope = scope;
-            this.xoc = new MemorizedXocument($"{scope}/hq/catalog.xml", mem);
+            this.idCache = new List<string>();
         }
 
         public void Add(string id)
         {
-            using (var xoc = this.xoc)
+            using (var xoc = ExclusiveXoc())
             {
-                if(this.xoc.Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0)
+                if(xoc.Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0)
                 {
                     throw new InvalidOperationException($"Cannot add {id} to {scope} catalog because it already exists.");
                 }
-                this.xoc.Modify(new Directives().Xpath("/catalog").Add(scope).Attr("id", id.ToLower()));
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("/catalog")
+                        .Add(scope)
+                        .Attr("id", id.ToLower())
+                    );
+                lock (idCache)
+                {
+                    idCache.Clear();
+                    idCache.AddRange(xoc.Values("/catalog/*/@id"));
+                }
             }
         }
 
-        public IList<IHoneyComb> Filtered(params IIndexFilter[] filters)
+        public IList<IHoneyComb> Filtered(params IHiveFilter[] filters)
         {
             IList<IHoneyComb> filtered = new List<IHoneyComb>();
-            var fltrs = new List<IIndexFilter>(filters);
-            foreach(var id in this.xoc.Values("/catalog/*/@id"))
+            var fltrs = new List<IHiveFilter>(filters);
+            lock (idCache)
             {
-                foreach(var filter in fltrs)
+                if (idCache.Count == 0)
                 {
-                    if(filter.Matches(this.mem.Props(scope, id)))
+                    idCache.AddRange(Xoc().Values("/catalog/*/@id"));
+                }
+            }
+            foreach(var id in idCache)
+            {
+                if (filters.Length == 0)
+                {
+                    filtered.Add(
+                        new MemorizedComb(
+                            new Normalized($"{scope.ToLower()}/{id.ToLower()}").AsString(), 
+                            this.mem
+                        )
+                    );
+                }
+                else
+                {
+                    foreach (var filter in fltrs)
                     {
-                        filtered.Add(new MemorizedComb($"{scope}/{id}", this.mem));
+                        if (filter.Matches(this.mem.Props(scope, id)))
+                        {
+                            filtered.Add(
+                                new MemorizedComb(
+                                    new Normalized($"{scope}/{id}").AsString(), 
+                                    this.mem
+                                )
+                            );
+                        }
                     }
                 }
             }
@@ -60,25 +95,47 @@ namespace Xive.Hive
 
         public bool Has(string id)
         {
-            return this.xoc.Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0;
+            lock (idCache)
+            {
+                if (idCache.Count == 0)
+                {
+                    idCache.AddRange(Xoc().Values("/catalog/*/@id"));
+                }
+            }
+            return Xoc().Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0;
         }
 
         public void Remove(string id)
         {
-            using (var xoc = this.xoc)
+            using (var xoc = Xoc())
             {
-                this.xoc.Modify(new Directives().Xpath($"/catalog/{this.scope.ToLower()}[@id='{id.ToLower()}']").Remove());
+                Xoc().Modify(
+                    new Directives()
+                        .Xpath($"/catalog/{this.scope.ToLower()}[@id='{id.ToLower()}']")
+                        .Remove()
+                );
+                lock (idCache)
+                {
+                    idCache.Clear();
+                    idCache.AddRange(xoc.Values("/catalog/*/@id"));
+                }
             }
         }
 
-        private IXocument Exclusive()
+        private IXocument ExclusiveXoc()
         {
             return
                 new SyncXocument(
                     $"{scope}/hq/catalog.xml",
-                    this.xoc,
+                    Xoc(),
                     valve
                 );
         }
+
+        private IXocument Xoc()
+        {
+            return new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem);
+        }
+
     }
 }

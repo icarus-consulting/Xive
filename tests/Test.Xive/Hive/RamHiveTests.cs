@@ -20,11 +20,9 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using Xive.Cache;
 using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
@@ -35,32 +33,37 @@ namespace Xive.Hive.Test
     public sealed class RamHiveTests
     {
         [Fact]
-        public void DeliversComb()
+        public void RemembersComb()
         {
-            var hive = new RamHive("in-memory");
-            var catalog = new SimpleCatalog("in-memory", hive.HQ());
-            catalog.Create("123");
+            var mem = new RamMemories();
+            new MemorizedHive("in-memory", mem)
+                .Catalog()
+                .Add("123");
 
-            Assert.NotEmpty(catalog.List("@id='123'"));
+            Assert.Equal(
+                "in-memory/123",
+                 new MemorizedHive("in-memory", mem)
+                    .Catalog()
+                    .Filtered()[0]
+                    .Name()
+            );
         }
 
         [Fact]
         public void DeliversProps()
         {
-            var hive = new RamHive("in-memory");
-            var catalog = new SimpleCatalog("in-memory", hive.HQ());
-            catalog.Create("123");
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("in-memory", mem);
+            hive.Catalog()
+                .Add("123");
 
-            new FirstOf<IHoneyComb>(
-                hive.Combs("'*'")
-            ).Value()
+            hive.Catalog().Filtered()[0]
             .Props()
             .Refined("prop", "eller");
 
             Assert.Equal(
                 "eller",
-                new FirstOf<IHoneyComb>(hive.Combs("'*'"))
-                    .Value()
+                hive.Catalog().Filtered()[0]
                     .Props()
                     .Value("prop")
             );
@@ -69,27 +72,25 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftsScope()
         {
-            var hive = new RamHive();
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("in-memory", mem);
+            hive.Catalog()
+                .Add("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new SimpleCatalog(shifted);
-
-            Assert.Empty(twilightCatalog.List("@id='123'"));
+            Assert.Empty(shifted.Catalog().Filtered());
         }
 
         [Fact]
         public void DistinguishesScope()
         {
             var mem = new RamMemories();
-            var hive = new RamHive(mem);
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
+            var hive = new MemorizedHive("in-memory", mem);
+                hive.Catalog()
+                    .Add("123");
 
             var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new SimpleCatalog(shifted);
-            twilightCatalog.Create("789");
+            shifted.Catalog().Add("789");
 
             Assert.Contains("twilight-zone/hq/catalog.xml", mem.XML().Knowledge());
         }
@@ -98,13 +99,18 @@ namespace Xive.Hive.Test
         public void DeliversHQCell()
         {
             string expected = "Four headquarters are one head";
-            var hive = new RamHive("in-memory");
-            hive.HQ().Cell("catalog.xml").Update(new InputOf(expected));
-            Assert.Equal(
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("in-memory", mem);
+                hive.Catalog()
+                    .Add("123");
+
+            hive.Comb("123", false).Props().Refined("Text of the day", expected);
+
+            Assert.Contains(
                 expected,
                 new TextOf(
                     new InputOf(
-                        hive.HQ().Cell("catalog.xml").Content()
+                        hive.HQ().Xocument("catalog.xml").Node().ToString()
                     )
                 ).AsString()
             );
@@ -113,54 +119,48 @@ namespace Xive.Hive.Test
         [Fact]
         public void PrependsScopeToCombName()
         {
-            IHive hive = new RamHive();
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("prepend-this", mem);
+                hive.Catalog()
+                    .Add("123");
 
             var shifted = hive.Shifted("prepend-this");
-            new SimpleCatalog(shifted).Create("an-entry");
 
             Assert.StartsWith("prepend-this",
-                new FirstOf<IHoneyComb>(
-                    shifted.Combs("@id='an-entry'")
-                ).Value().Name()
+                hive.Comb("123", false).Name()
             );
         }
 
         [Fact]
         public void DeliversHQXocument()
         {
-            var hive = new RamHive("in-memory");
-            hive.HQ().Xocument("catalog.xml")
-                .Modify(
-                    new Directives()
-                        .Xpath("/catalog")
-                        .Add("item")
-                        .Attr("id", "8")
-                        .Set("hello I am in a xocument, pretty cool eh?")
-                );
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("in-memory", mem);
+            hive.HQ().Cell("A").Update(new InputOf(new byte[1] { 0xAB }));
+
             Assert.Equal(
-                "8",
-                hive.HQ().Xocument("catalog.xml").Value("/catalog/item[@id='8']/@id", "")
+                new byte[1] { 0xAB },
+                hive.HQ().Cell("A").Content()
             );
         }
 
         [Fact]
         public void RemembersCombs()
         {
-            var hive = new RamHive("animal");
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
-            catalog.Create("456");
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("in-memory", mem);
+            hive.Catalog().Add("123");
+            hive.Catalog().Add("456");
 
-            var comb = new FirstOf<IHoneyComb>(hive.Combs("@id='456'")).Value();
-            comb.Cell("my-cell").Update(new InputOf("larva"));
+            hive.Comb("123", false)
+                .Cell("my-cell")
+                .Update(new InputOf("larva"));
 
             Assert.Equal(
                 "larva",
                 new TextOf(
                     new InputOf(
-                        new FirstOf<IHoneyComb>(
-                            hive.Combs("@id='456'")
-                        ).Value()
+                        hive.Comb("123", false)
                         .Cell("my-cell")
                         .Content()
                     )
@@ -171,26 +171,25 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemembersXocument()
         {
-            var hive = new RamHive("animal");
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
-            catalog.Create("456");
+            var mem = new RamMemories();
+            var hive = new MemorizedHive("animal", mem);
+            hive.Catalog().Add("123");
+            hive.Catalog().Add("456");
 
-            var comb = new FirstOf<IHoneyComb>(hive.Combs("@id='456'")).Value();
-            comb.Xocument("meatloaf.xml")
+            hive.Comb("456").Xocument("meatloaf.xml")
                 .Modify(
                     new Directives()
-                    .Xpath("/meatloaf")
-                    .Add("lines")
-                    .Add("line").Set("And I would do anything for love").Up()
-                    .Add("line").Set("But I won't do that").Up()
+                        .Xpath("/meatloaf")
+                        .Add("lines")
+                        .Add("line").Set("And I would do anything for love").Up()
+                        .Add("line").Set("But I won't do that").Up()
                 );
 
             Assert.Contains(
                 "But I won't do that",
-                new FirstOf<IHoneyComb>(
-                    hive.Combs("@id='456'")
-                ).Value().Xocument("meatloaf.xml").Values("//line/text()")
+                hive.Comb("456")
+                    .Xocument("meatloaf.xml")
+                    .Values("//line/text()")
             );
         }
     }

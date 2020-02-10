@@ -41,14 +41,14 @@ namespace Xive.Hive
             this.hive = hive;
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath)
+        public IIndex Catalog()
         {
-            return this.hive.Value().Combs(xpath);
+            return this.hive.Value().Catalog();
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalog)
+        public IHoneyComb Comb(string id, bool createIfAbsent = false)
         {
-            return this.hive.Value().Combs(xpath, catalog);
+            return this.hive.Value().Comb(id, createIfAbsent);
         }
 
         public IHoneyComb HQ()

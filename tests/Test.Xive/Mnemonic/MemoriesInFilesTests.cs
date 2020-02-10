@@ -16,13 +16,16 @@ namespace Xive.Test.Mnemonic
             using (var temp = new TempDirectory())
             {
                 var mem = new FileMemories(temp.Value().FullName);
-                var comb = new MemorizedComb("beverage/HQ", mem);
-                new SimpleCatalog("beverage", comb).Create("fritz-kola");
+                new XiveIndex(
+                    "beverage", 
+                    mem, 
+                    new SyncGate()
+                ).Add("fritz-kola");
 
                 mem.Props("beverage", "fritz-kola").Refined("light", "yes please");
 
                 mem = new FileMemories(temp.Value().FullName);
-                comb = new MemorizedComb("beverage/HQ", mem);
+
                 Assert.Equal(
                     "yes please",
                     mem.Props("beverage", "fritz-kola").Value("light")

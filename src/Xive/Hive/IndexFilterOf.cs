@@ -5,7 +5,7 @@ namespace Xive.Hive
     /// <summary>
     /// A filter which looks at props.
     /// </summary>
-    public sealed class IndexFilterOf : IIndexFilter
+    public sealed class IndexFilterOf : IHiveFilter
     {
         private readonly Func<IProps, bool> matches;
 

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Xive.Hive;
+using Xive.Mnemonic;
 
 namespace Xive.Cache
 {

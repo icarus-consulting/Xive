@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Xml.Linq;
 using Xive.Hive;
+using Xive.Mnemonic;
 using Xive.Props;
 using Xive.Xocument;
 

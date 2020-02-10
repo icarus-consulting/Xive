@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xive.Cell;
+using Xive.Mnemonic;
 using Xive.Test;
 using Xunit;
 using Yaapii.Xambly;
@@ -63,18 +64,22 @@ namespace Xive.Xocument.Test
         [Fact]
         public void WorksParallel()
         {
-            throw new NotImplementedException();
-            //var cell = new RamCell();
-            //var syncGate = new ProcessSyncValve();
-            //Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
-            //{
-            //    var content = Guid.NewGuid().ToString();
-            //    using (var synced = new SyncXocument(cell.Name(), new RamXocument(cell, "xoc"), syncGate))
-            //    {
-            //        synced.Modify(new Directives().Xpath("/xoc").Set(content));
-            //        Assert.Equal(content, synced.Value("/xoc/text()", ""));
-            //    }
-            //});
+            var syncGate = new SyncGate();
+            var mem = new RamMemories();
+            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
+            {
+                var content = Guid.NewGuid().ToString();
+                using (var synced =
+                    new SyncXocument("xoc",
+                        new MemorizedXocument("xoc", mem),
+                        syncGate
+                    )
+                )
+                {
+                    synced.Modify(new Directives().Xpath("/xoc").Set(content));
+                    Assert.Equal(content, synced.Value("/xoc/text()", ""));
+                }
+            });
         }
     }
 }
