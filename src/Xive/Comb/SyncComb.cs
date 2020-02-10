@@ -36,7 +36,7 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that accesses cells systemwide exclusively.
         /// </summary>
-        public SyncComb(IHoneyComb comb) : this(comb, new ProcessSyncValve())
+        public SyncComb(IHoneyComb comb) : this(comb, new SyncGate())
         { }
 
         /// <summary>

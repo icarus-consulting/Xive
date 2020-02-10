@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 
-namespace Xive.Hive
+namespace Xive.Mnemonic
 {
     /// <summary>
     /// A memory for all three types of data.

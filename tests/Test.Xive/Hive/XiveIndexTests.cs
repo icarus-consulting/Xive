@@ -9,7 +9,7 @@ namespace Xive.Test.Hive
         [Fact]
         public void AddsItems()
         {
-            var idx = new XiveIndex("test", new RamMemories(), new ProcessSyncValve());
+            var idx = new XiveIndex("test", new RamMemories(), new SyncGate());
             idx.Add("123");
             Assert.True(idx.Has("123"));
         }
@@ -17,7 +17,7 @@ namespace Xive.Test.Hive
         [Fact]
         public void RemovesItems()
         {
-            var idx = new XiveIndex("test", new RamMemories(), new ProcessSyncValve());
+            var idx = new XiveIndex("test", new RamMemories(), new SyncGate());
             idx.Add("123");
             idx.Remove("123");
             Assert.False(idx.Has("123"));
@@ -27,7 +27,7 @@ namespace Xive.Test.Hive
         public void FiltersItems()
         {
             var mem = new RamMemories();
-            var idx = new XiveIndex("test", mem, new ProcessSyncValve());
+            var idx = new XiveIndex("test", mem, new SyncGate());
             idx.Add("123");
             idx.Add("456");
             mem.Props("test", "123").Refined("works", "true");

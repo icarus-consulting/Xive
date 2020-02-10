@@ -47,7 +47,7 @@ namespace Xive.Cell.Test
                     }
                 );
 
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 using (var mutexed = new SyncCell(cell, valve))
@@ -61,7 +61,7 @@ namespace Xive.Cell.Test
         public void WorksParallel()
         {
             var cell = new RamCell();
-            var gate = new ProcessSyncValve();
+            var gate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
@@ -77,7 +77,7 @@ namespace Xive.Cell.Test
         public void DoesNotBlockItself()
         {
             var cell = new RamCell();
-            var gate = new ProcessSyncValve();
+            var gate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
@@ -102,7 +102,7 @@ namespace Xive.Cell.Test
         public void WorksWithRamCell()
         {
             var cell = new RamCell();
-            var gate = new ProcessSyncValve();
+            var gate = new SyncGate();
             using (var mutexed = new SyncCell(cell, gate))
             {
                 mutexed.Update(new InputOf("its so hot outside"));
@@ -119,7 +119,7 @@ namespace Xive.Cell.Test
             using (var file = new TempFile())
             {
                 var path = file.Value();
-                var gate = new ProcessSyncValve();
+                var gate = new SyncGate();
                 Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
                 {
                     using (var cell = new SyncCell(new FileCell(path), gate))

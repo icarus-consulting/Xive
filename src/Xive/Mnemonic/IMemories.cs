@@ -2,7 +2,7 @@
 using System.Xml.Linq;
 using Xive.Hive;
 
-namespace Xive.Cache
+namespace Xive.Mnemonic
 {
     /// <summary>
     /// The memories of the xive.

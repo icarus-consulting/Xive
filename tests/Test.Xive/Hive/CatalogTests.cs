@@ -98,7 +98,7 @@ namespace Xive.Hive.Test
             using (var dir = new TempDirectory())
             {
                 var locks = new ConcurrentDictionary<string, Mutex>();
-                var valve = new ProcessSyncValve(locks);
+                var valve = new SyncGate(locks);
                 var hive =
                     new SyncHive(
                        new FileHive(

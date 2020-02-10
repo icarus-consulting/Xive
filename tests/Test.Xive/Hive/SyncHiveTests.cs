@@ -39,7 +39,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void CreatesCatalogInParallel()
         {
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             var hive = new SyncHive(new RamHive("testRamHive"), valve);
 
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
@@ -52,7 +52,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversCombsInParallel()
         {
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             var hive = new SyncHive(new RamHive("product"), valve);
             new SyncCatalog(hive, valve).Create("2CV");
 
@@ -66,7 +66,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DoesNotBlockItself()
         {
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             var hive = new SyncHive(new RamHive("product"), valve);
             new SyncCatalog(hive, valve).Create("2CV");
             using (var xoc = hive.Shifted("machine").HQ().Xocument("catalog.xml"))
@@ -122,7 +122,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQInParallelAfterShift()
         {
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             var hive =
                 new SyncHive(
                     new RamHive("person"),
@@ -178,7 +178,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var valve = new ProcessSyncValve();
+                var valve = new SyncGate();
                 var hive = 
                     new SyncHive(
                         new FileHive("product", dir.Value().FullName)
@@ -197,7 +197,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksParallel()
         {
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             var hive = new SyncHive(new RamHive(), valve);
             var comb = "Dr.Robotic";
             new ParallelFunc(() =>
@@ -232,7 +232,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var valve = new ProcessSyncValve();
+                var valve = new SyncGate();
                 var hive =
                     new SyncHive(
                         new CachedHive(
@@ -279,7 +279,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksParallelWithRamHive()
         {
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             var hive =
                 new SyncHive(
                     new CachedHive(

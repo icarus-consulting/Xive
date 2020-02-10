@@ -36,7 +36,7 @@ namespace Xive.Xocument.Test
         public void DeliversParallel()
         {
             var accesses = 0;
-            var syncGate = new ProcessSyncValve();
+            var syncGate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var xoc =

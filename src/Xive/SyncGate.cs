@@ -6,20 +6,20 @@ namespace Xive
     /// <summary>
     /// A sync which synchronizes inside the process which owns the Xive.
     /// </summary>
-    public sealed class ProcessSyncValve : ISyncValve
+    public sealed class SyncGate : ISyncValve
     {
         private readonly ConcurrentDictionary<string, Mutex> locks;
 
         /// <summary>
         /// A sync which synchronizes inside the process which owns the Xive.
         /// </summary>
-        public ProcessSyncValve() : this(new ConcurrentDictionary<string, Mutex>())
+        public SyncGate() : this(new ConcurrentDictionary<string, Mutex>())
         { }
 
         /// <summary>
         /// A sync which synchronizes inside the process which owns the Xive.
         /// </summary>
-        public ProcessSyncValve(ConcurrentDictionary<string, Mutex> locks)
+        public SyncGate(ConcurrentDictionary<string, Mutex> locks)
         {
             this.locks = locks;
         }

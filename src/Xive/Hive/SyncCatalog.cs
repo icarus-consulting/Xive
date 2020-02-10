@@ -39,7 +39,7 @@ namespace Xive.Hive
         /// <summary>
         /// A catalog to manage a list of combs in a hive processwide exclusively.
         /// </summary>
-        public SyncCatalog(IHive hive) : this(hive, new SimpleCatalog(hive), new ProcessSyncValve())
+        public SyncCatalog(IHive hive) : this(hive, new SimpleCatalog(hive), new SyncGate())
         { }
 
         /// <summary>

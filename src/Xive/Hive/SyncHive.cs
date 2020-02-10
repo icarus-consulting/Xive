@@ -39,7 +39,7 @@ namespace Xive.Hive
         /// <summary>
         /// A hive that accesses cells systemwide exclusively.
         /// </summary>
-        public SyncHive(IHive hive) : this(hive, new ProcessSyncValve())
+        public SyncHive(IHive hive) : this(hive, new SyncGate())
         { }
 
         /// <summary>

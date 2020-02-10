@@ -33,7 +33,7 @@ namespace Xive.Cell
         private readonly ICell origin;
         private readonly int[] locked;
 
-        public SyncCell(ICell origin) : this(origin, new ProcessSyncValve())
+        public SyncCell(ICell origin) : this(origin, new SyncGate())
         { }
 
         public SyncCell(ICell origin, ISyncValve locks)
