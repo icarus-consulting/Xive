@@ -34,15 +34,34 @@ namespace Xive.Hive.Test
     public sealed class FileHiveTests
     {
         [Fact]
-        public void DeliversHQ()
+        public void DeliversHQWithBackSlashes()
         {
             using (var dir = new TempDirectory())
-            {
+            {                
                 Assert.Equal(
                     $"product/hq",
                     new FileHive(dir.Value().FullName, "product")
                         .HQ()
                         .Name()
+                );
+            }
+        }
+
+        [Fact]
+        public void DeliversHQWithForwardSlashes()
+        {
+            using (var dir = new TempDirectory())
+            {
+                Assert.Equal(
+                    $"product/hq",
+                    new FileHive(
+                        "product",
+                        new Normalized(
+                            dir.Value().FullName
+                        ).AsString()
+                    )
+                    .HQ()
+                    .Name()
                 );
             }
         }
@@ -107,7 +126,15 @@ namespace Xive.Hive.Test
                 {
                     cell.Update(new InputOf("bytes over bytes here..."));
                     Assert.True(
-                        Directory.Exists(Path.Combine(dir.Value().FullName, "product", "2CV"))
+                        Directory.Exists(
+                            new Normalized(
+                                Path.Combine(
+                                    dir.Value().FullName,
+                                    "product",
+                                    "2CV"
+                                )
+                            ).AsString()                        
+                        )
                     );
                 }
             }
@@ -120,7 +147,15 @@ namespace Xive.Hive.Test
             {
                 new FileHive(dir.Value().FullName, "product").Catalog().Add("2CV");
                 Assert.True(
-                    Directory.Exists(Path.Combine(dir.Value().FullName, "product", "HQ"))
+                    Directory.Exists(
+                        new Normalized(
+                            Path.Combine(
+                                dir.Value().FullName,
+                                "product",
+                                "HQ"
+                            )
+                        ).AsString()
+                    )
                 );
             }
         }
@@ -174,7 +209,12 @@ namespace Xive.Hive.Test
                     cell.Update(new InputOf("I am a very cool testdata string"));
                     var combDir = Path.Combine(dir.Value().FullName, "product", "2CV");
                     Assert.True(
-                        Directory.Exists(combDir),
+                        Directory.Exists(
+                            new Normalized(  
+                                combDir                                
+                            ).AsString()
+                        )
+                        ,
                         $"Directory '{combDir}' doesn't exist"
                     );
                 }
