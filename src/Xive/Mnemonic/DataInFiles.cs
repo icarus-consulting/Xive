@@ -22,8 +22,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Mnemonic
 {
@@ -33,26 +37,44 @@ namespace Xive.Mnemonic
     public sealed class DataInFiles : IMemory<MemoryStream>
     {
         private readonly string root;
+        private readonly ISyncPipe sync;
+        private readonly bool writeAsync;
 
         /// <summary>
         /// Data stored in files.
+        /// The access to the files is exclusive for this object, but not exclusive system-wide.
         /// </summary>
-        public DataInFiles(string root)
+        public DataInFiles(string root) : this(root, new LocalSyncPipe())
+        { }
+
+        /// <summary>
+        /// Data stored in files.
+        /// The access to files made exclusive by the given pipe.
+        /// </summary>
+        /// <param name="writeAsync">if true, updating is done asynchronously.</param>
+        public DataInFiles(string root, ISyncPipe sync, bool writeAsync = false)
         {
             this.root = root;
+            this.sync = sync;
+            this.writeAsync = writeAsync;
         }
 
         public MemoryStream Content(string name, Func<MemoryStream> ifAbsent)
         {
+            name = new Normalized(name).AsString();
             var result = new MemoryStream();
-            if (!File.Exists(Path(name)))
+            this.sync.Flush(name, () =>
             {
-                Update(name, ifAbsent());
-            }
-            if (File.Exists(Path(name)))
-            {
-                result = new MemoryStream(File.ReadAllBytes(Path(name)));
-            }
+                if (!File.Exists(Path(name)))
+                {
+                    result = ifAbsent();
+                    Update(name, result);
+                }
+                else
+                {
+                    result = new MemoryStream(File.ReadAllBytes(Path(name)));
+                }
+            });
             return result;
         }
 
@@ -77,29 +99,49 @@ namespace Xive.Mnemonic
 
         public void Update(string name, MemoryStream content)
         {
-            if (content.Length > 0)
+            if (this.writeAsync)
             {
-                var path = Path(name);
-                var dir = System.IO.Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
+                Task.Run(() =>
                 {
-                    Directory.CreateDirectory(dir);
-                }
-                using (FileStream f = File.Open(Path(name), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-                {
-                    f.Seek(0, SeekOrigin.Begin);
-                    f.SetLength(content.Length);
-                    content.Seek(0, SeekOrigin.Begin);
-                    content.CopyTo(f);
-                }
+                    Save(name, content);
+                });
             }
             else
             {
-                if (File.Exists(Path(name)))
-                {
-                    File.Delete(Path(name));
-                }
+                Save(name, content);
             }
+        }
+
+        private void Save(string name, MemoryStream content)
+        {
+            name = new Normalized(name).AsString();
+            var result = new MemoryStream();
+            this.sync.Flush(name, () =>
+            {
+                if (content.Length > 0)
+                {
+                    var path = Path(name);
+                    var dir = System.IO.Path.GetDirectoryName(path);
+                    if (!Directory.Exists(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                    using (FileStream f = File.Open(Path(name), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                    {
+                        f.Seek(0, SeekOrigin.Begin);
+                        f.SetLength(content.Length);
+                        content.Seek(0, SeekOrigin.Begin);
+                        content.CopyTo(f);
+                    }
+                }
+                else
+                {
+                    if (File.Exists(Path(name)))
+                    {
+                        File.Delete(Path(name));
+                    }
+                }
+            });
         }
 
         private string Path(string name)

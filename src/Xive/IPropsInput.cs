@@ -26,6 +26,6 @@ namespace Xive
 {
     public interface IPropsInput
     {
-        IDictionary<string, IList<string>> Apply(IDictionary<string, IList<string>> props);
+        IDictionary<string, string[]> Apply(IDictionary<string, string[]> props);
     }
 }

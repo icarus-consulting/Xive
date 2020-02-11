@@ -21,11 +21,15 @@
 //SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
+using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
+using Yaapii.Xambly;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -37,7 +41,7 @@ namespace Xive.Hive.Test
         public void DeliversHQWithBackSlashes()
         {
             using (var dir = new TempDirectory())
-            {                
+            {
                 Assert.Equal(
                     $"product/hq",
                     new FileHive(dir.Value().FullName, "product")
@@ -133,7 +137,7 @@ namespace Xive.Hive.Test
                                     "product",
                                     "2CV"
                                 )
-                            ).AsString()                        
+                            ).AsString()
                         )
                     );
                 }
@@ -210,8 +214,8 @@ namespace Xive.Hive.Test
                     var combDir = Path.Combine(dir.Value().FullName, "product", "2CV");
                     Assert.True(
                         Directory.Exists(
-                            new Normalized(  
-                                combDir                                
+                            new Normalized(
+                                combDir
                             ).AsString()
                         )
                         ,
@@ -250,6 +254,190 @@ namespace Xive.Hive.Test
         public void DeliversScope()
         {
             Assert.Equal("the name", new FileHive("the root", "the name").Scope());
+        }
+
+        [Fact]
+        public void AddsInParallel()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = new FileHive(dir.Value().FullName, "product");
+
+                Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+                {
+                    hive.Catalog().Add("supercar");
+                });
+
+                Assert.Equal(1, hive.Catalog().List().Count);
+            }
+        }
+
+        [Fact]
+        public void WritesPropsInParallel()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = new FileHive(dir.Value().FullName, "product");
+
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                {
+                    hive.Comb("2CV").Props().Refined("looping", "louie");
+                });
+
+                Assert.Equal("louie", hive.Comb("2CV").Props().Value("looping"));
+            }
+        }
+
+        [Fact]
+        public void WritesPropsWhenShifted()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = new FileHive(dir.Value().FullName, "product");
+
+                Parallel.For(0, 256, (i) =>
+                {
+                    var id = $"mech-{i}";
+                    hive.Shifted("machine").Catalog().Add(id);
+                    hive.Shifted("machine").Comb(id).Props().Refined("checksum", id);
+                });
+
+                Parallel.ForEach(hive.Shifted("machine").Catalog().List(), comb =>
+                {
+                    Assert.Equal(comb.Name(), $"machine/{comb.Props().Value("checksum")}");
+                });
+            }
+        }
+
+        [Fact]
+        public void WorksAsyncWithCache()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new MemorizedHive("product", new CachedMemories(new FileMemories(dir.Value().FullName, false)));
+                long elapsed = 0;
+
+                Parallel.For(0, 256, (i) =>
+                {
+                    var id = $"mech-{i}";
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    hive.Shifted("machine").Catalog().Add(id);
+                    stopWatch.Stop();
+                    elapsed += stopWatch.ElapsedMilliseconds;
+                });
+
+                Debug.WriteLine("Creation: " + elapsed);
+                elapsed = 0;
+
+                Parallel.For(0, 256, (i) =>
+                {
+                    var id = $"mech-{i}";
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    var prop = hive.Shifted("machine").Comb(id).Props().Value("checksum", string.Empty);
+                    stopWatch.Stop();
+                    elapsed += stopWatch.ElapsedMilliseconds;
+                });
+
+                Debug.WriteLine("Read 1: " + elapsed);
+                elapsed = 0;
+
+                Parallel.For(0, 256, i =>
+                {
+                    var id = $"mech-{i}";
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    hive.Shifted("machine").Comb(id).Props().Refined("checksum", id);
+                    stopWatch.Stop();
+                    elapsed += stopWatch.ElapsedMilliseconds;
+                });
+
+                Debug.WriteLine("Update: " + elapsed);
+                elapsed = 0;
+
+                Parallel.For(0, 256, (i) =>
+                {
+                    var id = $"mech-{i}";
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    var prop = hive.Shifted("machine").Comb(id).Props().Value("checksum", string.Empty);
+                    stopWatch.Stop();
+                    elapsed += stopWatch.ElapsedMilliseconds;
+                });
+
+                Debug.WriteLine("Read 2: " + elapsed);
+                elapsed = 0;
+
+                Parallel.For(0, 256, i =>
+                {
+                    var id = $"mech-{i}";
+                    var xoc = hive.Shifted("machine").Comb(id).Xocument("stuff.xml");
+                    var name = xoc.Value($"/stuff/thing/text()", "");
+                    xoc.Modify(new Directives().Xpath("//name").Set(Guid.NewGuid()));
+
+                    var xoc2 = hive.Shifted("machine").Comb(id).Xocument("stuff.xml");
+                    var name2 = xoc.Value($"/stuff/thing/text()", "");
+                    xoc2.Modify(new Directives().Xpath("/stuff").AddIf("thing").Set(Guid.NewGuid()));
+
+                    var xoc3 = hive.Shifted("machine").Comb(id).Xocument("stuff.xml");
+                    var name3 = xoc.Value($"/stuff/thing/text()", "");
+                    xoc3.Modify(new Directives().Xpath("/stuff").AddIf("thing").Set(Guid.NewGuid()));
+
+                    Assert.Equal(1, hive.Shifted("machine").Comb(id).Xocument("stuff.xml").Nodes("//thing").Count);
+                });
+
+
+                Debug.WriteLine("Read Stuff: " + elapsed);
+                elapsed = 0;
+            }
+
+        }
+
+        [Fact]
+        public void DeliversHQInParallelAfterShift()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName, "product");
+                hive = hive.Shifted("still-parallel");
+
+                var first = true;
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                {
+                    if (!first)
+                    {
+                        hive.Catalog().Remove("X");
+                        first = false;
+                    }
+                    hive.Catalog().Add("X");
+                });
+                Assert.True(hive.Catalog().Has("X"));
+            }
+        }
+
+        [Fact]
+        public void DeliversHQInParallel()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = new FileHive(dir.Value().FullName, "product");
+
+                Parallel.For(0, Environment.ProcessorCount << 4, i =>
+                {
+                    var xoc = hive.HQ().Xocument("test");
+                    xoc.Modify(
+                        new Directives()
+                            .Xpath("/test")
+                            .AddIf("result")
+                            .Set("passed")
+                        );
+                    Assert.Equal(
+                        "passed",
+                        hive.HQ().Xocument("test").Value("/test/result/text()", "")
+                    );
+                });
+            }
         }
     }
 }

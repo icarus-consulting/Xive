@@ -78,7 +78,7 @@ namespace Xive.Mnemonic.Test
             using (var temp = new TempDirectory())
             {
                 var mem = new XmlInFiles(temp.Value().FullName);
-                mem.Content("childhood", () => new XDocument(new XElement("root", new XText("1980's"))));
+                mem.Content("childhood", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
                 Assert.Contains(
                     "childhood",
                     mem.Knowledge()

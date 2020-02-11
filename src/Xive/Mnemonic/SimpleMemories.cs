@@ -36,6 +36,7 @@ namespace Xive.Cache
                         return
                             new XocumentProps(
                                 new MemorizedXocument($"{scope}/hq/catalog.xml", this),
+                                scope,
                                 id
                             );
                     }

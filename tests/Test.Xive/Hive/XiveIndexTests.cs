@@ -34,7 +34,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void AddsItems()
         {
-            var idx = new XiveIndex("test", new RamMemories(), new SyncGate());
+            var idx = new XiveIndex("test", new RamMemories());
             idx.Add("123");
             Assert.True(idx.Has("123"));
         }
@@ -42,7 +42,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemovesItems()
         {
-            var idx = new XiveIndex("test", new RamMemories(), new SyncGate());
+            var idx = new XiveIndex("test", new RamMemories());
             idx.Add("123");
             idx.Remove("123");
             Assert.False(idx.Has("123"));
@@ -52,7 +52,7 @@ namespace Xive.Hive.Test
         public void FiltersItems()
         {
             var mem = new RamMemories();
-            var idx = new XiveIndex("test", mem, new SyncGate());
+            var idx = new XiveIndex("test", mem);
             idx.Add("123");
             idx.Add("456");
             mem.Props("test", "123").Refined("works", "true");
@@ -67,7 +67,7 @@ namespace Xive.Hive.Test
         public void CachesItems()
         {
             var mem = new RamMemories();
-            var idx = new XiveIndex("test", mem, new SyncGate());
+            var idx = new XiveIndex("test", mem);
             idx.Add("123");
 
             new MemorizedXocument(
@@ -83,7 +83,7 @@ namespace Xive.Hive.Test
         public void ReloadsCacheAfterAdd()
         {
             var mem = new RamMemories();
-            var idx = new XiveIndex("test", mem, new SyncGate());
+            var idx = new XiveIndex("test", mem);
             idx.Add("123");
 
             new MemorizedXocument(
@@ -102,7 +102,7 @@ namespace Xive.Hive.Test
         public void ReloadsCacheAfterRemove()
         {
             var mem = new RamMemories();
-            var idx = new XiveIndex("test", mem, new SyncGate());
+            var idx = new XiveIndex("test", mem);
             idx.Add("123");
 
             new MemorizedXocument(
