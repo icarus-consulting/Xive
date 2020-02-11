@@ -14,7 +14,7 @@ namespace Xive.Xocument
     /// </summary>
     public sealed class MemorizedXocument : IXocument
     {
-        private readonly IMemories memories;
+        private readonly IMnemonic memories;
         private readonly IScalar<XNode> node;
         private readonly Sticky<string> root;
         private readonly string name;
@@ -22,7 +22,7 @@ namespace Xive.Xocument
         /// <summary>
         /// A xocument stored in memories.
         /// </summary>
-        public MemorizedXocument(string name, IMemories memories)
+        public MemorizedXocument(string name, IMnemonic memories)
         {
             this.name = name;
             this.memories = memories;

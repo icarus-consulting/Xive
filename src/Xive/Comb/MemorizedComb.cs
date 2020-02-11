@@ -21,7 +21,6 @@
 //SOFTWARE.
 
 using System.IO;
-using Xive.Cache;
 using Xive.Cell;
 using Xive.Mnemonic;
 using Xive.Xocument;
@@ -39,13 +38,13 @@ namespace Xive.Comb
     public sealed class MemorizedComb : IHoneyComb
     {
         private readonly IText name;
-        private readonly IMemories memory;
+        private readonly IMnemonic memory;
 
         /// <summary>
         /// A comb which exists in memory.
         /// By using this ctor, every RamComb with the same name will have the same contents.
         /// </summary>
-        public MemorizedComb(string name, IMemories mem)
+        public MemorizedComb(string name, IMnemonic mem)
         {
             this.name = new Normalized(name);
             this.memory = mem;

@@ -35,7 +35,7 @@ namespace Xive.Cell
     public sealed class RamCell : ICell
     {
         private readonly IScalar<string> name;
-        private readonly IScalar<IMemories> mem;
+        private readonly IScalar<IMnemonic> mem;
         private readonly string id;
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell() : this(
             new Solid<string>(() => Guid.NewGuid().ToString()),
-            new Solid<IMemories>(() => new RamMemories())
+            new Solid<IMnemonic>(() => new RamMemories())
         )
         { }
 
@@ -70,7 +70,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, IBytes content) : this(
             new ScalarOf<string>(() => path),
-            new Solid<IMemories>(() =>
+            new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
                 mem.Data().Update(path, new MemoryStream(content.AsBytes()));
@@ -87,7 +87,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(IScalar<string> path, MemoryStream content) : this(
             path,
-            new Solid<IMemories>(() =>
+            new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
                 mem.Data().Update(path.Value(), content);
@@ -104,7 +104,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, MemoryStream content) : this(
             new ScalarOf<string>(path),
-            new Solid<IMemories>(() =>
+            new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
                 mem.Data().Update(path, content);
@@ -129,9 +129,9 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="cellMemory">map with content for many items</param>
-        public RamCell(string path, IMemories mem) : this(
+        public RamCell(string path, IMnemonic mem) : this(
             new ScalarOf<string>(path),
-            new ScalarOf<IMemories>(mem)
+            new ScalarOf<IMnemonic>(mem)
         )
         { }
 
@@ -142,7 +142,7 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="itemMap">map with content for many items</param>
-        internal RamCell(IScalar<string> name, IScalar<IMemories> mem)
+        internal RamCell(IScalar<string> name, IScalar<IMnemonic> mem)
         {
             lock (mem)
             {

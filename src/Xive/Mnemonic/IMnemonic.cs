@@ -7,7 +7,7 @@ namespace Xive.Mnemonic
     /// <summary>
     /// The memories of the xive.
     /// </summary>
-    public interface IMemories
+    public interface IMnemonic
     {
         /// <summary>
         /// Props Memory - key: value

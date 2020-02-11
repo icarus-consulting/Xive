@@ -8,9 +8,9 @@ namespace Xive.Mnemonic
     /// <summary>
     /// Memories in Ram.
     /// </summary>
-    public sealed class RamMemories : IMemories
+    public sealed class RamMemories : IMnemonic
     {
-        private readonly IMemories mem;
+        private readonly IMnemonic mem;
 
         /// <summary>
         /// Memories in Ram.

@@ -1,8 +1,28 @@
-﻿using System.Collections.Generic;
+﻿//MIT License
+
+//Copyright (c) 2020 ICARUS Consulting GmbH
+
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
+using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using Xive.Cache;
-using Xive.Hive;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Scalar;
@@ -13,9 +33,9 @@ namespace Xive.Mnemonic
     /// Memories which a stored in a cache.
     /// Update is transferred to the origin memories.
     /// </summary>
-    public sealed class CachedMemories : IMemories
+    public sealed class CachedMemories : IMnemonic
     {
-        private readonly IMemories origin;
+        private readonly IMnemonic origin;
         private readonly Sticky<IMemory<MemoryStream>> data;
         private readonly Sticky<IMemory<XNode>> xml;
 
@@ -24,7 +44,7 @@ namespace Xive.Mnemonic
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="maxSize"></param>
-        public CachedMemories(IMemories origin, params string[] items) : this(origin, int.MaxValue, new List<string>(new EnumerableOf<string>(items)))
+        public CachedMemories(IMnemonic origin, params string[] items) : this(origin, int.MaxValue, new List<string>(new EnumerableOf<string>(items)))
         { }
 
         /// <summary>
@@ -32,7 +52,7 @@ namespace Xive.Mnemonic
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="maxSize"></param>
-        public CachedMemories(IMemories origin) : this(origin, int.MaxValue, new List<string>())
+        public CachedMemories(IMnemonic origin) : this(origin, int.MaxValue, new List<string>())
         { }
 
         /// <summary>
@@ -40,14 +60,14 @@ namespace Xive.Mnemonic
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="maxSize"></param>
-        public CachedMemories(IMemories origin, int maxSize) : this(origin, maxSize, new List<string>())
+        public CachedMemories(IMnemonic origin, int maxSize) : this(origin, maxSize, new List<string>())
         { }
 
         /// <summary>
         /// Memories which a stored in a cache.
         /// Update is transferred to the origin memories.
         /// </summary>
-        public CachedMemories(IMemories origin, int maxSize, IEnumerable<string> blacklist) : this(
+        public CachedMemories(IMnemonic origin, int maxSize, IEnumerable<string> blacklist) : this(
             origin,
             maxSize,
             new ListOf<string>(
@@ -65,7 +85,7 @@ namespace Xive.Mnemonic
         /// Memories which a stored in a cache.
         /// Update is transferred to the origin memories.
         /// </summary>
-        internal CachedMemories(IMemories origin, int maxSize, IList<string> blacklist)
+        internal CachedMemories(IMnemonic origin, int maxSize, IList<string> blacklist)
         {
             this.origin = origin;
             this.data =

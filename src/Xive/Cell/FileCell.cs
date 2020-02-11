@@ -34,7 +34,7 @@ namespace Xive.Cell
     /// </summary>
     public sealed class FileCell : ICell
     {
-        private readonly Sticky<IMemories> mem;
+        private readonly Sticky<IMnemonic> mem;
         private readonly IScalar<string> name;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Xive.Cell
                 }
                 return name;
             }),
-            new Sticky<IMemories>(() =>
+            new Sticky<IMnemonic>(() =>
             {
                 if (!Path.IsPathRooted(path))
                 {
@@ -69,7 +69,7 @@ namespace Xive.Cell
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        private FileCell(IScalar<string> name, Sticky<IMemories> mem)
+        private FileCell(IScalar<string> name, Sticky<IMnemonic> mem)
         {
             this.mem = mem;
             this.name = name;

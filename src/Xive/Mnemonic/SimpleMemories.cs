@@ -10,7 +10,7 @@ namespace Xive.Cache
     /// <summary>
     /// Simple Memories.
     /// </summary>
-    public sealed class SimpleMemories : IMemories
+    public sealed class SimpleMemories : IMnemonic
     {
         private readonly IMemory<XNode> xmlMem;
         private readonly IMemory<MemoryStream> dataMem;
