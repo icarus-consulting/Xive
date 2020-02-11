@@ -25,7 +25,7 @@ using Xunit;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
-namespace Xive.Test
+namespace Xive.Props.Test
 {
     public sealed class RamPropsTests
     {

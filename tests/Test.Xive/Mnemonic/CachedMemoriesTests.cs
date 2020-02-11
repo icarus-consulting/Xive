@@ -30,7 +30,7 @@ using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xml;
 
-namespace Xive.Test.Mnemonic
+namespace Xive.Mnemonic.Test
 {
     public sealed class CachedMemoriesTests
     {

@@ -27,7 +27,7 @@ using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Xml;
 
-namespace Xive.Test.Mnemonic
+namespace Xive.Mnemonic.Test
 {
     public sealed class XmlInFilesTests
     {

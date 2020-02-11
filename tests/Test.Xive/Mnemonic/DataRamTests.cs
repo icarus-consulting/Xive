@@ -23,10 +23,11 @@
 using System;
 using System.IO;
 using Xive.Cache;
+using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
 
-namespace Xive.Test.Mnemonic
+namespace Xive.Mnemonic.Test
 {
     public sealed class DataRamTests
     {

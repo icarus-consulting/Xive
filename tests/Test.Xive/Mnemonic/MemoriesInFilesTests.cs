@@ -28,7 +28,7 @@ using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
-namespace Xive.Test.Mnemonic
+namespace Xive.Mnemonic.Test
 {
     public sealed class MemoriesInFilesTests
     {

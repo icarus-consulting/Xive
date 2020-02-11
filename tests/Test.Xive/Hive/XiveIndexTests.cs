@@ -20,7 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using Xive.Hive;
 using Xive.Mnemonic;
 using Xive.Xocument;
 using Xunit;
@@ -28,7 +27,7 @@ using Yaapii.Xambly;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
-namespace Xive.Test.Hive
+namespace Xive.Hive.Test
 {
     public sealed class XiveIndexTests
     {
