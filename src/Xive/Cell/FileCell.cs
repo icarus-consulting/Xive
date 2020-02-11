@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,10 @@
 //SOFTWARE.
 
 using System;
-using System.Diagnostics;
 using System.IO;
+using Xive.Cache;
+using Xive.Mnemonic;
 using Yaapii.Atoms;
-using Yaapii.Atoms.Bytes;
-using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 
 namespace Xive.Cell
@@ -35,141 +34,79 @@ namespace Xive.Cell
     /// </summary>
     public sealed class FileCell : ICell
     {
-        private readonly IScalar<string> path;
+        private readonly Sticky<IMnemonic> mem;
+        private readonly IScalar<string> name;
 
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        public FileCell(string root, string name) : this(
-            new Solid<string>(() =>
-                Path.Combine(root, new StrictCellName(name).AsString())
-            )
+        public FileCell(string path) : this(
+            new Sticky<string>(() =>
+            {
+                if(!Path.IsPathRooted(path))
+                {
+                    throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
+                }
+                var name = Path.GetFileName(path);
+                if(String.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted and have a file name.");
+                }
+                return name;
+            }),
+            new Sticky<IMnemonic>(() =>
+            {
+                if (!Path.IsPathRooted(path))
+                {
+                    throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
+                }
+                var root = Path.GetDirectoryName(path);
+                return new FileMemories(root);
+            })
         )
         { }
 
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        public FileCell(string path) : this(new ScalarOf<string>(path))
-        { }
-
-        /// <summary>
-        /// A cell which exists physically as a file.
-        /// </summary>
-        private FileCell(IScalar<string> path)
+        private FileCell(IScalar<string> name, Sticky<IMnemonic> mem)
         {
-            this.path = 
-                new Solid<string>(() =>
-                {
-                    var pth = new Normalized(
-                            path.Value()
-                        ).AsString();
-                    if (!Path.IsPathRooted(pth))
-                    {
-                        throw new ArgumentException($"Cannot work with path '{pth}' because it is not rooted.");
-                    }
-                    var full = new Normalized(Path.GetFullPath(pth)).AsString();
-                    Validate(full);
-                    return full;
-                });
+            this.mem = mem;
+            this.name = name;
         }
 
         public string Name()
         {
-            return this.path.Value();
+            return this.name.Value();
         }
 
         public byte[] Content()
         {
-            lock (this)
-            {
-                byte[] result = new byte[0];
-
-                if (File.Exists(this.path.Value()))
-                {
-                    using (var file = new FileStream(this.path.Value(), FileMode.Open))
-                    {
-                        var mem = new MemoryStream();
-                        file.CopyTo(mem);
-                        mem.Seek(0, SeekOrigin.Begin);
-                        result = new BytesOf(new InputOf(mem)).AsBytes();
-                    }
-                }
-                return result;
-            }
+            return
+                this.mem
+                    .Value()
+                    .Data()
+                    .Content(this.name.Value(), () => new MemoryStream()).ToArray();
         }
 
         public void Update(IInput content)
         {
-            lock (this)
+            var stream = content.Stream();
+            if (stream.Length > 0)
             {
-                if (content.Stream().Length == 0)
-                {
-                    Cleanup();
-                }
-                else
-                {
-                    Write(content);
-                }
+                var memory = new MemoryStream();
+                content.Stream().CopyTo(memory);
+                memory.Seek(0, SeekOrigin.Begin);
+                content.Stream().Seek(0, SeekOrigin.Begin);
+                this.mem.Value().Data().Update(this.name.Value(), memory);
             }
-        }
-
-        private void Validate(string path)
-        {
-            if ((Path.GetFileName(path) + String.Empty).Length == 0)
+            else
             {
-                throw new ArgumentException($"Cannot work with path '{path}' because it is empty.");
-            }
-
-            var dir = new StrictCoordinate(Path.GetDirectoryName(path)).AsString();
-            var file = new StrictCellName(Path.GetFileName(path)).AsString();
-        }
-
-        private void Write(IInput content)
-        {
-            lock (this)
-            {
-                var dir = this.DirectoryName();
-                if (!Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-                var origin = content.Stream();
-                var copy = new MemoryStream();
-                content.Stream().CopyTo(copy);
-                copy.Seek(0, SeekOrigin.Begin);
-                origin.Seek(0, SeekOrigin.Begin);
-                File.WriteAllBytes(
-                    this.path.Value(),
-                    copy.ToArray()
-                );
-            }
-        }
-
-        private string DirectoryName()
-        {
-            return
-                new Normalized(
-                    Path.GetDirectoryName(
-                        this.path.Value()
-                    )
-                ).AsString();
-                
-        }
-        private void Cleanup()
-        {
-            lock (this)
-            {
-                if (File.Exists(this.path.Value()))
-                {
-                    File.Delete(this.path.Value());
-                }
+                this.mem.Value().Data().Update(this.name.Value(), new MemoryStream());
             }
         }
 
         public void Dispose()
-        {
-
-        }
+        { }
     }
 }

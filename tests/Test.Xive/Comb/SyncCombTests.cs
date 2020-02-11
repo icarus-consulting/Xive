@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -62,12 +62,13 @@ namespace Xive.Comb.Test
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var xoc = comb.Xocument("synced"))
-                {
-                    xoc.Node();
-                    xoc.Modify(new Directives().Xpath("/synced").Set(content));
-                    Assert.Equal(content, xoc.Value("/synced/text()", ""));
-                }
+                comb.Xocument("synced")
+                    .Modify(
+                        new Directives()
+                            .Xpath("/synced")
+                            .Set(content)
+                        );
+                Assert.NotEmpty(comb.Xocument("synced").Value("/synced/text()", ""));
             });
         }
 
@@ -81,12 +82,13 @@ namespace Xive.Comb.Test
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var xoc = comb.Xocument("synced"))
-                {
-                    xoc.Node();
-                    xoc.Modify(new Directives().Xpath("/synced").Set(content));
-                    Assert.Equal(content, xoc.Value("/synced/text()", ""));
-                }
+                comb.Xocument("synced")
+                    .Modify(
+                        new Directives()
+                            .Xpath("/synced")
+                            .Set(content)
+                        );
+                Assert.NotEmpty(comb.Xocument("synced").Value("/synced/text()", ""));
             });
         }
 
@@ -99,7 +101,7 @@ namespace Xive.Comb.Test
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                var content = Guid.NewGuid().ToString();
+                var content = ":xocument";
                 using (var xoc = comb.Xocument("synced"))
                 {
                     xoc.Node();
@@ -107,7 +109,7 @@ namespace Xive.Comb.Test
                     Assert.Equal(content, xoc.Value("/synced/text()", ""));
                 }
 
-                content = Guid.NewGuid().ToString();
+                content = ":cell";
                 using (var cell = comb.Cell("synced"))
                 {
                     cell.Update(new InputOf($"<synced>{content}</synced>"));

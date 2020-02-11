@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Xive.Cell;
+using Xive.Mnemonic;
 using Xive.Test;
 using Xunit;
 using Yaapii.Xambly;
@@ -36,7 +36,7 @@ namespace Xive.Xocument.Test
         public void DeliversParallel()
         {
             var accesses = 0;
-            var syncGate = new ProcessSyncValve();
+            var syncGate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var xoc =
@@ -63,15 +63,20 @@ namespace Xive.Xocument.Test
         [Fact]
         public void WorksParallel()
         {
-            var cell = new RamCell();
-            var syncGate = new ProcessSyncValve();
+            var syncGate = new SyncGate();
+            var mem = new RamMemories();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var synced = new SyncXocument(cell.Name(), new CellXocument(cell, "xoc"), syncGate))
+                using (var synced =
+                    new SyncXocument("xoc",
+                        new MemorizedXocument("xoc", mem),
+                        syncGate
+                    )
+                )
                 {
                     synced.Modify(new Directives().Xpath("/xoc").Set(content));
-                    Assert.Equal(content, synced.Value("/xoc/text()", ""));
+                    Assert.NotEmpty(synced.Value("/xoc/text()", ""));
                 }
             });
         }

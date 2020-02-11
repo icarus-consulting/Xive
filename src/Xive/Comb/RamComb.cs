@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -20,131 +20,49 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Xive.Cell;
-using Xive.Xocument;
-using Yaapii.Atoms.Bytes;
-using Yaapii.Atoms.Collection;
-using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
-using Yaapii.Xambly;
+using Xive.Mnemonic;
 
 namespace Xive.Comb
 {
     /// <summary>
-    /// A comb which exists in memory.
+    /// A comb that lives in memory.
     /// </summary>
     public sealed class RamComb : IHoneyComb
     {
-        private readonly string name;
-        private readonly IDictionary<string, MemoryStream> cellMemory;
-        private readonly Func<IXocument, IXocument> xocumentWrap;
-        private readonly Func<ICell, ICell> cellWrap;
+        private readonly IHoneyComb core;
 
         /// <summary>
-        /// A comb which exists in memory.
-        /// The contents of this comb will live as long as the comb lives.
+        /// A comb that lives in memory.
         /// </summary>
-        /// <param name="name"></param>
-        public RamComb(string name) : this(name, cell => cell, xoc => xoc, new Dictionary<string, MemoryStream>())
+        public RamComb(string name) : this(name, new RamMemories())
         { }
 
         /// <summary>
-        /// A comb which exists in memory.
-        /// The contents of this comb will live as long as the memory lives.
+        /// A comb that lives in memory.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="cellmemory"></param>
-        /// <param name="xmlMemory"></param>
-        public RamComb(string name, IDictionary<string, MemoryStream> cellmemory) : this(name, cell => cell, xoc => xoc, cellmemory)
-        { }
-
-        /// <summary>
-        /// A comb which exists in memory.
-        /// By using this ctor, the cells of this comb's ctor exist only as long as the comb instance exists.
-        /// By this ctor, you can tell the comb how to wrap a Xocument.
-        /// </summary>
-        public RamComb(string name, Func<ICell, ICell> cellWrap) : this(name, cellWrap, xoc => xoc, new Dictionary<string, MemoryStream>())
-        { }
-
-        /// <summary>
-        /// A comb which exists in memory.
-        /// By using this ctor, the cells of this comb's ctor exist only as long as the comb instance exists.
-        /// By this ctor, you can tell the comb how to wrap a Xocument.
-        /// </summary>
-        public RamComb(string name, Func<IXocument, IXocument> xocumentWrap) : this(name, cell => cell, xocumentWrap, new Dictionary<string, MemoryStream>())
-        { }
-
-        /// <summary>
-        /// A comb which exists in memory.
-        /// The first Dictionary contains memory of all cells, accessible by their name.
-        /// The second Dictionary contains memory of all xmls, also accessible by their name.
-        /// You must tell the comb how to build a Xocument from its name and a cell.
-        /// By using this ctor, every RamComb with the same name will have the same contents.
-        /// </summary>
-        public RamComb(string name, Func<ICell, ICell> cellWrap, Func<IXocument, IXocument> xocumentWrap, IDictionary<string, MemoryStream> cellMemory)
+        internal RamComb(string name, IMnemonic mem)
         {
-            this.name = name;
-            this.cellMemory = cellMemory;
-            this.xocumentWrap = xocumentWrap;
-            this.cellWrap = cellWrap;
-
-        }
-
-        public string Name()
-        {
-            return this.name;
-        }
-
-        public IXocument Xocument(string name)
-        {
-            return this.xocumentWrap(new CellXocument(Cell(name), name));
+            this.core = new MemorizedComb(name, mem);
         }
 
         public ICell Cell(string name)
         {
-            ICell result;
-            if (name.Equals("_guts.xml"))
-            {
+            return this.core.Cell(name);
+        }
 
-                var itemName = new Normalized(this.name).AsString();
-                var patch = new Directives().Add("items");
-                new Each<string>(
-                    (key) =>
-                        patch.Add("item")
-                        .Add("name")
-                        .Set(key.Substring((itemName + "/").Length))
-                        .Up()
-                        .Add("size")
-                        .Set(this.cellMemory[key].Length)
-                        .Up()
-                        .Up(),
-                    new Filtered<string>(
-                       (path) => path.Substring(0, itemName.Length) == itemName,
-                       this.cellMemory.Keys
-                   )
-                ).Invoke();
+        public string Name()
+        {
+            return this.core.Name();
+        }
 
-                result =
-                        new RamCell(
-                            "_guts.xml",
-                            new MemoryStream(
-                                new BytesOf(
-                                    new Xambler(patch).Dom().ToString()
-                                ).AsBytes()
-                            )
-                       );
-            }
-            else
-            {
-                result = 
-                    this.cellWrap(
-                        new RamCell($"{this.name}/{name}", cellMemory)
-                    );
-            }
-            return result;
+        public IProps Props()
+        {
+            return this.core.Props();
+        }
+
+        public IXocument Xocument(string name)
+        {
+            return this.core.Xocument(name);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,12 @@ namespace Xive
         string Name();
 
         /// <summary>
+        /// Props for this capsule.
+        /// </summary>
+        /// <returns></returns>
+        //IProps Props();
+
+        /// <summary>
         /// Get cell content as a Xocument by its unique name.
         /// It is not needed to seperately create a cell - just acquire it, 
         /// the Comb will build it if necessary.
@@ -50,5 +56,12 @@ namespace Xive
         /// <param name="name">Unique name of the cell</param>
         /// <returns>The cell</returns>
         ICell Cell(string name);
+
+        /// <summary>
+        /// Get props.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        IProps Props();
     }
 }

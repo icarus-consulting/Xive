@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using Test.Yaapii.Xive;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -41,12 +40,9 @@ namespace Xive.Hive.Test
             {                
                 Assert.Equal(
                     $"product/hq",
-                    new FileHive(
-                        "product",
-                        dir.Value().FullName
-                    )
-                    .HQ()
-                    .Name()
+                    new FileHive(dir.Value().FullName, "product")
+                        .HQ()
+                        .Name()
                 );
             }
         }
@@ -59,10 +55,10 @@ namespace Xive.Hive.Test
                 Assert.Equal(
                     $"product/hq",
                     new FileHive(
-                        "product",
                         new Normalized(
                             dir.Value().FullName
-                        ).AsString()
+                        ).AsString(),
+                        "product"
                     )
                     .HQ()
                     .Name()
@@ -75,10 +71,10 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new FileHive("product", dir.Value().FullName);
-                new SimpleCatalog(hive).Create("2CV");
+                var hive = new FileHive(dir.Value().FullName, "product");
+                hive.Catalog().Add("2CV");
                 Assert.NotEmpty(
-                    hive.Combs("@id='2CV'")
+                    hive.Catalog().List()
                 );
             }
         }
@@ -88,23 +84,15 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = 
-                    new CachedHive(
-                        new FileHive("cockpit", dir.Value().FullName)
-                    );
-                new SimpleCatalog(hive).Create("log");
+                var hive = new FileHive(dir.Value().FullName, "cockpit");
+                hive.Catalog().Add("log");
 
-                string a;
-                string b;
-                using (var cat = hive.HQ().Xocument("catalog.xml"))
-                {
-                    a = cat.Node().ToString();
-                }
+                var shifted = hive.Shifted("factory");
+                shifted.Catalog().Add("booyaa");
 
-                using (var shifted = hive.Shifted("factory").HQ().Xocument("catalog.xml"))
-                {
-                    b = shifted.Node().ToString();
-                }
+                var shiftedAgain = shifted.Shifted("cockpit");
+
+                Assert.Contains("log", shiftedAgain.Catalog().List()[0].Name());
             }
         }
 
@@ -113,14 +101,12 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new FileHive(dir.Value().FullName);
+                IHive hive = new FileHive(dir.Value().FullName, "cockpit");
                 var shifted = hive.Shifted("prepend-this");
-                new SimpleCatalog(shifted).Create("an-entry");
+                shifted.Catalog().Add("an-entry");
 
                 Assert.StartsWith("prepend-this",
-                    new FirstOf<IHoneyComb>(
-                        shifted.Combs("@id='an-entry'")
-                    ).Value().Name()
+                    shifted.Comb("an-entry").Name()
                 );
             }
         }
@@ -130,14 +116,12 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new FileHive(dir.Value().FullName);
+                IHive hive = new FileHive(dir.Value().FullName, "cars");
                 hive = hive.Shifted("product");
-                new SimpleCatalog(hive).Create("2CV");
+                hive.Catalog().Add("2CV");
 
                 using (var cell =
-                    new FirstOf<IHoneyComb>(
-                        hive.Combs("@id='2CV'")
-                    ).Value().Cell("data")
+                    hive.Comb("2CV").Cell("data")
                 )
                 {
                     cell.Update(new InputOf("bytes over bytes here..."));
@@ -161,9 +145,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new FileHive(dir.Value().FullName);
-                hive = hive.Shifted("product");
-                new SimpleCatalog(hive).Create("2CV");
+                new FileHive(dir.Value().FullName, "product").Catalog().Add("2CV");
                 Assert.True(
                     Directory.Exists(
                         new Normalized(
@@ -183,14 +165,13 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new FileHive(dir.Value().FullName);
-                hive.Shifted("product");
-                new SimpleCatalog(hive).Create("2CV");
-
+                IHive hive = new FileHive(dir.Value().FullName, "product");
+                hive.Catalog().Add("2CV");
                 hive = hive.Shifted("machine");
-                new SimpleCatalog(hive).Create("DrRobotic");
-                Assert.NotEmpty(
-                    hive.Combs("@id='DrRobotic'")
+                hive.Catalog().Add("DrRobotic");
+                Assert.Equal(
+                    1,
+                    hive.Catalog().List().Count
                 );
             }
         }
@@ -200,10 +181,10 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new FileHive("product", dir.Value().FullName);
-                new SimpleCatalog(hive).Create("2CV");
+                var hive = new FileHive(dir.Value().FullName, "product");
+                hive.Catalog().Add("2CV");
 
-                using (var cell = new FirstOf<IHoneyComb>(hive.Combs("@id='2CV'")).Value().Cell("Some-testing-item"))
+                using (var cell = hive.Comb("2CV").Cell("Some-testing-item"))
                 {
                     cell.Update(new InputOf("I am a very cool testdata string"));
                     var productDir = Path.Combine(dir.Value().FullName, "product");
@@ -220,13 +201,9 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new FileHive("product", dir.Value().FullName);
-                new SimpleCatalog(hive).Create("2CV");
-
+                var hive = new FileHive(dir.Value().FullName, "product");
                 using (var cell =
-                    new FirstOf<IHoneyComb>(
-                        hive.Combs("@id='2CV'")
-                    ).Value().Cell("Some-testing-item")
+                    hive.Comb("2CV", true).Cell("Some-testing-item")
                 )
                 {
                     cell.Update(new InputOf("I am a very cool testdata string"));
@@ -249,22 +226,14 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var hive = new FileHive("product", dir.Value().FullName);
-                new SimpleCatalog(hive).Create("2CV");
-
-                using (var cell =
-                    new FirstOf<IHoneyComb>(
-                        hive.Combs("@id='2CV'")
-                    ).Value().Cell("Some-testing-item")
+                var hive = new FileHive(dir.Value().FullName, "product");
+                using (var cell = hive.Comb("2CV").Cell("Some-testing-item")
                 )
                 {
                     cell.Update(new InputOf("I am a very cool testdata string"));
                 }
 
-                using (var cell =
-                    new FirstOf<IHoneyComb>(
-                        hive.Combs("@id='2CV'")
-                    ).Value().Cell("Some-testing-item")
+                using (var cell = hive.Comb("2CV").Cell("Some-testing-item")
                 )
                 {
                     Assert.Equal(
@@ -278,31 +247,9 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
-        public void FailsOnEmptyDirectory()
+        public void DeliversScope()
         {
-            using (var dir = new TempDirectory())
-            {
-                Assert.Throws<ArgumentException>(() =>
-                    new FileHive("product", "").Combs("@id='karre'")
-                );
-            }
-        }
-
-        [Fact]
-        public void FailsOnMissingRootPath()
-        {
-            using (var dir = new TempDirectory())
-            {
-                Assert.Throws<ArgumentException>(() =>
-                    new FileHive("product", "dir").Combs("@id='karre'")
-                );
-            }
-        }
-
-        [Fact]
-        public void HasCorrectName()
-        {
-            Assert.Equal("the name", new FileHive("the name", "the root").Scope());
+            Assert.Equal("the name", new FileHive("the root", "the name").Scope());
         }
     }
 }

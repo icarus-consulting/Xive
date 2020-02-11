@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -41,14 +41,14 @@ namespace Xive.Hive
             this.hive = hive;
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath)
+        public IIndex Catalog()
         {
-            return this.hive.Value().Combs(xpath);
+            return this.hive.Value().Catalog();
         }
 
-        public IEnumerable<IHoneyComb> Combs(string xpath, Func<ICatalog, ICatalog> catalog)
+        public IHoneyComb Comb(string id, bool createIfAbsent = true)
         {
-            return this.hive.Value().Combs(xpath, catalog);
+            return this.hive.Value().Comb(id, createIfAbsent);
         }
 
         public IHoneyComb HQ()

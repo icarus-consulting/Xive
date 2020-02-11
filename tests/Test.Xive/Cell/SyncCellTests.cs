@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,6 @@
 //SOFTWARE.
 
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Xive.Test;
 using Xunit;
@@ -48,7 +47,7 @@ namespace Xive.Cell.Test
                     }
                 );
 
-            var valve = new ProcessSyncValve();
+            var valve = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 using (var mutexed = new SyncCell(cell, valve))
@@ -62,7 +61,7 @@ namespace Xive.Cell.Test
         public void WorksParallel()
         {
             var cell = new RamCell();
-            var gate = new ProcessSyncValve();
+            var gate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
@@ -78,7 +77,7 @@ namespace Xive.Cell.Test
         public void DoesNotBlockItself()
         {
             var cell = new RamCell();
-            var gate = new ProcessSyncValve();
+            var gate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
@@ -103,7 +102,7 @@ namespace Xive.Cell.Test
         public void WorksWithRamCell()
         {
             var cell = new RamCell();
-            var gate = new ProcessSyncValve();
+            var gate = new SyncGate();
             using (var mutexed = new SyncCell(cell, gate))
             {
                 mutexed.Update(new InputOf("its so hot outside"));
@@ -120,7 +119,7 @@ namespace Xive.Cell.Test
             using (var file = new TempFile())
             {
                 var path = file.Value();
-                var gate = new ProcessSyncValve();
+                var gate = new SyncGate();
                 Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
                 {
                     using (var cell = new SyncCell(new FileCell(path), gate))

@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that accesses cells systemwide exclusively.
         /// </summary>
-        public SyncComb(IHoneyComb comb) : this(comb, new ProcessSyncValve())
+        public SyncComb(IHoneyComb comb) : this(comb, new SyncGate())
         { }
 
         /// <summary>
@@ -69,6 +69,11 @@ namespace Xive.Comb
                     this.comb.Xocument(name),
                     this.syncValve
                 );
+        }
+
+        public IProps Props()
+        {
+            return this.comb.Props();
         }
     }
 }

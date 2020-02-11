@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -21,64 +21,79 @@
 //SOFTWARE.
 
 using System.IO;
-using Xive.Hive;
+using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.IO;
 
 namespace Xive.Cell
 {
     /// <summary>
-    /// A cell whose content is cached in memory.
+    /// A cell which is cached in memory.
     /// </summary>
     public sealed class CachedCell : ICell
     {
         private readonly ICell origin;
-        private readonly IText name;
-        private readonly ICache cache;
+        private readonly IMnemonic mem;
 
         /// <summary>
-        /// A cell whose content is cached in memory.
+        /// A cell which is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin, string name, ICache cache)
+        public CachedCell(ICell origin) : this(origin, new RamMemories())
+        { }
+
+        /// <summary>
+        /// A cell which is cached in memory.
+        /// </summary>
+        internal CachedCell(ICell origin, IMnemonic cache)
         {
             this.origin = origin;
-            this.name = new Normalized(name);
-            this.cache = cache;
-        }
+            this.mem = cache;
 
-        public string Name()
-        {
-            return this.name.AsString();
         }
 
         public byte[] Content()
         {
-            byte[] result = new byte[0];
-            var stream =
-                this.cache.Binary(
-                    this.name.AsString(),
-                    () => new MemoryStream(this.origin.Content())
-                );
-            stream.Seek(0, SeekOrigin.Begin);
-            result = stream.ToArray();
-            return result;
+            return
+                this.mem
+                    .Data()
+                    .Content(
+                        this.origin.Name(),
+                        () => new MemoryStream(this.origin.Content())
+                    ).ToArray();
+        }
+
+        public string Name()
+        {
+            return this.origin.Name();
         }
 
         public void Update(IInput content)
         {
             var stream = content.Stream();
-            var copy = new MemoryStream();
-            stream.CopyTo(copy);
-            stream.Seek(0, SeekOrigin.Begin);
-            copy.Seek(0, SeekOrigin.Begin);
-            this.origin.Update(new InputOf(copy));
-            copy.Seek(0, SeekOrigin.Begin);
-            this.cache.Update(this.name.AsString(), copy);
+            if (stream.Length > 0)
+            {
+                var memory = new MemoryStream();
+                content.Stream().CopyTo(memory);
+                memory.Seek(0, SeekOrigin.Begin);
+                content.Stream().Seek(0, SeekOrigin.Begin);
+                this.mem.Data().Update(this.origin.Name(), memory);
+            }
+            else
+            {
+                this.mem
+                    .Data()
+                    .Update(this.origin.Name(), new MemoryStream());
+            }
+            this.origin.Update(
+                new InputOf(
+                    this.mem
+                        .Data()
+                        .Content(this.origin.Name(), () => new MemoryStream())
+                    )
+                );
         }
 
         public void Dispose()
-        {
-            this.origin.Dispose();
-        }
+        { }
     }
 }

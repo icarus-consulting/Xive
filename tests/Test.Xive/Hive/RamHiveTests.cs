@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,9 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Collections.Generic;
+using System;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -35,145 +36,224 @@ namespace Xive.Hive.Test
     public sealed class RamHiveTests
     {
         [Fact]
-        public void DeliversComb()
+        public void DeliversHQ()
         {
-            var memory = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive("in-memory", memory);
-            var catalog = new SimpleCatalog("in-memory", hive.HQ());
-            catalog.Create("123");
-
-            Assert.NotEmpty(catalog.List("@id='123'"));
+            using (var dir = new TempDirectory())
+            {
+                Assert.Equal(
+                    $"product/hq",
+                    new RamHive("product")
+                        .HQ()
+                        .Name()
+                );
+            }
         }
 
         [Fact]
-        public void ShiftsScope()
+        public void FindsComb()
         {
-            var mem = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive(mem);
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
-
-            var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new SimpleCatalog(shifted);
-
-            Assert.Empty(twilightCatalog.List("@id='123'"));
+            using (var dir = new TempDirectory())
+            {
+                var hive = new RamHive("product");
+                hive.Catalog().Add("2CV");
+                Assert.NotEmpty(
+                    hive.Catalog().List()
+                );
+            }
         }
 
         [Fact]
-        public void DistinguishesScope()
+        public void ShiftsHQ()
         {
-            var mem = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive(mem);
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
+            using (var dir = new TempDirectory())
+            {
+                var hive = new RamHive("cockpit");
+                hive.Catalog().Add("log");
 
-            var shifted = hive.Shifted("twilight-zone");
-            var twilightCatalog = new SimpleCatalog(shifted);
-            twilightCatalog.Create("789");
+                var shifted = hive.Shifted("factory");
+                shifted.Catalog().Add("booyaa");
 
-            Assert.Contains("twilight-zone/hq/catalog.xml", mem.Keys);
-        }
+                var shiftedAgain = shifted.Shifted("cockpit");
 
-        [Fact]
-        public void DeliversHQCell()
-        {
-            var mem = new Dictionary<string, MemoryStream>();
-            string expected = "Four headquarters are one head";
-            var hive = new RamHive("in-memory", mem);
-            hive.HQ().Cell("catalog.xml").Update(new InputOf(expected));
-            Assert.Equal(
-                expected,
-                new TextOf(
-                    new InputOf(
-                        hive.HQ().Cell("catalog.xml").Content()
-                    )
-                ).AsString()
-            );
+                Assert.Contains("log", shiftedAgain.Catalog().List()[0].Name());
+            }
         }
 
         [Fact]
         public void PrependsScopeToCombName()
         {
-            IHive hive = new RamHive();
+            using (var dir = new TempDirectory())
+            {
+                var hive = new RamHive("product");
+                var shifted = hive.Shifted("prepend-this");
+                shifted.Catalog().Add("an-entry");
 
-            var shifted = hive.Shifted("prepend-this");
-            new SimpleCatalog(shifted).Create("an-entry");
-
-            Assert.StartsWith("prepend-this",
-                new FirstOf<IHoneyComb>(
-                    shifted.Combs("@id='an-entry'")
-                ).Value().Name()
-            );
-        }
-
-        [Fact]
-        public void DeliversHQXocument()
-        {
-            var mem = new Dictionary<string, MemoryStream>();
-            var hive = new RamHive("in-memory", mem);
-            hive.HQ().Xocument("catalog.xml")
-                .Modify(
-                    new Directives()
-                        .Xpath("/catalog")
-                        .Add("item")
-                        .Attr("id", "8")
-                        .Set("hello I am in a xocument, pretty cool eh?")
+                Assert.StartsWith("prepend-this",
+                    shifted.Comb("an-entry").Name()
                 );
-            Assert.Equal(
-                "8",
-                hive.HQ().Xocument("catalog.xml").Value("/catalog/item[@id='8']/@id", "")
-            );
+            }
         }
 
         [Fact]
-        public void RemembersCombs()
+        public void ShiftsScope()
         {
-            var hive = new RamHive("animal");
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
-            catalog.Create("456");
-
-            var comb = new FirstOf<IHoneyComb>(hive.Combs("@id='456'")).Value();
-            comb.Cell("my-cell").Update(new InputOf("larva"));
-
-            Assert.Equal(
-                "larva",
-                new TextOf(
-                    new InputOf(
-                        new FirstOf<IHoneyComb>(
-                            hive.Combs("@id='456'")
-                        ).Value()
-                        .Cell("my-cell")
-                        .Content()
-                    )
-                ).AsString()
-            );
-        }
-
-        [Fact]
-        public void RemembersXocument()
-        {
-            var hive = new RamHive("animal");
-            var catalog = new SimpleCatalog(hive);
-            catalog.Create("123");
-            catalog.Create("456");
-
-            var comb = new FirstOf<IHoneyComb>(hive.Combs("@id='456'")).Value();
-            comb.Xocument("meatloaf.xml")
-                .Modify(
-                    new Directives()
-                    .Xpath("/meatloaf")
-                    .Add("lines")
-                    .Add("line").Set("And I would do anything for love").Up()
-                    .Add("line").Set("But I won't do that").Up()
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new RamHive("product");
+                hive.Catalog().Add("2CV");
+                hive = hive.Shifted("machine");
+                hive.Catalog().Add("DrRobotic");
+                Assert.Equal(
+                    1,
+                    hive.Catalog().List().Count
                 );
+            }
+        }
 
-            Assert.Contains(
-                "But I won't do that",
-                new FirstOf<IHoneyComb>(
-                    hive.Combs("@id='456'")
-                ).Value().Xocument("meatloaf.xml").Values("//line/text()")
-            );
+        [Fact]
+        public void RemembersCombCell()
+        {
+            IHive hive = new RamHive("product");
+            using (var cell = hive.Comb("2CV").Cell("Some-testing-item"))
+            {
+                cell.Update(new InputOf("I am a very cool testdata string"));
+            }
+
+            using (var cell = hive.Comb("2CV").Cell("Some-testing-item")
+            )
+            {
+                Assert.Equal(
+                    "I am a very cool testdata string",
+                    new TextOf(
+                        cell.Content()
+                    ).AsString()
+                );
+            }
+        }
+
+
+        [Fact]
+        public void DeliversScope()
+        {
+            Assert.Equal("the name", new RamHive("the name").Scope());
+        }
+
+        [Fact]
+        public void AddsInParallel()
+        {
+            var valve = new SyncGate();
+            var hive = new RamHive("testRamHive");
+
+            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
+            {
+                hive.Catalog().Add("123");
+            });
+
+            Assert.Equal(1, hive.Catalog().List().Count);
+        }
+
+        [Fact]
+        public void WritesPropsInParallel()
+        {
+            var hive = new RamHive("product");
+            hive.Catalog().Add("2CV");
+
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                hive.Comb("2CV").Props().Refined("looping", "louie");
+            });
+
+            Assert.Equal("louie", hive.Comb("2CV").Props().Value("looping"));
+        }
+
+        [Fact]
+        public void WritesPropsWhenShifted()
+        {
+            var hive = new RamHive("product");
+            for (int i = 0; i < 256; i++)
+            {
+                var id = $"mech-{i}";
+                hive.Shifted("machine").Catalog().Add(id);
+                hive.Shifted("machine").Comb(id).Props().Refined("checksum", id);
+            }
+
+            foreach (var comb in hive.Shifted("machine").Catalog().List())
+            {
+                Assert.Equal(comb.Name(), $"machine/{comb.Props().Value("checksum")}");
+            }
+
+        }
+
+        [Fact]
+        public void WritesComplexInParallel()
+        {
+            var hive = new RamHive("product");
+            for (int i = 0; i < 256; i++)
+            {
+                var id = $"mech-{i}";
+                hive.Shifted("machine").Catalog().Add(id);
+                hive.Shifted("machine").Comb(id).Props().Refined("checksum", id);
+            }
+
+            Parallel.For(0, 256, i =>
+            {
+                var id = $"mech-{i}";
+                using (var xoc = hive.Shifted("machine").Comb(id).Xocument("stuff.xml"))
+                {
+                    var name = xoc.Value($"/stuff/thing/text()", "");
+                    xoc.Modify(new Directives().Xpath("//name").Set(Guid.NewGuid()));
+                    using (var xoc2 = hive.Shifted("machine").Comb(id).Xocument("stuff.xml"))
+                    {
+                        var name2 = xoc.Value($"/stuff/thing/text()", "");
+                        xoc2.Modify(new Directives().Xpath("/stuff").AddIf("thing").Set(Guid.NewGuid()));
+                        using (var xoc3 = hive.Shifted("machine").Comb(id).Xocument("stuff.xml"))
+                        {
+                            var name3 = xoc.Value($"/stuff/thing/text()", "");
+                            xoc3.Modify(new Directives().Xpath("/stuff").AddIf("thing").Set(Guid.NewGuid()));
+                        }
+                    }
+                }
+                Assert.Equal(1, hive.Shifted("machine").Comb(id).Xocument("stuff.xml").Nodes("//thing").Count);
+            });
+
+        }
+
+        [Fact]
+        public void DeliversHQInParallelAfterShift()
+        {
+            var hive = new RamHive("person").Shifted("still-parallel");
+            var first = true;
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                if (!first)
+                {
+                    hive.Catalog().Remove("X");
+                    first = false;
+                }
+                hive.Catalog().Add("X");
+            });
+
+            Assert.True(hive.Catalog().Has("X"));
+        }
+
+        [Fact]
+        public void DeliversHQInParallel()
+        {
+            var hive = new RamHive("person");
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                var xoc = hive.HQ().Xocument("test");
+                xoc.Modify(
+                    new Directives()
+                        .Xpath("/test")
+                        .AddIf("result")
+                        .Set("passed")
+                    );
+                Assert.Equal(
+                    "passed",
+                    hive.HQ().Xocument("test").Value("/test/result/text()", "")
+                );
+            });
         }
     }
 }

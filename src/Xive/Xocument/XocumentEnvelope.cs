@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,16 @@ using Yaapii.Xml;
 
 namespace Xive.Xocument
 {
+    /// <summary>
+    /// Envelope for xocument.
+    /// </summary>
     public class XocumentEnvelope : IXocument
     {
         private readonly IScalar<IXocument> origin;
 
+        /// <summary>
+        /// Envelope for xocument.
+        /// </summary>
         public XocumentEnvelope(IScalar<IXocument> origin)
         {
             this.origin = origin;

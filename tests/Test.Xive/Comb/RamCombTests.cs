@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,11 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Collections.Generic;
-using System.IO;
+using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
-using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -38,7 +35,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersCell()
         {
-            var memory = new Dictionary<string, MemoryStream>();
+            var memory = new RamMemories();
             new RamComb("my-comb", memory)
                 .Cell("my-cell")
                 .Update(new InputOf("larva"));
@@ -58,7 +55,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersXocument()
         {
-            var memory = new Dictionary<string, MemoryStream>();
+            var memory = new RamMemories();
             new RamComb("my-comb", memory)
                 .Xocument("xoctor.xml")
                 .Modify(
@@ -69,20 +66,32 @@ namespace Xive.Comb.Test
 
             Assert.Equal(
                 "help me please",
-                new XMLCursor(
-                    new InputOf(
-                        new RamComb("my-comb", memory)
-                            .Cell("xoctor.xml")
-                            .Content()
-                    )
-                ).Values("/xoctor/text()")[0]
+                new RamComb("my-comb", memory)
+                    .Xocument("xoctor.xml")
+                    .Values("/xoctor/text()")[0]
+            );
+        }
+
+        [Fact]
+        public void RemembersProps()
+        {
+            var memory = new RamMemories();
+            new RamComb("my-comb", memory)
+                .Props()
+                .Refined("beer", "astra");
+
+            Assert.Equal(
+                "astra",
+                new RamComb("my-comb", memory)
+                    .Props()
+                    .Value("beer")
             );
         }
 
         [Fact]
         public void DeliversXocument()
         {
-            var memory = new Dictionary<string, MemoryStream>();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("some.xml"))
             {
@@ -96,7 +105,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersSubPathXocument()
         {
-            var memory = new Dictionary<string, MemoryStream>();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/dir/some.xml"))
             {
@@ -114,7 +123,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void XocumentRootSkipsSubDir()
         {
-            var memory = new Dictionary<string, MemoryStream>();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/some.xml"))
             {
@@ -125,10 +134,10 @@ namespace Xive.Comb.Test
             }
         }
 
-        [Fact]
+        [Fact(Skip ="Guts are not supported at the moment")]
         public void ReturnsGutsCaseAndSeparatorInsensitive()
         {
-            var memory = new Dictionary<string, MemoryStream>();
+            var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub\\DIR/some.xml"))
             {

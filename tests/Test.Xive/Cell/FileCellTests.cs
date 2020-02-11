@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -97,35 +97,10 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
-        public void RejectsWhiteSpacesFilename()
-        {
-            using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/white space file name")))
-            {
-                Assert.Throws<ArgumentException>(
-                    () => item.Update(new InputOf("after holiday is before holiday"))
-                );
-            }
-        }
-
-        [Fact]
         public void AllowsWhiteSpacesFoldername()
         {
             using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder/filename.txt")))
-            {
-                item.Update(new InputOf("after holiday is before holiday"));
-                Assert.True(
-                    File.Exists(Path.Combine(dir.Value().FullName, "white space folder", "filename.txt"))
-                );
-            }
-        }
-
-        [Fact]
-        public void AllowsBackslash()
-        {
-            using (var dir = new TempDirectory())
-            using (var item = new FileCell(Path.Combine(dir.Value().FullName, "white space folder\\filename.txt")))
+            using (var item = new FileCell(Path.Combine(dir.Value().FullName, $"white space folder{Path.AltDirectorySeparatorChar}filename.txt")))
             {
                 item.Update(new InputOf("after holiday is before holiday"));
                 Assert.True(

@@ -162,11 +162,19 @@ IHoneyComb comb = new RamComb();
 //A honeycomb which lives persistent in the filesystem:
 IHoneyComb comb = new FileComb("C:/temp/todoapp");
 
+//Store properties in the comb
+workTodos.Props()
+        .Refined("has-larva", "true")
+        .Refined("created", DateTime.Now.ToString());
+
+var hasLarva = workTodos.Props().Value("has-larva");
+
 //Get access to raw cell data
 var titlePicture = comb.Cell("title.jpg")
 
 //Get simple access to XML
 var todos = comb.Xocument("todos.xml");
+
 ```
 
 Note: A Xocument is a simple way to:
@@ -251,35 +259,28 @@ For easy use, this can be done with the class Catalog:
 var todosHive = new RamHive().Shifted("todos");
 
 //1. Create a comb, before you can query it
-new Catalog(todosHive).Create("work");
-new Catalog(todosHive).Create("private");
+todosHive.Catalog().Add("work");
+todosHive.Catalog().Create("private");
 
-//2. Query the combs using xpath:
-IEnumerable<IHoneyComb> workTodos = hive.Combs("@id='work'");
+//2. Get the comb by id:
+IHoneyComb workTodos = hive.Comb("work");
+
+//3. Store properties in the comb:
+workTodos.Props()
+        .Refined("has-larva", "true")
+        .Refined("created", DateTime.Now.ToString())
+
+//4. Work with an XML inside the comb:
+var xoc = workTodos.Xocument("example.xml");
+
+//4. Work with bytes inside the comb:
+var xoc = workTodos.Cell("bytes.dat");
+
 ```
 
+# Mnemonic
+This is the memory of the xive. It is used in every layer (cell, comb, hive).
+The memory contains xmls, cells, properties and if needed the indexcatalog of the hive.
 
-# Mutexed hive
-You can mutex all layers of the hive:
-
-```csharp
-var mutexedCell = new MutexCell(new RamCell());
-
-var mutexedComb = new MutexComb(new RamComb());
-
-var mutexedHive = new MutexHive(new RamHive());
-```
-
-# Cached hive
-You can cache the contents of all layers of the hive:
-
-```csharp
-var cachedCell = new CachedCell(new RamCell());
-
-var cachedComb = new CachedComb(new RamComb());
-
-var cachedHive = new CachedHive(new RamHive());
-```
-
-When you cache the hive, not only the bytes that are read or written are cached.
-If you acquire a Xocument using IHoneyComb.Xocument, the parsed xml is also cached and does not need to be parsed again.
+Mnemonic can be in files, or in ram.
+Mnemonic can be cached (with options to max size of cached cells and a blacklist for items not to cache)

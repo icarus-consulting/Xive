@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,11 @@ namespace Xive.Comb
         public string Name()
         {
             return this.comb.Value().Name();
+        }
+
+        public IProps Props()
+        {
+            return this.comb.Value().Props();
         }
 
         public IXocument Xocument(string name)

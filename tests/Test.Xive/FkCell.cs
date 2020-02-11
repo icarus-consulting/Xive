@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -32,18 +32,32 @@ namespace Xive.Test
     {
         private readonly Func<byte[]> content;
         private readonly Action<IInput> update;
+        private readonly string name;
 
         /// <summary>
         /// A fake cell.
         /// </summary>
-        public FkCell() : this(content => { }, () => new byte[0])
+        public FkCell(string name) : this(name, content => { }, () => new byte[0])
         { }
 
         /// <summary>
         /// A fake cell.
         /// </summary>
-        public FkCell(Action<IInput> update, Func<byte[]> content)
+        public FkCell() : this("unknown", content => { }, () => new byte[0])
+        { }
+
+        /// <summary>
+        /// A fake cell.
+        /// </summary>
+        public FkCell(Action<IInput> update, Func<byte[]> content) : this("unknown", update, content)
+        { }
+
+        /// <summary>
+        /// A fake cell.
+        /// </summary>
+        public FkCell(string name, Action<IInput> update, Func<byte[]> content)
         {
+            this.name = name;
             this.content = content;
             this.update = update;
         }
@@ -63,7 +77,7 @@ namespace Xive.Test
 
         public string Name()
         {
-            return "unknown";
+            return this.name;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Diagnostics;
-using System.Threading;
 using Yaapii.Atoms;
 
 namespace Xive.Cell
@@ -35,7 +33,7 @@ namespace Xive.Cell
         private readonly ICell origin;
         private readonly int[] locked;
 
-        public SyncCell(ICell origin) : this(origin, new ProcessSyncValve())
+        public SyncCell(ICell origin) : this(origin, new SyncGate())
         { }
 
         public SyncCell(ICell origin, ISyncValve locks)
