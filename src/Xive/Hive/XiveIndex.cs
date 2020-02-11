@@ -35,10 +35,6 @@ namespace Xive.Hive
         {
             using (var xoc = ExclusiveXoc())
             {
-                //if(xoc.Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0)
-                //{
-                //    throw new InvalidOperationException($"Cannot add {id} to {scope} catalog because it already exists.");
-                //}
                 xoc.Modify(
                     new Directives()
                         .Xpath("/catalog")
