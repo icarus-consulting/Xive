@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 
@@ -35,18 +36,18 @@ namespace Xive.Props
     /// </summary>
     public sealed class RamProps : IProps
     {
-        private readonly ConcurrentDictionary<string, IList<string>> props;
+        private readonly ConcurrentDictionary<string, string[]> props;
 
         /// <summary>
         /// Props which are stored in memory.
         /// </summary>
-        public RamProps() : this(new ConcurrentDictionary<string, IList<string>>())
+        public RamProps() : this(new ConcurrentDictionary<string, string[]>())
         { }
 
         /// <summary>
         /// Props which are stored in memory.
         /// </summary>
-        public RamProps(ConcurrentDictionary<string, IList<string>> props)
+        public RamProps(ConcurrentDictionary<string, string[]> props)
         {
             this.props = props;
         }
@@ -60,11 +61,11 @@ namespace Xive.Props
         {
             if (!values.GetEnumerator().MoveNext())
             {
-                this.props[prop] = new List<string>();
+                this.props[prop] = new string[0];
             }
             else
             {
-                this.props[prop] = new StickyList<string>(new List<string>(values));
+                this.props[prop] = values.ToArray();
             }
             return this;
         }
@@ -95,10 +96,10 @@ namespace Xive.Props
 
         public IList<string> Values(string prop)
         {
-            IList<string> values = new List<string>();
+            string[] values = new string[0];
             if (!this.props.TryGetValue(prop, out values))
             {
-                values = new ListOf<string>();
+                values = new string[0];
             }
             return new ListOf<string>(values);
         }

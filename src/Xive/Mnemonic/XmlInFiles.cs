@@ -60,7 +60,7 @@ namespace Xive.Mnemonic
             if (!this.memory.Knows(name))
             {
                 result = ifAbsent();
-                if(result.Document.Root.HasElements)
+                if(!result.Document.Root.IsEmpty)
                 {
                     Update(name, result);
                 }
@@ -85,7 +85,7 @@ namespace Xive.Mnemonic
 
         public void Update(string name, XNode content)
         {
-            if (!content.Document.Root.HasElements)
+            if (content.Document.Root.IsEmpty)
             {
                 this.memory.Update(name, new MemoryStream());
             }

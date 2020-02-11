@@ -314,7 +314,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new MemorizedHive("product", new CachedMemories(new FileMemories(dir.Value().FullName, true)));
+                IHive hive = new MemorizedHive("product", new CachedMemories(new FileMemories(dir.Value().FullName, false)));
                 long elapsed = 0;
 
                 Parallel.For(0, 256, (i) =>

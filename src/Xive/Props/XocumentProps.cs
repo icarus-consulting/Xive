@@ -23,6 +23,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
@@ -37,9 +38,10 @@ namespace Xive.Props
     /// </summary>
     public sealed class XocumentProps : IProps
     {
-        private readonly IText xpath;
         private readonly IXocument catalog;
         private readonly Sticky<IProps> memoryProps;
+        private readonly string id;
+        private readonly string scope;
 
         /// <summary>
         /// Props which are read into memory from internal xml document _catalog.xml in the given comb.
@@ -48,32 +50,28 @@ namespace Xive.Props
         /// </summary>
         public XocumentProps(IXocument catalog, string scope, string id)
         {
-            this.xpath = new TextOf(() => $"/catalog/{scope}[@id='{id}']");
+            this.id = id;
+            this.scope = scope;
             this.catalog = catalog;
             this.memoryProps = new Sticky<IProps>(() =>
             {
-                ConcurrentDictionary<string, IList<string>> props = new ConcurrentDictionary<string, IList<string>>();
-                bool exists = false;
-                foreach (var entity in catalog.Nodes(this.xpath.AsString()))
+                ConcurrentDictionary<string, string[]> props = new ConcurrentDictionary<string, string[]>();
+                foreach (var entity in catalog.Nodes($"/catalog/{scope}[@id='{id}']"))
                 {
-                    exists = true;
                     foreach (var prop in entity.Nodes("./props/prop"))
                     {
                         var name = prop.Values("./name/text()");
                         if (name.Count == 1)
                         {
+                            var values = prop.Values("./values/item/text()").ToArray();
                             props.AddOrUpdate(
                                 name[0],
-                                new List<string>(),
-                                (key, current) => prop.Values("./values/item/text()")
+                                values,
+                                (key, current) => values
                             );
                         }
                     }
                 }
-                //if (!exists)
-                //{
-                //    catalog.Modify(new Directives().Xpath("/catalog").Add("item").Attr("id", id));
-                //}
                 return new RamProps(props);
             });
         }
@@ -110,10 +108,14 @@ namespace Xive.Props
         private void Save()
         {
             var patch =
-                new Directives()
-                    .Xpath($"{this.xpath.AsString()}/props")
+                new Directives(
+                    new Directives()
+                        .Xpath("/catalog")
+                        .Append(new AddIfAttributeDirective(this.scope.ToLower(), "id", this.id.ToLower()))
+                    )
+                    .Xpath($"/catalog/{this.scope.ToLower()}[@id='{this.id.ToLower()}']/props")
                     .Remove()
-                    .Xpath(this.xpath.AsString());
+                    .Xpath($"/catalog/{this.scope.ToLower()}[@id='{this.id.ToLower()}']");
 
             foreach (var prop in this.memoryProps.Value().Names())
             {

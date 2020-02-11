@@ -30,17 +30,17 @@ namespace Xive.Props
     /// </summary>
     public sealed class FkPropsInput : IPropsInput
     {
-        private readonly Func<IDictionary<string, IList<string>>, IDictionary<string, IList<string>>> apply;
+        private readonly Func<IDictionary<string, string[]>, IDictionary<string, string[]>> apply;
 
         /// <summary>
         /// A fake capsule props input.
         /// </summary>
-        public FkPropsInput(Func<IDictionary<string, IList<string>>, IDictionary<string, IList<string>>> apply)
+        public FkPropsInput(Func<IDictionary<string, string[]>, IDictionary<string, string[]>> apply)
         {
             this.apply = apply;
         }
 
-        public IDictionary<string, IList<string>> Apply(IDictionary<string, IList<string>> props)
+        public IDictionary<string, string[]> Apply(IDictionary<string, string[]> props)
         {
             return this.apply(props);
         }
