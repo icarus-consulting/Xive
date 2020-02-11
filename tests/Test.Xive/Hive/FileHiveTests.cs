@@ -55,10 +55,10 @@ namespace Xive.Hive.Test
                 Assert.Equal(
                     $"product/hq",
                     new FileHive(
-                        "product",
                         new Normalized(
                             dir.Value().FullName
-                        ).AsString()
+                        ).AsString(),
+                        "product"
                     )
                     .HQ()
                     .Name()
