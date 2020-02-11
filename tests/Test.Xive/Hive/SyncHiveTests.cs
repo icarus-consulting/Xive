@@ -79,7 +79,7 @@ namespace Xive.Hive.Test
                     hive.Catalog().Add(comb);
                     hive.Comb(comb).Cell(id).Update(new InputOf(content));
 
-                    contents.AddOrUpdate(id, content, (a, b) => { throw new ApplicationException($"Expected to never updating here"); });
+                    contents.AddOrUpdate(id, content, (a, b) => content);
                     return true;
                 },
                 Environment.ProcessorCount << 4,

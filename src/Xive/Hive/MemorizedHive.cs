@@ -82,7 +82,7 @@ namespace Xive.Hive
 
         public string Scope()
         {
-            return this.scope;
+            return this.scope.ToLower();
         }
 
         public IHive Shifted(string scope)
