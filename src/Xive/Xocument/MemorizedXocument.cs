@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 using Xive.Mnemonic;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
 using Yaapii.Xml;
@@ -14,7 +15,8 @@ namespace Xive.Xocument
     public sealed class MemorizedXocument : IXocument
     {
         private readonly IMemories memories;
-        private readonly Solid<XNode> node;
+        private readonly IScalar<XNode> node;
+        private readonly Sticky<string> root;
         private readonly string name;
 
         /// <summary>
@@ -22,31 +24,31 @@ namespace Xive.Xocument
         /// </summary>
         public MemorizedXocument(string name, IMemories memories)
         {
+            this.name = name;
             this.memories = memories;
             this.node =
-                new Solid<XNode>(() =>
+                new ScalarOf<XNode>(() =>
+                    memories.XML().Content(name, () =>
+                        new XDocument(
+                            new XElement(this.root.Value())
+                        )
+                    )
+                );
+            this.root =
+                new Sticky<string>(() =>
                 {
-                    var node =
-                        memories.XML().Content(name, () =>
-                        {
-                            var rootName = new Normalized(name).AsString();
-                            if (rootName.ToLower().EndsWith(".xml"))
-                            {
-                                rootName = rootName.Substring(0, rootName.Length - 4);
-                            }
-                            if (rootName.Contains("/"))
-                            {
-                                rootName = rootName.Substring(rootName.LastIndexOf("/"));
-                                rootName = rootName.TrimStart('/');
-                            }
-                            return
-                                new XDocument(
-                                    new XElement(rootName)
-                                );
-                        });
-                    return node;
+                    var rootName = new Normalized(name).AsString();
+                    if (rootName.ToLower().EndsWith(".xml"))
+                    {
+                        rootName = rootName.Substring(0, rootName.Length - 4);
+                    }
+                    if (rootName.Contains("/"))
+                    {
+                        rootName = rootName.Substring(rootName.LastIndexOf("/"));
+                        rootName = rootName.TrimStart('/');
+                    }
+                    return rootName;
                 });
-            this.name = name;
         }
 
         public void Dispose()
@@ -54,9 +56,9 @@ namespace Xive.Xocument
 
         public void Modify(IEnumerable<IDirective> dirs)
         {
-            var node = this.node.Value();
-            new Xambler(dirs).ApplyQuietly(node);
-            this.memories.XML().Update(this.name, node);
+            var copy = new XDocument(this.node.Value().Document.Root);
+            new Xambler(dirs).ApplyQuietly(copy);
+            this.memories.XML().Update(this.name, copy);
         }
 
         public XNode Node()

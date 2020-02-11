@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Xive.Hive;
 
 namespace Xive.Mnemonic
 {
     /// <summary>
     /// Memory for anything.
+    /// You must tell the memory how it can check if the given object is empty, because it will automatically remove these items.
     /// </summary>
     public sealed class VersatileRam<T> : IMemory<T>
     {
@@ -15,12 +15,14 @@ namespace Xive.Mnemonic
 
         /// <summary>
         /// Memory for anything.
+        /// You must tell the memory how it can check if the given object is empty, because it will automatically remove these items.
         /// </summary>
         public VersatileRam(Func<T, bool> isEmpty) : this(new ConcurrentDictionary<string, T>(), isEmpty)
         { }
 
         /// <summary>
         /// Memory for anything.
+        /// You must tell the memory how it can check if the given object is empty, because it will automatically remove these items.
         /// </summary>
         public VersatileRam(ConcurrentDictionary<string, T> mem, Func<T, bool> isEmpty)
         {

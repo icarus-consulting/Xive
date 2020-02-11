@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -100,7 +100,7 @@ namespace Yaapii.Xambly
                         doc = dom.Document;
                     }
 
-                    target = new XElement(this.name.Raw());
+                    target = new XElement(this.name.Raw(), new XAttribute(this.attribute.Raw(), this.value.Raw()));
                     (node as XElement).Add(target);
                 }
                 targets.Add(target);

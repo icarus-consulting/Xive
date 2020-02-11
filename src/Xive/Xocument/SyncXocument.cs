@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2019 ICARUS Consulting GmbH
+//Copyright (c) 2020 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -55,37 +55,43 @@ namespace Xive.Xocument
 
         public void Modify(IEnumerable<IDirective> dirs)
         {
-            Block("Modify");
+            Block();
             this.origin.Modify(dirs);
+            Dispose();
         }
 
         public XNode Node()
         {
-            Block("node()");
-            return this.origin.Node();
+            Block();
+            XNode node = this.origin.Node();
+            Dispose();
+            return node;
         }
 
         public IList<IXML> Nodes(string xpath)
         {
             IList<IXML> result;
-            Block($"Nodes({xpath})");
+            Block();
             result = this.origin.Nodes(xpath);
+            Dispose();
             return result;
         }
 
         public string Value(string xpath, string def)
         {
             string result = String.Empty;
-            Block($"Value({xpath})");
+            Block();
             result = this.origin.Value(xpath, def);
+            Dispose();
             return result;
         }
 
         public IList<string> Values(string xpath)
         {
             IList<string> result;
-            Block($"Values({xpath})");
+            Block();
             result = this.origin.Values(xpath);
+            Dispose();
             return result;
         }
 
@@ -103,7 +109,7 @@ namespace Xive.Xocument
             }
         }
 
-        private void Block(string xpath)
+        private void Block()
         {
             this.valve.Mutex(this.name).WaitOne();
             this.locked[0]++;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
@@ -29,27 +30,25 @@ namespace Xive.Props
             this.catalog = catalog;
             this.memoryProps = new Solid<IProps>(() =>
             {
+                Debug.WriteLine("Read props for " + id);
                 IDictionary<string, IList<string>> props = new Dictionary<string, IList<string>>();
-                using (catalog)
+                bool exists = false;
+                foreach (var entity in catalog.Nodes(this.xpath.AsString()))
                 {
-                    bool exists = false;
-                    foreach (var entity in catalog.Nodes(this.xpath.AsString()))
+                    exists = true;
+                    foreach (var prop in entity.Nodes("./props/*"))
                     {
-                        exists = true;
-                        foreach (var prop in entity.Nodes("./props/*"))
+                        var name = prop.Values("./name/text()");
+                        if (name.Count == 1)
                         {
-                            var name = prop.Values("./name/text()");
-                            if (name.Count == 1)
-                            {
-                                var values = prop.Values("./values/item/text()");
-                                props.Add(name[0], values);
-                            }
+                            var values = prop.Values("./values/item/text()");
+                            props.Add(name[0], values);
                         }
                     }
-                    if (!exists)
-                    {
-                        catalog.Modify(new Directives().Xpath("/catalog").Add("item").Attr("id", id));
-                    }
+                }
+                if (!exists)
+                {
+                    catalog.Modify(new Directives().Xpath("/catalog").Add("item").Attr("id", id));
                 }
                 return new RamProps(props);
             });

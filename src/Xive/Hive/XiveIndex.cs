@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Xive.Comb;
 using Xive.Mnemonic;
 using Xive.Xocument;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 using Yaapii.Xambly;
 
@@ -34,15 +35,18 @@ namespace Xive.Hive
         {
             using (var xoc = ExclusiveXoc())
             {
-                if(xoc.Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0)
-                {
-                    throw new InvalidOperationException($"Cannot add {id} to {scope} catalog because it already exists.");
-                }
+                //if(xoc.Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0)
+                //{
+                //    throw new InvalidOperationException($"Cannot add {id} to {scope} catalog because it already exists.");
+                //}
                 xoc.Modify(
                     new Directives()
                         .Xpath("/catalog")
-                        .Add(scope)
-                        .Attr("id", id.ToLower())
+                        .Append(
+                            new EnumerableOf<IDirective>(
+                                new AddIfAttributeDirective(scope, "id", id.ToLower())
+                            )
+                        )
                     );
                 lock (idCache)
                 {
@@ -60,7 +64,7 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(Xoc().Values("/catalog/*/@id"));
+                    idCache.AddRange(ExclusiveXoc().Values("/catalog/*/@id"));
                 }
             }
             foreach(var id in idCache)
@@ -99,17 +103,17 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(Xoc().Values("/catalog/*/@id"));
+                    idCache.AddRange(ExclusiveXoc().Values("/catalog/*/@id"));
                 }
             }
-            return Xoc().Nodes($"/catalog/{this.scope}[@id='{id.ToLower()}']").Count > 0;
+            return idCache.Contains(id.ToLower());
         }
 
         public void Remove(string id)
         {
-            using (var xoc = Xoc())
+            using (var xoc = ExclusiveXoc())
             {
-                Xoc().Modify(
+                xoc.Modify(
                     new Directives()
                         .Xpath($"/catalog/{this.scope.ToLower()}[@id='{id.ToLower()}']")
                         .Remove()
@@ -127,15 +131,15 @@ namespace Xive.Hive
             return
                 new SyncXocument(
                     $"{scope}/hq/catalog.xml",
-                    Xoc(),
+                    new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem),
                     valve
                 );
         }
 
-        private IXocument Xoc()
-        {
-            return new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem);
-        }
+        //private IXocument Xoc()
+        //{
+        //    return new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem);
+        //}
 
     }
 }

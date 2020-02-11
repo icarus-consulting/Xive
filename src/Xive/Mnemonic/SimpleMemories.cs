@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.IO;
 using System.Xml.Linq;
-using Xive.Hive;
 using Xive.Mnemonic;
 using Xive.Props;
 using Xive.Xocument;
@@ -34,10 +32,13 @@ namespace Xive.Cache
                 this.propsMem.GetOrAdd(
                     $"{scope}/{id}",
                     key =>
-                    new XocumentProps(
-                        new MemorizedXocument($"{scope}/hq/catalog.xml", this),
-                        id
-                    )
+                    {
+                        return
+                            new XocumentProps(
+                                new MemorizedXocument($"{scope}/hq/catalog.xml", this),
+                                id
+                            );
+                    }
                 );
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Xive.Hive;
 using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Mnemonic
@@ -64,7 +63,6 @@ namespace Xive.Mnemonic
                 {
                     Directory.CreateDirectory(dir);
                 }
-
                 using (FileStream f = File.Open(Path(name), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                 {
                     f.Seek(0, SeekOrigin.Begin);
