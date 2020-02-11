@@ -102,7 +102,7 @@ namespace Xive.Mnemonic
                     new CachedMemory<XNode>(
                         origin.XML(),
                         maxSize,
-                        node => node.Document.Root.HasElements,
+                        node => !node.Document.Root.HasElements,
                         blacklist
                     )
                 );

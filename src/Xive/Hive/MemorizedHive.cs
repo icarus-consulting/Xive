@@ -56,7 +56,7 @@ namespace Xive.Hive
 
         public IIndex Catalog()
         {
-            return this.indices.GetOrAdd(scope.ToLower(), new XiveIndex(scope.ToLower(), this.mem, this.valve));
+            return this.indices.GetOrAdd(scope.ToLower(), new XiveIndex(scope.ToLower(), this.mem));
         }
 
         public IHoneyComb Comb(string id, bool createIfAbsent = true)

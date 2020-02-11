@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using Xive.Comb;
 using Xive.Mnemonic;
 using Xive.Xocument;
@@ -36,25 +37,25 @@ namespace Xive.Hive
     public sealed class XiveIndex : IIndex
     {
         private readonly string scope;
-        private readonly ISyncValve valve;
+        private readonly ISyncPipe sync;
         private readonly IMnemonic mem;
         private readonly List<string> idCache;
 
         /// <summary>
         /// The index of a xive, realized as a catalog xml document.
         /// </summary>
-        public XiveIndex(string scope, IMnemonic mem, ISyncValve valve)
+        public XiveIndex(string scope, IMnemonic mem)
         {
             this.mem = mem;
-            this.valve = valve;
             this.scope = scope;
             this.idCache = new List<string>();
         }
 
         public void Add(string id)
         {
-            using (var xoc = ExclusiveXoc())
-            {
+            //this.sync.Flush("scope/hq/catalog.xml", () =>
+            //{
+            var xoc = Xoc();
                 xoc.Modify(
                     new Directives()
                         .Xpath("/catalog")
@@ -67,9 +68,9 @@ namespace Xive.Hive
                 lock (idCache)
                 {
                     idCache.Clear();
-                    idCache.AddRange(xoc.Values("/catalog/*/@id"));
+                    idCache.AddRange(xoc.Values($"/catalog/{scope.ToLower()}/@id"));
                 }
-            }
+            //});
         }
 
         public IList<IHoneyComb> List(params IHiveFilter[] filters)
@@ -80,16 +81,17 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(ExclusiveXoc().Values("/catalog/*/@id"));
+                    Debug.WriteLine("Loaded index from xocument");
+                    idCache.AddRange(Xoc().Values($"/catalog/{scope.ToLower()}/@id"));
                 }
             }
-            foreach(var id in idCache)
+            foreach (var id in idCache)
             {
                 if (filters.Length == 0)
                 {
                     filtered.Add(
                         new MemorizedComb(
-                            new Normalized($"{scope.ToLower()}/{id.ToLower()}").AsString(), 
+                            new Normalized($"{scope.ToLower()}/{id.ToLower()}").AsString(),
                             this.mem
                         )
                     );
@@ -102,7 +104,7 @@ namespace Xive.Hive
                         {
                             filtered.Add(
                                 new MemorizedComb(
-                                    new Normalized($"{scope}/{id}").AsString(), 
+                                    new Normalized($"{scope}/{id}").AsString(),
                                     this.mem
                                 )
                             );
@@ -119,7 +121,7 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(ExclusiveXoc().Values("/catalog/*/@id"));
+                    idCache.AddRange(Xoc().Values($"/catalog/{scope.ToLower()}/@id"));
                 }
             }
             return idCache.Contains(id.ToLower());
@@ -127,7 +129,7 @@ namespace Xive.Hive
 
         public void Remove(string id)
         {
-            using (var xoc = ExclusiveXoc())
+            using (var xoc = Xoc())
             {
                 xoc.Modify(
                     new Directives()
@@ -142,14 +144,9 @@ namespace Xive.Hive
             }
         }
 
-        private IXocument ExclusiveXoc()
+        private IXocument Xoc()
         {
-            return
-                new SyncXocument(
-                    $"{scope}/hq/catalog.xml",
-                    new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem),
-                    valve
-                );
+            return new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem);
         }
 
         //private IXocument Xoc()

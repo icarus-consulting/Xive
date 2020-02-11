@@ -32,24 +32,44 @@ using Yaapii.Atoms.Text;
 
 namespace Xive.Mnemonic
 {
+    /// <summary>
+    /// Xmls stored in files.
+    /// </summary>
     public sealed class XmlInFiles : IMemory<XNode>
     {
         private DataInFiles memory;
 
-        public XmlInFiles(string root)
+        /// <summary>
+        /// Xmls stored in files.
+        /// </summary>
+        public XmlInFiles(string root) : this(root, new LocalSyncPipe())
+        { }
+
+        /// <summary>
+        /// Xmls stored in files.
+        /// </summary>
+        /// <param name="root">if true, when updating, the file is written asynchronously.</param>
+        public XmlInFiles(string root, ISyncPipe sync, bool writeAsync = false)
         {
-            this.memory = new DataInFiles(root);
+            this.memory = new DataInFiles(root, sync, writeAsync);
         }
 
         public XNode Content(string name, Func<XNode> ifAbsent)
         {
-            var data = 
-                this.memory.Content(name, () =>
+            XNode result;
+            if (!this.memory.Knows(name))
+            {
+                result = ifAbsent();
+                if(result.Document.Root.HasElements)
                 {
-                    var node = ifAbsent();
-                    return new MemoryStream(new BytesOf(node.ToString()).AsBytes());
-                });
-            return Parsed(name, data);
+                    Update(name, result);
+                }
+            }
+            else
+            {
+                result = Parsed(name, this.memory.Content(name, () => throw new ApplicationException($"Internal error, assumend to never access ifAbsent() method here.")));
+            }
+            return result;
 
         }
 

@@ -36,12 +36,22 @@ namespace Xive.Mnemonic
         /// <summary>
         /// Memories in Files.
         /// </summary>
-        public FileMemories(string root)
+        /// <param name="writeAsync">if true, when updating a memory, the file is written asynchronously. 
+        /// Use this in combination with a cache, because the cache is up-to-date, no matter when the file is written.</param>
+        public FileMemories(string root, bool writeAsync = false) : this(root, new LocalSyncPipe())
+        { }
+
+        /// <summary>
+        /// Memories in Files.
+        /// </summary>
+        /// <param name="writeAsync">if true, when updating a memory, the file is written asynchronously. 
+        /// Use this in combination with a cache, because the cache is up-to-date, no matter when the file is written.</param>
+        public FileMemories(string root, ISyncPipe pipe, bool writeAsync = false)
         {
             this.mem =
                 new SimpleMemories(
-                    new XmlInFiles(root),
-                    new DataInFiles(root)
+                    new XmlInFiles(root, pipe, writeAsync),
+                    new DataInFiles(root, pipe, writeAsync)
                 );
         }
 

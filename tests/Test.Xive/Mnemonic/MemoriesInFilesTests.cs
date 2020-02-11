@@ -40,8 +40,7 @@ namespace Xive.Mnemonic.Test
                 var mem = new FileMemories(temp.Value().FullName);
                 new XiveIndex(
                     "beverage", 
-                    mem, 
-                    new SyncGate()
+                    mem
                 ).Add("fritz-kola");
 
                 mem.Props("beverage", "fritz-kola").Refined("light", "yes please");

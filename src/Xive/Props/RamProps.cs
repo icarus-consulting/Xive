@@ -46,9 +46,9 @@ namespace Xive.Props
         /// <summary>
         /// Props which are stored in memory.
         /// </summary>
-        public RamProps(IDictionary<string, IList<string>> props)
+        public RamProps(ConcurrentDictionary<string, IList<string>> props)
         {
-            this.props = new ConcurrentDictionary<string, IList<string>>(props);
+            this.props = props;
         }
 
         public IProps Refined(string prop, params string[] value)

@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Yaapii.Atoms;
@@ -38,39 +39,41 @@ namespace Xive.Props
     {
         private readonly IText xpath;
         private readonly IXocument catalog;
-        private readonly Solid<IProps> memoryProps;
+        private readonly Sticky<IProps> memoryProps;
 
         /// <summary>
         /// Props which are read into memory from internal xml document _catalog.xml in the given comb.
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
-        public XocumentProps(IXocument catalog, string id)
+        public XocumentProps(IXocument catalog, string scope, string id)
         {
-            this.xpath = new TextOf(() => $"/catalog/*[@id='{id}']");
+            this.xpath = new TextOf(() => $"/catalog/{scope}[@id='{id}']");
             this.catalog = catalog;
-            this.memoryProps = new Solid<IProps>(() =>
+            this.memoryProps = new Sticky<IProps>(() =>
             {
-                Debug.WriteLine("Read props for " + id);
-                IDictionary<string, IList<string>> props = new Dictionary<string, IList<string>>();
+                ConcurrentDictionary<string, IList<string>> props = new ConcurrentDictionary<string, IList<string>>();
                 bool exists = false;
                 foreach (var entity in catalog.Nodes(this.xpath.AsString()))
                 {
                     exists = true;
-                    foreach (var prop in entity.Nodes("./props/*"))
+                    foreach (var prop in entity.Nodes("./props/prop"))
                     {
                         var name = prop.Values("./name/text()");
                         if (name.Count == 1)
                         {
-                            var values = prop.Values("./values/item/text()");
-                            props.Add(name[0], values);
+                            props.AddOrUpdate(
+                                name[0],
+                                new List<string>(),
+                                (key, current) => prop.Values("./values/item/text()")
+                            );
                         }
                     }
                 }
-                if (!exists)
-                {
-                    catalog.Modify(new Directives().Xpath("/catalog").Add("item").Attr("id", id));
-                }
+                //if (!exists)
+                //{
+                //    catalog.Modify(new Directives().Xpath("/catalog").Add("item").Attr("id", id));
+                //}
                 return new RamProps(props);
             });
         }
