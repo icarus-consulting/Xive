@@ -299,7 +299,10 @@ namespace Xive.Hive.Test
                 {
                     var id = $"mech-{i}";
                     hive.Shifted("machine").Catalog().Add(id);
-                    hive.Shifted("machine").Comb(id).Props().Refined("checksum", id);
+                    hive.Shifted("machine")
+                        .Comb(id)
+                        .Props()
+                        .Refined("checksum", id);
                 });
 
                 Parallel.ForEach(hive.Shifted("machine").Catalog().List(), comb =>
@@ -314,7 +317,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new MemorizedHive("product", new CachedMemories(new FileMemories(dir.Value().FullName, false)));
+                IHive hive = new MemorizedHive("product", new CachedMemories(new FileMemories(dir.Value().FullName, true)));
                 long elapsed = 0;
 
                 Parallel.For(0, 256, (i) =>
@@ -348,7 +351,10 @@ namespace Xive.Hive.Test
                     var id = $"mech-{i}";
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    hive.Shifted("machine").Comb(id).Props().Refined("checksum", id);
+                    hive.Shifted("machine")
+                        .Comb(id)
+                        .Props()
+                        .Refined("checksum", id);
                     stopWatch.Stop();
                     elapsed += stopWatch.ElapsedMilliseconds;
                 });
@@ -391,7 +397,6 @@ namespace Xive.Hive.Test
                 Debug.WriteLine("Read Stuff: " + elapsed);
                 elapsed = 0;
             }
-
         }
 
         [Fact]

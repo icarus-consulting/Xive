@@ -33,12 +33,7 @@ namespace Xive.Cache
                     $"{scope}/{id}",
                     key =>
                     {
-                        return
-                            new XocumentProps(
-                                new MemorizedXocument($"{scope}/hq/catalog.xml", this),
-                                scope,
-                                id
-                            );
+                        return new SandboxProps(this, scope, id);
                     }
                 );
         }

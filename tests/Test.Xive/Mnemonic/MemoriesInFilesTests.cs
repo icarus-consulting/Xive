@@ -38,7 +38,7 @@ namespace Xive.Mnemonic.Test
             using (var temp = new TempDirectory())
             {
                 var mem = new FileMemories(temp.Value().FullName);
-                new XiveIndex(
+                new TextIndex(
                     "beverage", 
                     mem
                 ).Add("fritz-kola");
