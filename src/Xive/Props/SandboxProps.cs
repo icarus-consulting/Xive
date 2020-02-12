@@ -20,15 +20,20 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Yaapii.Atoms;
+using System.Xml.Linq;
+using Xive.Mnemonic;
+using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
+using Yaapii.Xml;
 
 namespace Xive.Props
 {
@@ -37,9 +42,9 @@ namespace Xive.Props
     /// Props are read from memory.
     /// Props are updated into the comb.
     /// </summary>
-    public sealed class XocumentProps : IProps
+    public sealed class SandboxProps : IProps
     {
-        private readonly IXocument catalog;
+        private readonly IMnemonic mem;
         private readonly Sticky<IProps> memoryProps;
         private readonly string id;
         private readonly string scope;
@@ -49,33 +54,36 @@ namespace Xive.Props
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
-        public XocumentProps(IXocument catalog, string scope, string id)
+        public SandboxProps(IMnemonic mem, string scope, string id)
         {
             this.id = id;
             this.scope = scope;
-            this.catalog = catalog;
+            this.mem = mem;
             this.memoryProps = new Sticky<IProps>(() =>
             {
-                ConcurrentDictionary<string, string[]> props = new ConcurrentDictionary<string, string[]>();
-                Parallel.ForEach(catalog.Nodes($"/catalog/{scope}[@id='{id}']"), (entity) =>
+                var stringProps =
+                    new TextOf(
+                        this.mem
+                            .Data()
+                            .Content(
+                                new Normalized($"{scope}/{id}/props.cat").AsString(),
+                                () => new MemoryStream()
+                            )
+                        ).AsString();
+
+                var cachedProps = new RamProps();
+                Parallel.ForEach(stringProps.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries), (stringProp) =>
                 {
+                    var parts = stringProp.Split(':');
+                    if (parts.Length != 2)
                     {
-                        Parallel.ForEach(entity.Nodes("./props/prop"), (prop) =>
-                        {
-                            var name = prop.Values("./name/text()");
-                            if (name.Count == 1)
-                            {
-                                var values = prop.Values("./values/item/text()").ToArray();
-                                props.AddOrUpdate(
-                                    name[0],
-                                    values,
-                                    (key, current) => values
-                                );
-                            }
-                        });
+                        throw new ApplicationException($"A property of {scope}/{id} has an invalid format: {stringProp}");
                     }
+                    var name = parts[0].Trim();
+                    var values = parts[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    cachedProps.Refined(name, values);
                 });
-                return new RamProps(props);
+                return cachedProps;
             });
         }
 
@@ -101,37 +109,26 @@ namespace Xive.Props
             return this.memoryProps.Value().Names();
         }
 
-        public void Save()
+        private void Save()
         {
-            var patch =
-                new Directives(
-                    new Directives()
-                        .Xpath("/catalog")
-                        .Append(new AddIfAttributeDirective(this.scope.ToLower(), "id", this.id.ToLower()))
-                    )
-                    .Xpath($"/catalog/{this.scope.ToLower()}[@id='{this.id.ToLower()}']/props")
-                    .Remove()
-                    .Xpath($"/catalog/{this.scope.ToLower()}[@id='{this.id.ToLower()}']");
-
+            string serialized = string.Empty;
             foreach (var prop in this.memoryProps.Value().Names())
             {
-                patch.Add("props")
-                    .Add("prop")
-                    .Add("name")
-                    .Set(prop)
-                    .Up()
-                    .Add("values");
-                foreach (var value in this.memoryProps.Value().Values(prop))
-                {
-                    patch.Add("item").Set(value).Up();
-                }
-                patch.Up();
+                serialized += $"{prop}:{string.Join(",", memoryProps.Value().Values(prop))}\r";
             }
+            var data = new MemoryStream(new BytesOf(serialized).AsBytes());
 
-            using (var xoc = catalog)
-            {
-                xoc.Modify(patch);
-            }
+            this.mem
+                .Data()
+                .Update(
+                    new Normalized($"{scope}/{id}/props.cat").AsString(),
+                    data
+                );
+        }
+
+        private XDocument Bootstrapped()
+        {
+            return new XDocument(new XElement("props", new XAttribute("id", id)));
         }
     }
 }

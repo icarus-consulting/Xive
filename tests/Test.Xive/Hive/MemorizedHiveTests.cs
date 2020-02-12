@@ -94,28 +94,7 @@ namespace Xive.Hive.Test
             var shifted = hive.Shifted("twilight-zone");
             shifted.Catalog().Add("789");
 
-            Assert.Contains("twilight-zone/hq/catalog.xml", mem.XML().Knowledge());
-        }
-
-        [Fact]
-        public void DeliversHQCell()
-        {
-            string expected = "Four headquarters are one head";
-            var mem = new RamMemories();
-            var hive = new MemorizedHive("in-memory", mem);
-            hive.Catalog()
-                .Add("123");
-
-            hive.Comb("123", false).Props().Refined("Text of the day", expected);
-
-            Assert.Contains(
-                expected,
-                new TextOf(
-                    new InputOf(
-                        hive.HQ().Xocument("catalog.xml").Node().ToString()
-                    )
-                ).AsString()
-            );
+            Assert.Contains("twilight-zone/hq/catalog.cat", mem.Data().Knowledge());
         }
 
         [Fact]

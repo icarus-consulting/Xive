@@ -36,6 +36,6 @@ public sealed class FileHive : HiveEnvelope
     /// <summary>
     /// A hive whose contents are stored in files.
     /// </summary>
-    internal FileHive(string scope, IMnemonic mem) : base(new Solid<IHive>(() => new MemorizedHive(scope, mem)))
+    internal FileHive(string scope, IMnemonic mem) : base(new ScalarOf<IHive>(() => new MemorizedHive(scope, mem)))
     { }
 }

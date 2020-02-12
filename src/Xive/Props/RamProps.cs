@@ -54,7 +54,7 @@ namespace Xive.Props
 
         public IProps Refined(string prop, params string[] value)
         {
-            return this.Refined(prop, new EnumerableOf<string>(value));
+            return this.Refined(prop, new List<string>(value));
         }
 
         public IProps Refined(string prop, IEnumerable<string> values)
@@ -66,15 +66,6 @@ namespace Xive.Props
             else
             {
                 this.props[prop] = values.ToArray();
-            }
-            return this;
-        }
-
-        public IProps Refined(params IPropsInput[] props)
-        {
-            foreach (var prop in props)
-            {
-                prop.Apply(this.props);
             }
             return this;
         }
@@ -108,5 +99,8 @@ namespace Xive.Props
         {
             return new ListOf<string>(this.props.Keys);
         }
+
+        public void Save()
+        { }
     }
 }

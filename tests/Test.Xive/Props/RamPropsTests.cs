@@ -76,19 +76,19 @@ namespace Xive.Props.Test
             );
         }
 
-        [Fact]
-        public void AppliesPropsInput()
-        {
-            Assert.Equal(
-                "",
-                new RamProps()
-                    .Refined("behaviour", "nasty boy")
-                    .Refined(
-                        new FkPropsInput(props => { props.Remove("behaviour"); return props; })
-                    )
-                    .Value("behaviour")
-            );
-        }
+        //[Fact]
+        //public void AppliesPropsInput()
+        //{
+        //    Assert.Equal(
+        //        "",
+        //        new RamProps()
+        //            .Refined("behaviour", "nasty boy")
+        //            .Refined(
+        //                new FkPropsInput(props => { props.Remove("behaviour"); return props; })
+        //            )
+        //            .Value("behaviour")
+        //    );
+        //}
 
         [Fact]
         public void RejectsSingleWhenMultipleExist()

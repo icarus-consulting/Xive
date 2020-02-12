@@ -30,8 +30,6 @@ using Yaapii.Atoms.Scalar;
 /// </summary>
 public sealed class RamHive : HiveEnvelope
 {
-    private readonly string scope;
-
     /// <summary>
     /// A hive which stores contents in RAM.
     /// </summary>
@@ -42,7 +40,7 @@ public sealed class RamHive : HiveEnvelope
     /// A hive which stores contents in RAM.
     /// </summary>
     internal RamHive(string scope, IMnemonic mem) : base(
-        new Solid<IHive>(() => 
+        new ScalarOf<IHive>(() => 
             new MemorizedHive(scope, mem)
         )
     )

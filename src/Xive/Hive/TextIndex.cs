@@ -20,14 +20,18 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
 using Xive.Xocument;
 using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
+using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
 namespace Xive.Hive
@@ -35,17 +39,16 @@ namespace Xive.Hive
     /// <summary>
     /// The index of a xive, realized as a catalog xml document.
     /// </summary>
-    public sealed class XiveIndex : IIndex
+    public sealed class TextIndex : IIndex
     {
         private readonly string scope;
-        private readonly ISyncPipe sync;
         private readonly IMnemonic mem;
         private readonly List<string> idCache;
 
         /// <summary>
         /// The index of a xive, realized as a catalog xml document.
         /// </summary>
-        public XiveIndex(string scope, IMnemonic mem)
+        public TextIndex(string scope, IMnemonic mem)
         {
             this.mem = mem;
             this.scope = scope;
@@ -54,24 +57,21 @@ namespace Xive.Hive
 
         public void Add(string id)
         {
-            //this.sync.Flush("scope/hq/catalog.xml", () =>
-            //{
-            var xoc = Xoc();
-                xoc.Modify(
-                    new Directives()
-                        .Xpath("/catalog")
-                        .Append(
-                            new EnumerableOf<IDirective>(
-                                new AddIfAttributeDirective(scope, "id", id.ToLower())
-                            )
-                        )
-                    );
-                lock (idCache)
+            lock (idCache)
+            {
+                var cell = Cell();
+                if (id.Contains("\r"))
                 {
-                    idCache.Clear();
-                    idCache.AddRange(xoc.Values($"/catalog/{scope.ToLower()}/@id"));
+                    throw new ArgumentException($"Cannot use id with character \\r inside. This is reserved for internal usage.");
                 }
-            //});
+                idCache.Clear();
+                idCache.AddRange(new TextOf(cell.Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                if (!idCache.Contains(id.ToLower()))
+                {
+                    idCache.Add(id.ToLower());
+                }
+                cell.Update(new InputOf(string.Join(";", idCache)));
+            }
         }
 
         public IList<IHoneyComb> List(params IHiveFilter[] filters)
@@ -82,8 +82,7 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    Debug.WriteLine("Loaded index from xocument");
-                    idCache.AddRange(Xoc().Values($"/catalog/{scope.ToLower()}/@id"));
+                    idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
                 }
             }
             Parallel.ForEach(idCache, (id) =>
@@ -99,19 +98,20 @@ namespace Xive.Hive
                 }
                 else
                 {
-                    foreach (var filter in fltrs)
+                    Parallel.ForEach(fltrs, (filter) =>
                     {
                         if (filter.Matches(this.mem.Props(scope, id)))
                         {
                             filtered.Add(
-                                new MemorizedComb(
-                                    new Normalized($"{scope}/{id}").AsString(),
-                                    this.mem
-                                )
-                            );
+                            new MemorizedComb(
+                                new Normalized($"{scope}/{id}").AsString(),
+                                this.mem
+                            )
+                        );
                         }
-                    }
+                    });
                 }
+
             });
             return new ListOf<IHoneyComb>(filtered);
         }
@@ -122,7 +122,7 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(Xoc().Values($"/catalog/{scope.ToLower()}/@id"));
+                    idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
             }
             return idCache.Contains(id.ToLower());
@@ -130,30 +130,20 @@ namespace Xive.Hive
 
         public void Remove(string id)
         {
-            using (var xoc = Xoc())
+            lock (idCache)
             {
-                xoc.Modify(
-                    new Directives()
-                        .Xpath($"/catalog/{this.scope.ToLower()}[@id='{id.ToLower()}']")
-                        .Remove()
-                );
-                lock (idCache)
+                if (idCache.Count == 0)
                 {
-                    idCache.Clear();
-                    idCache.AddRange(xoc.Values("/catalog/*/@id"));
+                    idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
+                idCache.Remove(id.ToLower());
+                Cell().Update(new InputOf(string.Join(";", idCache)));
             }
         }
 
-        private IXocument Xoc()
+        private ICell Cell()
         {
-            return new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem);
+            return new MemorizedCell($"{scope}/hq/catalog.cat", this.mem);
         }
-
-        //private IXocument Xoc()
-        //{
-        //    return new MemorizedXocument($"{scope}/hq/catalog.xml", this.mem);
-        //}
-
     }
 }
