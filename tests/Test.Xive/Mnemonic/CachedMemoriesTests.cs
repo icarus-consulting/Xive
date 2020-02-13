@@ -26,6 +26,7 @@ using System.Xml.Linq;
 using Xive.Cell;
 using Xive.Mnemonic;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xml;
@@ -39,12 +40,10 @@ namespace Xive.Mnemonic.Test
         {
             var mem = new RamMemories();
             var cache = new CachedMemories(mem);
-            var data = new MemoryStream();
-            new InputOf("splashy").Stream().CopyTo(data);
-            data.Seek(0, SeekOrigin.Begin);
+            var data = new BytesOf(new InputOf("splashy")).AsBytes();
 
             cache.Data().Content("cashy", () => data); //read 1
-            mem.Data().Update("cashy", new MemoryStream());
+            mem.Data().Update("cashy", new byte[0]);
 
             Assert.Equal(
                 "splashy",
@@ -87,7 +86,7 @@ namespace Xive.Mnemonic.Test
                     );
 
             cell.Content();
-            mem.Data().Update("a/file\\which/is\\blacklisted/data.dat", new MemoryStream(new byte[128]));
+            mem.Data().Update("a/file\\which/is\\blacklisted/data.dat", new byte[128]);
 
             Assert.False(cache.Data().Knows("a/file\\which/is\\blacklisted/data.dat"));
         }
@@ -104,9 +103,9 @@ namespace Xive.Mnemonic.Test
                 );
             cell.Update(new InputOf(new byte[128]));
             cell.Content();
-            mem.Data().Update("a/file/which/is/oversized", new MemoryStream());
+            mem.Data().Update("a/file/which/is/oversized", new byte[0]);
 
-            Assert.True(cache.Data().Content("a/file/which/is/oversized", () => new MemoryStream()).Length == 0);
+            Assert.True(cache.Data().Content("a/file/which/is/oversized", () => new byte[0]).Length == 0);
         }
     }
 }

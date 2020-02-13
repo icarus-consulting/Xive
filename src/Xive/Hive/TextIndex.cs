@@ -137,8 +137,8 @@ namespace Xive.Hive
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
                 idCache.Remove(id.ToLower());
-                Cell().Update(new InputOf(string.Join(";", idCache)));
             }
+            Cell().Update(new InputOf(string.Join(";", idCache)));
         }
 
         private ICell Cell()

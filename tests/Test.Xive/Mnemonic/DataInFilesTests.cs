@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using Xive.Mnemonic;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
@@ -36,8 +37,11 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var data = new MemoryStream();
-                new InputOf("1980's").Stream().CopyTo(data);
+                var data =
+                    new BytesOf(
+                        new InputOf("1980's")
+                    ).AsBytes();
+
                 var mem = new DataInFiles(temp.Value().FullName);
                 mem.Content("childhood", () => data);
 
@@ -59,13 +63,10 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var data = new MemoryStream();
-                new InputOf("1980's").Stream().CopyTo(data);
+                var data = new BytesOf(new InputOf("1980's")).AsBytes();
                 var mem = new DataInFiles(temp.Value().FullName);
                 mem.Update("childhood", data);
-                data.Seek(0, SeekOrigin.Begin);
-                data.SetLength(0);
-                new InputOf("nothing").Stream().CopyTo(data);
+                data = new BytesOf(new InputOf("nothing")).AsBytes();
                 mem.Update("childhood", data);
 
                 Assert.Equal(
@@ -86,8 +87,10 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var data = new MemoryStream();
-                new InputOf("1980's").Stream().CopyTo(data);
+                var data =
+                    new BytesOf(
+                        new InputOf("1980's")
+                    ).AsBytes();
                 var mem = new DataInFiles(temp.Value().FullName);
                 mem.Content("childhood", () => data);
                 Assert.Contains(
@@ -102,13 +105,13 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var data = new MemoryStream();
-                new InputOf("1980's").Stream().CopyTo(data);
+                var data =
+                    new BytesOf(
+                        new InputOf("1980's")
+                    ).AsBytes();
                 var mem = new DataInFiles(temp.Value().FullName);
                 mem.Update("childhood", data);
-                data.Seek(0, SeekOrigin.Begin);
-                data.SetLength(0);
-                mem.Update("childhood", data);
+                mem.Update("childhood", new byte[0]);
 
                 Assert.False(
                     mem.Knows("childhood")

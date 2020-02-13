@@ -13,13 +13,13 @@ namespace Xive.Cache
     public sealed class SimpleMemories : IMnemonic
     {
         private readonly IMemory<XNode> xmlMem;
-        private readonly IMemory<MemoryStream> dataMem;
+        private readonly IMemory<byte[]> dataMem;
         private readonly ConcurrentDictionary<string, IProps> propsMem;
 
         /// <summary>
         /// Simple Memories.
         /// </summary>
-        public SimpleMemories(IMemory<XNode> xmlMem, IMemory<MemoryStream> dataMem)
+        public SimpleMemories(IMemory<XNode> xmlMem, IMemory<byte[]> dataMem)
         {
             this.xmlMem = xmlMem;
             this.dataMem = dataMem;
@@ -43,7 +43,7 @@ namespace Xive.Cache
             return this.xmlMem;
         }
 
-        public IMemory<MemoryStream> Data()
+        public IMemory<byte[]> Data()
         {
             return this.dataMem;
         }

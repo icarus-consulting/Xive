@@ -20,7 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.IO;
 using System.Xml.Linq;
 using Xive.Cache;
 
@@ -55,7 +54,7 @@ namespace Xive.Mnemonic
                 );
         }
 
-        public IMemory<MemoryStream> Data()
+        public IMemory<byte[]> Data()
         {
             return this.mem.Data();
         }

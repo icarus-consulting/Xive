@@ -317,7 +317,14 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = new MemorizedHive("product", new CachedMemories(new FileMemories(dir.Value().FullName, true)));
+                IHive hive = 
+                    new MemorizedHive(
+                        "product",
+                        new CachedMemories(
+                            new FileMemories(dir.Value().FullName, true)
+                        )
+                    ).Shifted("machine");
+
                 long elapsed = 0;
 
                 Parallel.For(0, 256, (i) =>
@@ -325,7 +332,7 @@ namespace Xive.Hive.Test
                     var id = $"mech-{i}";
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    hive.Shifted("machine").Catalog().Add(id);
+                    hive.Catalog().Add(id);
                     stopWatch.Stop();
                     elapsed += stopWatch.ElapsedMilliseconds;
                 });
@@ -338,7 +345,7 @@ namespace Xive.Hive.Test
                     var id = $"mech-{i}";
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    var prop = hive.Shifted("machine").Comb(id).Props().Value("checksum", string.Empty);
+                    var prop = hive.Comb(id).Props().Value("checksum", string.Empty);
                     stopWatch.Stop();
                     elapsed += stopWatch.ElapsedMilliseconds;
                 });
@@ -351,15 +358,14 @@ namespace Xive.Hive.Test
                     var id = $"mech-{i}";
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    hive.Shifted("machine")
-                        .Comb(id)
+                    hive.Comb(id)
                         .Props()
                         .Refined("checksum", id);
                     stopWatch.Stop();
                     elapsed += stopWatch.ElapsedMilliseconds;
                 });
 
-                Debug.WriteLine("Update: " + elapsed);
+                Debug.WriteLine("Update props: " + elapsed);
                 elapsed = 0;
 
                 Parallel.For(0, 256, (i) =>
@@ -367,7 +373,7 @@ namespace Xive.Hive.Test
                     var id = $"mech-{i}";
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
-                    var prop = hive.Shifted("machine").Comb(id).Props().Value("checksum", string.Empty);
+                    var prop = hive.Comb(id).Props().Value("checksum", string.Empty);
                     stopWatch.Stop();
                     elapsed += stopWatch.ElapsedMilliseconds;
                 });
@@ -378,15 +384,15 @@ namespace Xive.Hive.Test
                 Parallel.For(0, 256, i =>
                 {
                     var id = $"mech-{i}";
-                    var xoc = hive.Shifted("machine").Comb(id).Xocument("stuff.xml");
+                    var xoc = hive.Comb(id).Xocument("stuff.xml");
                     var name = xoc.Value($"/stuff/thing/text()", "");
                     xoc.Modify(new Directives().Xpath("//name").Set(Guid.NewGuid()));
 
-                    var xoc2 = hive.Shifted("machine").Comb(id).Xocument("stuff.xml");
+                    var xoc2 = hive.Comb(id).Xocument("stuff.xml");
                     var name2 = xoc.Value($"/stuff/thing/text()", "");
                     xoc2.Modify(new Directives().Xpath("/stuff").AddIf("thing").Set(Guid.NewGuid()));
 
-                    var xoc3 = hive.Shifted("machine").Comb(id).Xocument("stuff.xml");
+                    var xoc3 = hive.Comb(id).Xocument("stuff.xml");
                     var name3 = xoc.Value($"/stuff/thing/text()", "");
                     xoc3.Modify(new Directives().Xpath("/stuff").AddIf("thing").Set(Guid.NewGuid()));
 

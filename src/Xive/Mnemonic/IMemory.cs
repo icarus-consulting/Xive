@@ -12,7 +12,7 @@ namespace Xive.Mnemonic
     {
         void Update(string name, MemoryStream binary);
         void Update(string name, XNode xNode);
-        MemoryStream Binary(string name, Func<MemoryStream> ifAbsent);
+        byte[] Binary(string name, Func<byte[]> ifAbsent);
         XNode Xml(string name, Func<XNode> ifAbsent);
         IProps Props(string name, Func<IProps> ifAbsent);
     }

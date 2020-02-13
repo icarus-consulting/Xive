@@ -25,6 +25,8 @@ using System.IO;
 using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 
 namespace Xive.Cell
@@ -73,7 +75,7 @@ namespace Xive.Cell
             new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
-                mem.Data().Update(path, new MemoryStream(content.AsBytes()));
+                mem.Data().Update(path, content.AsBytes());
                 return mem;
             })
         )
@@ -90,7 +92,13 @@ namespace Xive.Cell
             new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
-                mem.Data().Update(path.Value(), content);
+                mem.Data()
+                    .Update(
+                        path.Value(), 
+                        new BytesOf(
+                            new InputOf(content)
+                        ).AsBytes()
+                    );
                 return mem;
             })
         )
@@ -107,7 +115,13 @@ namespace Xive.Cell
             new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
-                mem.Data().Update(path, content);
+                mem.Data()
+                    .Update(
+                        path, 
+                        new BytesOf(
+                            new InputOf(content)
+                        ).AsBytes()
+                    );
                 return mem;
             })
         )
@@ -162,12 +176,13 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            byte[] result = new byte[0];
-            var name = new Normalized(this.name.Value()).AsString();
-            var stream = this.mem.Value().Data().Content(name, () => new MemoryStream());
-            stream.Seek(0, SeekOrigin.Begin);
-            result = stream.ToArray();
-            return result;
+            return 
+                this.mem.Value()
+                    .Data()
+                    .Content(
+                        new Normalized(this.name.Value()).AsString(), 
+                        () => new byte[0]
+                    );
         }
 
         public void Update(IInput content)
@@ -176,15 +191,18 @@ namespace Xive.Cell
             var stream = content.Stream();
             if (stream.Length > 0)
             {
-                var memory = new MemoryStream();
-                content.Stream().CopyTo(memory);
-                memory.Seek(0, SeekOrigin.Begin);
-                content.Stream().Seek(0, SeekOrigin.Begin);
-                this.mem.Value().Data().Update(name, memory);
+                stream.Seek(0, SeekOrigin.Begin);
+                this.mem
+                    .Value()
+                    .Data()
+                    .Update(
+                        name, 
+                        new BytesOf(new InputOf(stream)).AsBytes()
+                    );
             }
             else
             {
-                this.mem.Value().Data().Update(name, new MemoryStream());
+                this.mem.Value().Data().Update(name, new byte[0]);
             }
         }
 

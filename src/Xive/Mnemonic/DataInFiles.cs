@@ -34,7 +34,7 @@ namespace Xive.Mnemonic
     /// <summary>
     /// Data stored in files.
     /// </summary>
-    public sealed class DataInFiles : IMemory<MemoryStream>
+    public sealed class DataInFiles : IMemory<byte[]>
     {
         private readonly string root;
         private readonly ISyncPipe sync;
@@ -59,10 +59,10 @@ namespace Xive.Mnemonic
             this.writeAsync = writeAsync;
         }
 
-        public MemoryStream Content(string name, Func<MemoryStream> ifAbsent)
+        public byte[] Content(string name, Func<byte[]> ifAbsent)
         {
             name = new Normalized(name).AsString();
-            var result = new MemoryStream();
+            var result = new byte[0];
             this.sync.Flush(name, () =>
             {
                 if (!File.Exists(Path(name)))
@@ -72,7 +72,7 @@ namespace Xive.Mnemonic
                 }
                 else
                 {
-                    result = new MemoryStream(File.ReadAllBytes(Path(name)));
+                    result = File.ReadAllBytes(Path(name));
                 }
             });
             return result;
@@ -97,7 +97,7 @@ namespace Xive.Mnemonic
             return File.Exists(Path(name));
         }
 
-        public void Update(string name, MemoryStream content)
+        public void Update(string name, byte[] content)
         {
             if (this.writeAsync)
             {
@@ -112,36 +112,37 @@ namespace Xive.Mnemonic
             }
         }
 
-        private void Save(string name, MemoryStream content)
+        private void Save(string name, byte[] content)
         {
-            name = new Normalized(name).AsString();
-            var result = new MemoryStream();
-            this.sync.Flush(name, () =>
+            var path = Path(name);
+            var dir = System.IO.Path.GetDirectoryName(path);
+            if (!Directory.Exists(dir))
             {
-                if (content.Length > 0)
+                Directory.CreateDirectory(dir);
+            }
+
+            if (content.Length > 0)
+            {
+                this.sync.Flush(name, () =>
                 {
-                    var path = Path(name);
-                    var dir = System.IO.Path.GetDirectoryName(path);
-                    if (!Directory.Exists(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-                    using (FileStream f = File.Open(Path(name), FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                    using (FileStream f = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
                     {
                         f.Seek(0, SeekOrigin.Begin);
                         f.SetLength(content.Length);
-                        content.Seek(0, SeekOrigin.Begin);
-                        content.CopyTo(f);
+                        f.Write(content, 0, content.Length);
                     }
-                }
-                else
+                });
+            }
+            else
+            {
+                this.sync.Flush(name, () =>
                 {
-                    if (File.Exists(Path(name)))
+                    if (File.Exists(path))
                     {
-                        File.Delete(Path(name));
+                        File.Delete(path);
                     }
-                }
-            });
+                });
+            }
         }
 
         private string Path(string name)

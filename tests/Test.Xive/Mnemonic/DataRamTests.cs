@@ -25,6 +25,7 @@ using System.IO;
 using Xive.Cache;
 using Xive.Mnemonic;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 
 namespace Xive.Mnemonic.Test
@@ -34,7 +35,7 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void Memorizes()
         {
-            var data = new MemoryStream();
+            var data = new BytesOf(new InputOf("1980's")).AsBytes();
             var mem = new DataRam();
             mem.Content("childhood", () => data);
 
@@ -49,8 +50,7 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void Updates()
         {
-            var data = new MemoryStream();
-            new InputOf("1980's").Stream().CopyTo(data);
+            var data = new BytesOf(new InputOf("1980's")).AsBytes();
             var mem = new DataRam();
             mem.Update("childhood", data);
 
@@ -65,11 +65,9 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void RemovesIfEmpty()
         {
-            var data = new MemoryStream();
-            new InputOf("1980's").Stream().CopyTo(data);
             var mem = new DataRam();
-            mem.Update("childhood", data);
-            mem.Update("childhood", new MemoryStream());
+            mem.Update("childhood", new BytesOf(new InputOf("1980's")).AsBytes());
+            mem.Update("childhood", new byte[0]);
 
             Assert.False(
                 mem.Knows("childhood")

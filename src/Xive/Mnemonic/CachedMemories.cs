@@ -36,7 +36,7 @@ namespace Xive.Mnemonic
     public sealed class CachedMemories : IMnemonic
     {
         private readonly IMnemonic origin;
-        private readonly Sticky<IMemory<MemoryStream>> data;
+        private readonly Sticky<IMemory<byte[]>> data;
         private readonly Sticky<IMemory<XNode>> xml;
 
         /// <summary>
@@ -89,11 +89,11 @@ namespace Xive.Mnemonic
         {
             this.origin = origin;
             this.data =
-                new Sticky<IMemory<MemoryStream>>(() =>
-                    new CachedMemory<MemoryStream>(
+                new Sticky<IMemory<byte[]>>(() =>
+                    new CachedMemory<byte[]>(
                         origin.Data(),
                         maxSize,
-                        stream => stream.Length == 0,
+                        bytes => bytes.Length == 0,
                         blacklist
                     )
                 );
@@ -108,7 +108,7 @@ namespace Xive.Mnemonic
                 );
         }
 
-        public IMemory<MemoryStream> Data()
+        public IMemory<byte[]> Data()
         {
             return this.data.Value();
         }

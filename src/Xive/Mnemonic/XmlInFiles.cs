@@ -87,22 +87,20 @@ namespace Xive.Mnemonic
         {
             if (content.Document.Root.IsEmpty)
             {
-                this.memory.Update(name, new MemoryStream());
+                this.memory.Update(name, new byte[0]);
             }
             else
             {
                 this.memory.Update(
                     name,
-                    new MemoryStream(
-                        new BytesOf(
-                            Encoding.UTF8.GetBytes(content.ToString())
-                        ).AsBytes()
-                    )
+                    new BytesOf(
+                        Encoding.UTF8.GetBytes(content.ToString())
+                    ).AsBytes()
                 );
             }
         }
 
-        private XNode Parsed(string name, MemoryStream data)
+        private XNode Parsed(string name, byte[] data)
         {
             XDocument doc;
             if (data.Length == 0)

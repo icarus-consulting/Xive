@@ -110,7 +110,7 @@ namespace Xive.Comb
                     .Set(
                         this.memory
                             .Data()
-                            .Content(key, () => new MemoryStream())
+                            .Content(key, () => new byte[0])
                     )
                     .Up()
                     .Up(),

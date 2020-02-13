@@ -28,6 +28,6 @@ namespace Xive.Mnemonic
         /// Data Memory.
         /// </summary>
         /// <returns></returns>
-        IMemory<MemoryStream> Data();
+        IMemory<byte[]> Data();
     }
 }

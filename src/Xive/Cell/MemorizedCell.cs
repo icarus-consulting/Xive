@@ -23,6 +23,8 @@
 using System.IO;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 
 namespace Xive.Cell
@@ -37,7 +39,7 @@ namespace Xive.Cell
 
         public MemorizedCell(string name, byte[] data, IMnemonic mem) : this(name, new Sticky<IMnemonic>(() =>
             {
-                mem.Data().Update(name, new MemoryStream(data));
+                mem.Data().Update(name, data);
                 return mem;
             })
         )
@@ -68,23 +70,28 @@ namespace Xive.Cell
             return
                 this.mem.Value().Data().Content(
                     this.name.AsString(),
-                    () => new MemoryStream()
-                ).ToArray();
+                    () => new byte[0]
+                );
         }
 
         public void Update(IInput content)
         {
             var stream = content.Stream();
-            var copy = new MemoryStream();
-            stream.CopyTo(copy);
             stream.Seek(0, SeekOrigin.Begin);
-            copy.Seek(0, SeekOrigin.Begin);
-            this.mem.Value().Data().Update(this.name.AsString(), copy);
+            var data =
+                new BytesOf(
+                    new InputOf(stream)
+                ).AsBytes();
+            this.mem
+                .Value()
+                .Data()
+                .Update(
+                    this.name.AsString(),
+                    data
+                );
         }
 
         public void Dispose()
-        {
-            
-        }
+        { }
     }
 }
