@@ -20,7 +20,7 @@ namespace Xive.Mnemonic
             this.mem = new SimpleMemories(new XmlRam(), new DataRam());
         }
 
-        public IMemory<MemoryStream> Data()
+        public IMemory<byte[]> Data()
         {
             return this.mem.Data();
         }

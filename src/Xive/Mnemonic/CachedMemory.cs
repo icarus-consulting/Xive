@@ -86,11 +86,11 @@ namespace Xive.Mnemonic
             {
                 var skip = false;
                 name = new Normalized(name).AsString();
-                if (content is Stream && (content as Stream).Length > maxSize)
+                if (content is byte[] && (content as byte[]).Length > maxSize)
                 {
                     skip = true;
                 }
-                if (IsBlacklisted(name))
+                if (!skip && IsBlacklisted(name))
                 {
                     skip = true;
                 }

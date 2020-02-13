@@ -24,7 +24,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Xive.Hive;
 using Xive.Mnemonic;
 
 namespace Xive.Cache
@@ -69,7 +68,15 @@ namespace Xive.Cache
         public void Update(string name, XNode content)
         {
             name = new Normalized(name).AsString();
-            this.mem.AddOrUpdate(name, content, (currentName, currentContent) => content);
+            if (content.Document.Root == null || content.Document.Root.IsEmpty)
+            {
+                XNode devNull;
+                this.mem.TryRemove(name, out devNull);
+            }
+            else
+            {
+                this.mem.AddOrUpdate(name, content, (currentName, currentContent) => content);
+            }
         }
     }
 }

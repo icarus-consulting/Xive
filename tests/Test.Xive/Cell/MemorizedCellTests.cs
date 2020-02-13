@@ -34,7 +34,7 @@ namespace Xive.Cell.Test
         public void InitializesWithMemory()
         {
             var mem = new RamMemories();
-            mem.Data().Update("my-cell", new MemoryStream(new byte[1] { 0x02 }));
+            mem.Data().Update("my-cell", new byte[1] { 0x02 });
 
             using (var cell = new MemorizedCell("my-cell", mem))
             {

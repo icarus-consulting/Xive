@@ -30,20 +30,20 @@ namespace Xive.Mnemonic
     /// <summary>
     /// Memory for XML nodes.
     /// </summary>
-    public sealed class DataRam : IMemory<MemoryStream>
+    public sealed class DataRam : IMemory<byte[]>
     {
-        private readonly ConcurrentDictionary<string, MemoryStream> mem;
+        private readonly ConcurrentDictionary<string, byte[]> mem;
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public DataRam() : this(new ConcurrentDictionary<string, MemoryStream>())
+        public DataRam() : this(new ConcurrentDictionary<string, byte[]>())
         { }
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public DataRam(ConcurrentDictionary<string, MemoryStream> mem)
+        public DataRam(ConcurrentDictionary<string, byte[]> mem)
         {
             this.mem = mem;
         }
@@ -58,18 +58,19 @@ namespace Xive.Mnemonic
             return this.mem.Keys;
         }
 
-        public MemoryStream Content(string name, Func<MemoryStream> ifAbsent)
+        public byte[] Content(string name, Func<byte[]> ifAbsent)
         {
             name = new Normalized(name).AsString();
-            return this.mem.GetOrAdd(name, (key) => ifAbsent());
+            var result = this.mem.GetOrAdd(name, (key) => ifAbsent());
+            return result;
         }
 
-        public void Update(string name, MemoryStream content)
+        public void Update(string name, byte[] content)
         {
             name = new Normalized(name).AsString();
             if (content.Length == 0)
             {
-                MemoryStream removed;
+                byte[] removed;
                 this.mem.TryRemove(name, out removed);
             }
             else

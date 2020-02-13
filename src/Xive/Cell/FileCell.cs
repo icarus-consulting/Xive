@@ -25,6 +25,7 @@ using System.IO;
 using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Scalar;
 
 namespace Xive.Cell
@@ -86,7 +87,7 @@ namespace Xive.Cell
                 this.mem
                     .Value()
                     .Data()
-                    .Content(this.name.Value(), () => new MemoryStream()).ToArray();
+                    .Content(this.name.Value(), () => new byte[0]);
         }
 
         public void Update(IInput content)
@@ -94,15 +95,12 @@ namespace Xive.Cell
             var stream = content.Stream();
             if (stream.Length > 0)
             {
-                var memory = new MemoryStream();
-                content.Stream().CopyTo(memory);
-                memory.Seek(0, SeekOrigin.Begin);
-                content.Stream().Seek(0, SeekOrigin.Begin);
-                this.mem.Value().Data().Update(this.name.Value(), memory);
+                stream.Seek(0, SeekOrigin.Begin);
+                this.mem.Value().Data().Update(this.name.Value(), new BytesOf(content).AsBytes());
             }
             else
             {
-                this.mem.Value().Data().Update(this.name.Value(), new MemoryStream());
+                this.mem.Value().Data().Update(this.name.Value(), new byte[0]);
             }
         }
 

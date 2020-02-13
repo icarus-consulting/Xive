@@ -67,7 +67,7 @@ namespace Xive.Props
                             .Data()
                             .Content(
                                 new Normalized($"{scope}/{id}/props.cat").AsString(),
-                                () => new MemoryStream()
+                                () => new byte[0]
                             )
                         ).AsString();
 
@@ -116,7 +116,7 @@ namespace Xive.Props
             {
                 serialized += $"{prop}:{string.Join(",", memoryProps.Value().Values(prop))}\r";
             }
-            var data = new MemoryStream(new BytesOf(serialized).AsBytes());
+            var data = new BytesOf(serialized).AsBytes();
 
             this.mem
                 .Data()

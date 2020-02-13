@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Xive.Test.Mnemonic
+namespace Xive.Mnemonic.Test
 {
     public sealed class LocalSyncPipeTests
     {

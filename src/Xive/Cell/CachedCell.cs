@@ -23,6 +23,7 @@
 using System.IO;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 
 namespace Xive.Cell
@@ -58,8 +59,8 @@ namespace Xive.Cell
                     .Data()
                     .Content(
                         this.origin.Name(),
-                        () => new MemoryStream(this.origin.Content())
-                    ).ToArray();
+                        () => this.origin.Content()
+                    );
         }
 
         public string Name()
@@ -72,25 +73,27 @@ namespace Xive.Cell
             var stream = content.Stream();
             if (stream.Length > 0)
             {
-                var memory = new MemoryStream();
-                content.Stream().CopyTo(memory);
-                memory.Seek(0, SeekOrigin.Begin);
-                content.Stream().Seek(0, SeekOrigin.Begin);
-                this.mem.Data().Update(this.origin.Name(), memory);
+                stream.Seek(0, SeekOrigin.Begin);
+                this.mem
+                    .Data()
+                    .Update(
+                        this.origin.Name(), 
+                        new BytesOf(new InputOf(stream)).AsBytes()
+                    );
             }
             else
             {
                 this.mem
                     .Data()
-                    .Update(this.origin.Name(), new MemoryStream());
+                    .Update(this.origin.Name(), new byte[0]);
             }
             this.origin.Update(
                 new InputOf(
                     this.mem
                         .Data()
-                        .Content(this.origin.Name(), () => new MemoryStream())
-                    )
-                );
+                        .Content(this.origin.Name(), () => new byte[0])
+                )
+            );
         }
 
         public void Dispose()
