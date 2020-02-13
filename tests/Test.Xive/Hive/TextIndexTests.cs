@@ -124,13 +124,7 @@ namespace Xive.Test.Hive
             var idx = new TextIndex("test", mem);
             idx.Add("123");
 
-            new MemorizedXocument(
-                $"test/hq/catalog.xml",
-                mem
-            ).Modify(
-                new Directives().Xpath("/catalog/*").Remove()
-            );
-
+            mem.Data().Update("test/hq/catalog.cat", new byte[0]);
             idx.Add("456"); //trigger reloading from file by updating index
 
             Assert.False(idx.Has("123"));
@@ -143,12 +137,7 @@ namespace Xive.Test.Hive
             var idx = new TextIndex("test", mem);
             idx.Add("123");
 
-            new MemorizedXocument(
-                $"test/hq/catalog.xml",
-                mem
-            ).Modify(
-                new Directives().Xpath("/catalog/*").Remove()
-            );
+            mem.Data().Update("test/hq/catalog.cat", new byte[0]);
 
             idx.Add("456");
             idx.Remove("456"); //trigger reloading from file by updating index

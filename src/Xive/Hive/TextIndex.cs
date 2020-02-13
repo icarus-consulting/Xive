@@ -159,8 +159,8 @@ namespace Xive.Hive
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
-                Cell().Update(new InputOf(string.Join(";", idCache)));
                 idCache.Remove(id.ToLower());
+                Cell().Update(new InputOf(string.Join(";", idCache)));
             }
         }
 

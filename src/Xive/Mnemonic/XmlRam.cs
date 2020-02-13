@@ -68,7 +68,7 @@ namespace Xive.Cache
         public void Update(string name, XNode content)
         {
             name = new Normalized(name).AsString();
-            if (content.Document.Root.HasElements)
+            if (content.Document.Root == null || content.Document.Root.IsEmpty)
             {
                 XNode devNull;
                 this.mem.TryRemove(name, out devNull);
