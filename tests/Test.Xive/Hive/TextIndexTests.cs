@@ -8,6 +8,7 @@ using Xive.Xocument;
 using Xunit;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
@@ -65,6 +66,38 @@ namespace Xive.Test.Hive
 
             Assert.Equal(
                 "test/456", idx.List(new IndexFilterOf(props => props.Value("works", "") == "false"))[0].Name()
+            );
+        }
+
+        [Fact]
+        public void FindsSingleItem()
+        {
+            var mem = new RamMemories();
+            var idx = new TextIndex("test", mem);
+            idx.Add("123")
+                .Cell("zäll")
+                .Update(new InputOf("condänd"));
+
+            Assert.Equal(
+                "condänd", 
+                new TextOf(
+                    new InputOf(
+                        idx.Comb("123")
+                            .Cell("zäll")
+                            .Content()
+                    )
+                ).AsString()
+            );
+        }
+
+        [Fact]
+        public void RejectsUnknownSingleItem()
+        {
+            var mem = new RamMemories();
+            var idx = new TextIndex("test", mem);
+
+            Assert.Throws<ArgumentException>(() =>
+                idx.Comb("123")
             );
         }
 
