@@ -31,8 +31,9 @@ namespace Xive
     /// </summary>
     public interface IIndex
     {
-        void Add(string id);
+        IHoneyComb Add(string id);
         IList<IHoneyComb> List(params IHiveFilter[] filters);
+        IHoneyComb Comb(string id);
         bool Has(string id);
         void Remove(string id);
     }

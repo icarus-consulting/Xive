@@ -22,17 +22,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
-using Xive.Xocument;
-using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Text;
-using Yaapii.Xambly;
 
 namespace Xive.Hive
 {
@@ -55,15 +52,15 @@ namespace Xive.Hive
             this.idCache = new List<string>();
         }
 
-        public void Add(string id)
+        public IHoneyComb Add(string id)
         {
+            var cell = Cell();
+            if (id.Contains("\r"))
+            {
+                throw new ArgumentException($"Cannot use id with character \\r inside. This is reserved for internal usage.");
+            }
             lock (idCache)
             {
-                var cell = Cell();
-                if (id.Contains("\r"))
-                {
-                    throw new ArgumentException($"Cannot use id with character \\r inside. This is reserved for internal usage.");
-                }
                 idCache.Clear();
                 idCache.AddRange(new TextOf(cell.Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
                 if (!idCache.Contains(id.ToLower()))
@@ -71,6 +68,7 @@ namespace Xive.Hive
                     idCache.Add(id.ToLower());
                 }
                 cell.Update(new InputOf(string.Join(";", idCache)));
+                return new MemorizedComb($"{scope}/{id}", this.mem);
             }
         }
 
@@ -116,6 +114,15 @@ namespace Xive.Hive
             return new ListOf<IHoneyComb>(filtered);
         }
 
+        public IHoneyComb Comb(string id)
+        {
+            if(!this.Has(id))
+            {
+                throw new ArgumentException($"Cannot find unknown id '{id}'.");
+            }
+            return new MemorizedComb($"{scope}/{id}", this.mem);
+        }
+
         public bool Has(string id)
         {
             lock (idCache)
@@ -130,15 +137,31 @@ namespace Xive.Hive
 
         public void Remove(string id)
         {
+            var prefix = new Normalized($"{scope}/{id}").AsString();
+            Parallel.ForEach(this.mem.Data().Knowledge(), dataId =>
+            {
+                if (dataId.StartsWith(prefix))
+                {
+                    this.mem.Data().Update(dataId, new byte[0]);
+                }
+            });
+            Parallel.ForEach(this.mem.XML().Knowledge(), xmlId =>
+            {
+                if (xmlId.StartsWith(prefix))
+                {
+                    this.mem.XML().Update(xmlId, new XDocument());
+                }
+            });
+
             lock (idCache)
             {
                 if (idCache.Count == 0)
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
+                Cell().Update(new InputOf(string.Join(";", idCache)));
                 idCache.Remove(id.ToLower());
             }
-            Cell().Update(new InputOf(string.Join(";", idCache)));
         }
 
         private ICell Cell()
