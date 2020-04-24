@@ -21,7 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Yaapii.Atoms" Version="0.29.0" />
+    <PackageReference Include="Yaapii.Atoms" Version="2.0.1" />
     <PackageReference Include="Yaapii.Xambly" Version="0.7.3" />
   </ItemGroup>
 

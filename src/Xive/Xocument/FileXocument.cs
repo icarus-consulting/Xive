@@ -35,11 +35,11 @@ namespace Xive.Xocument
         /// A xocument stored in a file.
         /// </summary>
         public FileXocument(string path) : base(
-            new Sticky<IXocument>(() =>
+            new ScalarOf<IXocument>(() =>
             {
                 string root = Path.GetDirectoryName(path);
                 var name = Path.GetFileName(path);
-                return 
+                return
                     new MemorizedXocument(
                         name,
                         new FileMemories(root)

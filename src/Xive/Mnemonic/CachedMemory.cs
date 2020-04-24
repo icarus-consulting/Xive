@@ -40,7 +40,7 @@ namespace Xive.Mnemonic
         private readonly IMemory<T> cache;
         private readonly BiFuncOf<string, T, bool> skip;
         private readonly IMemory<T> origin;
-        private readonly Sticky<string[]> patterns;
+        private readonly IScalar<string[]> patterns;
 
         /// <summary>
         /// Memory which is cached.
@@ -50,7 +50,7 @@ namespace Xive.Mnemonic
             origin,
             checkEmpty,
             maxSize,
-            new Sticky<IList<string>>(() =>
+            new ScalarOf<IList<string>>(() =>
             {
                 return
                     new List<string>(
@@ -72,7 +72,7 @@ namespace Xive.Mnemonic
             this.cache = new VersatileRam<T>(checkEmpty);
             this.origin = origin;
             this.patterns =
-                new Sticky<string[]>(() =>
+                new ScalarOf<string[]>(() =>
                 {
                     var blacks = blacklist.Value();
                     var compiled = new string[blacks.Count];

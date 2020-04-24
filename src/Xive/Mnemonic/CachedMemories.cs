@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Scalar;
@@ -36,15 +37,15 @@ namespace Xive.Mnemonic
     public sealed class CachedMemories : IMnemonic
     {
         private readonly IMnemonic origin;
-        private readonly Sticky<IMemory<byte[]>> data;
-        private readonly Sticky<IMemory<XNode>> xml;
+        private readonly IScalar<IMemory<byte[]>> data;
+        private readonly IScalar<IMemory<XNode>> xml;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="origin"></param>
         /// <param name="maxSize"></param>
-        public CachedMemories(IMnemonic origin, params string[] items) : this(origin, int.MaxValue, new List<string>(new EnumerableOf<string>(items)))
+        public CachedMemories(IMnemonic origin, params string[] items) : this(origin, int.MaxValue, new List<string>(new ManyOf<string>(items)))
         { }
 
         /// <summary>
@@ -70,13 +71,9 @@ namespace Xive.Mnemonic
         public CachedMemories(IMnemonic origin, int maxSize, IEnumerable<string> blacklist) : this(
             origin,
             maxSize,
-            new ListOf<string>(
-                new StickyEnumerable<string>(
-                    new Yaapii.Atoms.Enumerable.Mapped<string, string>(
-                        entry => new Normalized(entry).AsString(),
-                        blacklist
-                    )
-                )
+            new Yaapii.Atoms.List.Mapped<string, string>(
+                entry => new Normalized(entry).AsString(),
+                blacklist
             )
         )
         { }
@@ -89,7 +86,7 @@ namespace Xive.Mnemonic
         {
             this.origin = origin;
             this.data =
-                new Sticky<IMemory<byte[]>>(() =>
+                new ScalarOf<IMemory<byte[]>>(() =>
                     new CachedMemory<byte[]>(
                         origin.Data(),
                         maxSize,
@@ -98,7 +95,7 @@ namespace Xive.Mnemonic
                     )
                 );
             this.xml =
-                new Sticky<IMemory<XNode>>(() =>
+                new ScalarOf<IMemory<XNode>>(() =>
                     new CachedMemory<XNode>(
                         origin.XML(),
                         maxSize,

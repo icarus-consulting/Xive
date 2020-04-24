@@ -28,6 +28,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xive.Mnemonic;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
@@ -45,7 +46,7 @@ namespace Xive.Props
     public sealed class SandboxProps : IProps
     {
         private readonly IMnemonic mem;
-        private readonly Sticky<IProps> memoryProps;
+        private readonly IScalar<IProps> memoryProps;
         private readonly string id;
         private readonly string scope;
 
@@ -59,7 +60,7 @@ namespace Xive.Props
             this.id = id;
             this.scope = scope;
             this.mem = mem;
-            this.memoryProps = new Sticky<IProps>(() =>
+            this.memoryProps = new ScalarOf<IProps>(() =>
             {
                 var stringProps =
                     new TextOf(
