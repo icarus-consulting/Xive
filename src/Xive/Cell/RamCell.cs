@@ -59,7 +59,7 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell(MemoryStream content) : this(
-            new ScalarOf<string>(() => Guid.NewGuid().ToString()),
+            new Live<string>(() => Guid.NewGuid().ToString()),
             content
         )
         { }
@@ -71,7 +71,7 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell(string path, IBytes content) : this(
-            new ScalarOf<string>(() => path),
+            new Live<string>(() => path),
             new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
@@ -94,7 +94,7 @@ namespace Xive.Cell
                 var mem = new RamMemories();
                 mem.Data()
                     .Update(
-                        path.Value(), 
+                        path.Value(),
                         new BytesOf(
                             new InputOf(content)
                         ).AsBytes()
@@ -111,13 +111,13 @@ namespace Xive.Cell
         /// they will not have the same content.
         /// </summary>
         public RamCell(string path, MemoryStream content) : this(
-            new ScalarOf<string>(path),
+            new Live<string>(path),
             new Solid<IMnemonic>(() =>
             {
                 var mem = new RamMemories();
                 mem.Data()
                     .Update(
-                        path, 
+                        path,
                         new BytesOf(
                             new InputOf(content)
                         ).AsBytes()
@@ -144,8 +144,8 @@ namespace Xive.Cell
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="cellMemory">map with content for many items</param>
         public RamCell(string path, IMnemonic mem) : this(
-            new ScalarOf<string>(path),
-            new ScalarOf<IMnemonic>(mem)
+            new Live<string>(path),
+            new Live<IMnemonic>(mem)
         )
         { }
 
@@ -176,11 +176,11 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            return 
+            return
                 this.mem.Value()
                     .Data()
                     .Content(
-                        new Normalized(this.name.Value()).AsString(), 
+                        new Normalized(this.name.Value()).AsString(),
                         () => new byte[0]
                     );
         }
@@ -196,7 +196,7 @@ namespace Xive.Cell
                     .Value()
                     .Data()
                     .Update(
-                        name, 
+                        name,
                         new BytesOf(new InputOf(stream)).AsBytes()
                     );
             }

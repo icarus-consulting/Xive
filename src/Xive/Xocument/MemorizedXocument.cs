@@ -27,7 +27,7 @@ namespace Xive.Xocument
             this.name = name;
             this.memories = memories;
             this.node =
-                new ScalarOf<XNode>(() =>
+                new Live<XNode>(() =>
                     memories.XML().Content(name, () =>
                         new XDocument(
                             new XElement(this.root.Value())
