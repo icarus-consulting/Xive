@@ -131,8 +131,8 @@ namespace Xive.Hive
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
+                return idCache.Contains(id.ToLower());
             }
-            return idCache.Contains(id.ToLower());
         }
 
         public void Remove(string id)
