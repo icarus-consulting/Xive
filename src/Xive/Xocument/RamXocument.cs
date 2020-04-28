@@ -31,7 +31,7 @@ namespace Xive.Xocument
         /// A xocument stored in memory.
         /// </summary>
         public RamXocument(string name) : base(
-            new Sticky<IXocument>(() =>
+            new ScalarOf<IXocument>(() =>
                 new MemorizedXocument(
                     name,
                     new RamMemories()

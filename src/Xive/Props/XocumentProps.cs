@@ -40,7 +40,7 @@ namespace Xive.Props
     public sealed class XocumentProps : IProps
     {
         private readonly IXocument catalog;
-        private readonly Sticky<IProps> memoryProps;
+        private readonly IScalar<IProps> memoryProps;
         private readonly string id;
         private readonly string scope;
 
@@ -54,7 +54,7 @@ namespace Xive.Props
             this.id = id;
             this.scope = scope;
             this.catalog = catalog;
-            this.memoryProps = new Sticky<IProps>(() =>
+            this.memoryProps = new ScalarOf<IProps>(() =>
             {
                 ConcurrentDictionary<string, string[]> props = new ConcurrentDictionary<string, string[]>();
                 Parallel.ForEach(catalog.Nodes($"/catalog/{scope}[@id='{id}']"), (entity) =>

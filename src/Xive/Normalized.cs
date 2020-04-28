@@ -30,14 +30,14 @@ namespace Xive
     /// </summary>
     public sealed class Normalized : IText
     {
-        private readonly Sticky<string> name;
+        private readonly IScalar<string> name;
 
         /// <summary>
         /// A text with only forward slashes instead of backslashes and only lower-cased
         /// </summary>
         public Normalized(string name)
         {
-            this.name = new Sticky<string>(() => name.Replace('\\', '/').ToLower());
+            this.name = new ScalarOf<string>(() => name.Replace('\\', '/').ToLower());
         }
 
         public string AsString()

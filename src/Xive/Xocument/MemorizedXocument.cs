@@ -16,7 +16,7 @@ namespace Xive.Xocument
     {
         private readonly IMnemonic memories;
         private readonly IScalar<XNode> node;
-        private readonly Sticky<string> root;
+        private readonly IScalar<string> root;
         private readonly string name;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Xive.Xocument
             this.name = name;
             this.memories = memories;
             this.node =
-                new ScalarOf<XNode>(() =>
+                new Live<XNode>(() =>
                     memories.XML().Content(name, () =>
                         new XDocument(
                             new XElement(this.root.Value())
@@ -35,7 +35,7 @@ namespace Xive.Xocument
                     )
                 );
             this.root =
-                new Sticky<string>(() =>
+                new ScalarOf<string>(() =>
                 {
                     var rootName = new Normalized(name).AsString();
                     if (rootName.ToLower().EndsWith(".xml"))

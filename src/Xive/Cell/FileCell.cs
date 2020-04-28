@@ -35,27 +35,27 @@ namespace Xive.Cell
     /// </summary>
     public sealed class FileCell : ICell
     {
-        private readonly Sticky<IMnemonic> mem;
+        private readonly IScalar<IMnemonic> mem;
         private readonly IScalar<string> name;
 
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
         public FileCell(string path) : this(
-            new Sticky<string>(() =>
+            new ScalarOf<string>(() =>
             {
-                if(!Path.IsPathRooted(path))
+                if (!Path.IsPathRooted(path))
                 {
                     throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
                 }
                 var name = Path.GetFileName(path);
-                if(String.IsNullOrEmpty(name))
+                if (String.IsNullOrEmpty(name))
                 {
                     throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted and have a file name.");
                 }
                 return name;
             }),
-            new Sticky<IMnemonic>(() =>
+            new ScalarOf<IMnemonic>(() =>
             {
                 if (!Path.IsPathRooted(path))
                 {
@@ -70,7 +70,7 @@ namespace Xive.Cell
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        private FileCell(IScalar<string> name, Sticky<IMnemonic> mem)
+        private FileCell(IScalar<string> name, ScalarOf<IMnemonic> mem)
         {
             this.mem = mem;
             this.name = name;
