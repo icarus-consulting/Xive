@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yaapii.Atoms" Version="2.1.0" />
-    <PackageReference Include="Yaapii.Xambly" Version="1.0.0" />
-    <PackageReference Include="Yaapii.Xml" Version="1.0.0" />
+  <PackageReference Include="Yaapii.Atoms" Version="0.29.0" />
+    <PackageReference Include="Yaapii.Xambly" Version="0.7.3" />
+    <PackageReference Include="Yaapii.Xml" Version="0.16.0" />
   </ItemGroup>
 
 </Project>
