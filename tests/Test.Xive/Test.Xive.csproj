@@ -12,16 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeDesign.Analyzers.StayObjects" Version="1.0.6508.10017">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Yaapii.Atoms" Version="2.0.2" />
+    <PackageReference Include="Yaapii.Atoms" Version="2.1.0" />
     <PackageReference Include="Yaapii.Xambly" Version="1.0.0" />
     <PackageReference Include="Yaapii.Xml" Version="1.0.0" />
   </ItemGroup>
