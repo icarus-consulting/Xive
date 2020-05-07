@@ -25,6 +25,7 @@ using System.Xml.Linq;
 using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Xml;
 
 namespace Xive.Mnemonic.Test
@@ -96,6 +97,20 @@ namespace Xive.Mnemonic.Test
                 mem.Update("childhood", new XDocument(new XElement("root")));
 
                 Assert.False(mem.Knows("childhood"));
+            }
+        }
+
+        [Fact]
+        public void KnowledgeIsSeparatorInsensitive()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var mem = new XmlInFiles(temp.Value().FullName);
+                mem.Content("childhood\\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
+                Assert.Equal(
+                    "childhood/subdir/file",
+                    new FirstOf<string>(mem.Knowledge()).Value()
+                );
             }
         }
     }

@@ -28,7 +28,9 @@ using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
+using Yaapii.Xml;
 
 namespace Xive.Comb
 {
@@ -70,7 +72,19 @@ namespace Xive.Comb
 
         public IXocument Xocument(string name)
         {
-            return new MemorizedXocument($"{this.name.AsString()}/{name}", this.memory);
+            IXocument result;
+            if (name.Equals("_guts.xml"))
+            {
+                Directives patch = GutsDirectives();
+                result = new ReadOnlyXocument(
+                    new XMLCursor(new Xambler(patch).Dom())
+                );
+            }
+            else
+            {
+                result = new MemorizedXocument($"{this.name.AsString()}/{name}", this.memory);
+            }
+            return result;
         }
 
         public ICell Cell(string name)
@@ -78,9 +92,7 @@ namespace Xive.Comb
             ICell result;
             if (name.Equals("_guts.xml"))
             {
-                var patch = new Directives().Add("data");
-                patch = WithData(patch);
-                patch = WithXml(patch);
+                var patch = GutsDirectives();
                 result =
                         new RamCell(
                             "_guts.xml",
@@ -98,6 +110,16 @@ namespace Xive.Comb
             return result;
         }
 
+        private Directives GutsDirectives()
+        {
+            var patch = new Directives().Add("items");
+            patch.Add("data");
+            patch = WithData(patch);
+            patch.Up().Add("xml");
+            patch = WithXml(patch);
+            return patch;
+        }
+
         private Directives WithData(Directives patch)
         {
             new Each<string>(
@@ -108,9 +130,11 @@ namespace Xive.Comb
                     .Up()
                     .Add("size")
                     .Set(
-                        this.memory
+                        new LengthOf(
+                            this.memory
                             .Data()
                             .Content(key, () => new byte[0])
+                        ).Value()
                     )
                     .Up()
                     .Up(),
@@ -126,15 +150,24 @@ namespace Xive.Comb
         {
             new Each<string>(
                 (key) =>
-                    patch.Add("xml")
+                    patch.Add("item")
                     .Add("name")
                     .Set(key.Substring((this.name.AsString() + "/").Length))
                     .Up()
-                    .Up()
+                    .Add("size")
+                    .Set(
+                        new LengthOf(
+                            new BytesOf(
+                                new TextOf(
+                                    new XMLCursor(this.memory.XML().Content(key, () => new XMLCursor("").AsNode())).AsNode().ToString()
+                                )
+                            ).AsBytes()
+                        ).Value()
+                    ).Up()
                     .Up(),
                 new Filtered<string>(
                     (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
-                    this.memory.Data().Knowledge()
+                    this.memory.XML().Knowledge()
                 )
             ).Invoke();
             return patch;
