@@ -7,10 +7,16 @@ using Yaapii.Xml;
 
 namespace Xive.Xocument
 {
+    /// <summary>
+    /// A Xocument that cant be modified
+    /// </summary>
     public sealed class ReadOnlyXocument : IXocument
     {
         private readonly IXML xml;
 
+        /// <summary>
+        /// A Xocument that cant be modified
+        /// </summary>
         public ReadOnlyXocument(IXML xml)
         {
             this.xml = xml;
