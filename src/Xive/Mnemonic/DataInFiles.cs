@@ -85,7 +85,7 @@ namespace Xive.Mnemonic
             {
                 knowledge =
                     new Mapped<string, string>(
-                        path => path.Substring($"{this.root}/".Length),
+                        path => path.Substring($"{this.root}/".Length).Replace('\\', '/'),
                         Directory.GetFiles(this.root, "*", SearchOption.AllDirectories)
                     );
             }

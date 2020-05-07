@@ -147,21 +147,24 @@ namespace Xive.Comb.Test
             }
         }
 
-        [Fact(Skip = "Guts are not supported at the moment")]
+        [Fact]
         public void ReturnsGutsCaseAndSeparatorInsensitive()
         {
-            var memory = new RamMemories();
-            var comb = new RamComb("my-comb", memory);
-            using (var xoc = comb.Xocument("sub\\DIR/some.xml"))
+            using (var temp = new TempDirectory())
             {
-                xoc.Modify(new Directives().Xpath("/some").Add("test"));
-            }
-            using (var xoc = comb.Xocument("_guts.xml"))
-            {
-                Assert.Equal(
-                    "sub/dir/some.xml",
-                    xoc.Value("/items/item/name/text()", "")
-                );
+                var memory = new FileMemories(temp.Value().FullName);
+                var comb = new FileComb("my-comb", memory);
+                using (var xoc = comb.Xocument("sub\\DIR/some.xml"))
+                {
+                    xoc.Modify(new Directives().Xpath("/some").Add("test"));
+                }
+                using (var xoc = comb.Xocument("_guts.xml"))
+                {
+                    Assert.Equal(
+                        @"sub/dir/some.xml",
+                        xoc.Value("/items/xml/item/name/text()", "")
+                    );
+                }
             }
         }
     }
