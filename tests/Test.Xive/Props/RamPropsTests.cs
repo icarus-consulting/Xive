@@ -100,5 +100,14 @@ namespace Xive.Props.Test
                     .Value("behaviour")
             );
         }
+
+        [Fact]
+        public void RemovesProps()
+        {
+            var props = new RamProps();
+            props.Refined("name", "mr jelly");
+            props.Refined("name");
+            Assert.Empty(props.Names());
+        }
     }
 }

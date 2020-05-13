@@ -20,8 +20,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.Collections.Generic;
 using Xive.Mnemonic;
 using Xunit;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
@@ -165,6 +167,51 @@ namespace Xive.Comb.Test
                         xoc.Value("/items/xml/item/name/text()", "")
                     );
                 }
+            }
+        }
+
+        [Fact]
+        public void HasProps()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var memory = new FileMemories(temp.Value().FullName);
+                var comb = new FileComb("my-comb", memory);
+                comb.Props().Refined("name", "value");
+                Assert.Equal(
+                    "value",
+                    comb.Props().Value("name")
+                );
+            }
+        }
+
+        [Fact]
+        public void HasArrayProps()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var memory = new FileMemories(temp.Value().FullName);
+                var comb = new FileComb("my-comb", memory);
+                comb.Props().Refined("name", "value", "value2");
+                Assert.Equal(
+                    new ManyOf("value", "value2"),
+                    comb.Props().Values("name")
+                );
+            }
+        }
+
+        [Fact]
+        public void RemovesProp()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var memory = new FileMemories(temp.Value().FullName);
+                var comb = new FileComb("my-comb", memory);
+                comb.Props().Refined("name", "value", "value2");
+                comb.Props().Refined("name");
+                Assert.Empty(
+                    comb.Props().Names()
+                );
             }
         }
     }
