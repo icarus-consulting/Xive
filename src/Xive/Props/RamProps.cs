@@ -61,7 +61,7 @@ namespace Xive.Props
         {
             if (!values.GetEnumerator().MoveNext())
             {
-                this.props[prop] = new string[0];
+                this.props.TryRemove(prop, out string[] value);
             }
             else
             {
