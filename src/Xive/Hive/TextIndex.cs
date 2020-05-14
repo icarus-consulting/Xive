@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -74,7 +75,7 @@ namespace Xive.Hive
 
         public IList<IHoneyComb> List(params IHiveFilter[] filters)
         {
-            IList<IHoneyComb> filtered = new List<IHoneyComb>();
+            var filtered = new ConcurrentBag<IHoneyComb>();
             var fltrs = new List<IHiveFilter>(filters);
             lock (idCache)
             {
@@ -116,7 +117,7 @@ namespace Xive.Hive
 
         public IHoneyComb Comb(string id)
         {
-            if(!this.Has(id))
+            if (!this.Has(id))
             {
                 throw new ArgumentException($"Cannot find unknown id '{id}'.");
             }

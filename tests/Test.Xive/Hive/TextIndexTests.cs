@@ -79,7 +79,7 @@ namespace Xive.Test.Hive
                 .Update(new InputOf("condänd"));
 
             Assert.Equal(
-                "condänd", 
+                "condänd",
                 new TextOf(
                     new InputOf(
                         idx.Comb("123")
@@ -143,6 +143,27 @@ namespace Xive.Test.Hive
             idx.Remove("456"); //trigger reloading from file by updating index
 
             Assert.False(idx.Has("123"));
+        }
+
+        [Fact]
+        public void WorksWithLargeData()
+        {
+            var mem = new RamMemories();
+            var idx = new TextIndex("test", mem);
+            var random = new Random();
+            for (int i = 0; i < 1000; i++)
+            {
+                var number = random.Next();
+                while (idx.Has(number.ToString()))
+                {
+                    number = random.Next();
+                }
+                idx.Add(number.ToString());
+            }
+            Assert.Equal(
+                1000,
+                idx.List(new IndexFilterOf(props => true)).Count
+            );
         }
     }
 }
