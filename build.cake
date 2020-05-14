@@ -25,7 +25,7 @@ var githubtoken 		= "";
 var codecovToken 		= "";
 
 var isAppVeyor          = AppVeyor.IsRunningOnAppVeyor;
-var version 			= "0.6.2";
+var version 			= "3.0.2";
 
 
 ///////////////////////////////////////////////////////////////////////////////
