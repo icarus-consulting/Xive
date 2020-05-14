@@ -134,7 +134,7 @@ namespace Xive.Comb.Test
             }
         }
 
-        [Fact(Skip ="Guts are not supported at the moment")]
+        [Fact]
         public void ReturnsGutsCaseAndSeparatorInsensitive()
         {
             var memory = new RamMemories();
@@ -146,8 +146,8 @@ namespace Xive.Comb.Test
             using (var xoc = comb.Xocument("_guts.xml"))
             {
                 Assert.Equal(
-                    "sub/dir/some.xml",
-                    xoc.Value("/items/item/name/text()", "")
+                    @"sub/dir/some.xml",
+                    xoc.Value("/items/xml/item/name/text()", "")
                 );
             }
         }

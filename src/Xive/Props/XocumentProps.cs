@@ -107,7 +107,7 @@ namespace Xive.Props
                 new Directives(
                     new Directives()
                         .Xpath("/catalog")
-                        .Append(new AddIfAttributeDirective(this.scope.ToLower(), "id", this.id.ToLower()))
+                        .AddIfAttr(this.scope.ToLower(), "id", this.id.ToLower())
                     )
                     .Xpath($"/catalog/{this.scope.ToLower()}[@id='{this.id.ToLower()}']/props")
                     .Remove()

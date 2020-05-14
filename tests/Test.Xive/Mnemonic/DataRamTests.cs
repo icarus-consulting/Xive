@@ -27,6 +27,7 @@ using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.Scalar;
 
 namespace Xive.Mnemonic.Test
 {
@@ -71,6 +72,21 @@ namespace Xive.Mnemonic.Test
 
             Assert.False(
                 mem.Knows("childhood")
+            );
+        }
+
+        [Fact]
+        public void KnowledgeIsSeparatorInsensitive()
+        {
+            var data =
+                    new BytesOf(
+                        new InputOf("1980's")
+                    ).AsBytes();
+            var mem = new DataRam();
+            mem.Content("childhood\\subdir/file", () => data);
+            Assert.Equal(
+                "childhood/subdir/file",
+                new FirstOf<string>(mem.Knowledge()).Value()
             );
         }
     }
