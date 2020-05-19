@@ -10,6 +10,7 @@ using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
+using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
@@ -164,6 +165,30 @@ namespace Xive.Test.Hive
                 1000,
                 idx.List(new IndexFilterOf(props => true)).Count
             );
+        }
+
+        [Fact]
+        public void RemovesWithLargeData()
+        {
+            var mem = new RamMemories();
+            var idx = new TextIndex("test", mem);
+            var random = new Random();
+            var numbers = new List<string>();
+            for (int i = 0; i < 1000; i++)
+            {
+                var number = random.Next();
+                while (idx.Has(number.ToString()))
+                {
+                    number = random.Next();
+                }
+                numbers.Add(number.ToString());
+                idx.Add(number.ToString());
+            }
+            for (int i = 0; i < 1000; i++)
+            {
+                idx.Remove(numbers[i]);
+            }
+            Assert.Equal(0, idx.List().Count);
         }
     }
 }

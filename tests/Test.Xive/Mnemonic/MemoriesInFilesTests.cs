@@ -20,10 +20,12 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.Xml.Linq;
 using Xive.Comb;
 using Xive.Hive;
 using Xive.Mnemonic;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
@@ -39,7 +41,7 @@ namespace Xive.Mnemonic.Test
             {
                 var mem = new FileMemories(temp.Value().FullName);
                 new TextIndex(
-                    "beverage", 
+                    "beverage",
                     mem
                 ).Add("fritz-kola");
 
@@ -97,6 +99,29 @@ namespace Xive.Mnemonic.Test
                         ).AsString()
                     );
                 }
+            }
+        }
+
+        [Fact]
+        public void DeliversXmlWithHead()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var mem = new FileMemories(temp.Value().FullName);
+                mem.Data().Update("childhood.xml",
+                    new BytesOf(
+                        string.Concat(
+                            new XDeclaration("1.0", "UTF-8", "no"),
+                            new XElement("root",
+                                new XElement("years", new XText("1980's"))
+                            )
+                        )
+                    ).AsBytes()
+                );
+                Assert.Contains(
+                    "childhood.xml",
+                    mem.XML().Knowledge()
+                );
             }
         }
     }

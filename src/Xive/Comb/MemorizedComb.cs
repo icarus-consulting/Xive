@@ -28,7 +28,6 @@ using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Scalar;
-using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 
@@ -122,6 +121,9 @@ namespace Xive.Comb
 
         private Directives WithData(Directives patch)
         {
+            var dataKnowledge = this.memory.Data().Knowledge();
+            var xmlKnowledge = this.memory.XML().Knowledge();
+            var filtered = new Filtered<string>((item) => !new Contains<string>(xmlKnowledge, item).Value(), dataKnowledge);
             new Each<string>(
                 (key) =>
                     patch.Add("item")
@@ -140,7 +142,7 @@ namespace Xive.Comb
                     .Up(),
                 new Filtered<string>(
                     (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
-                    this.memory.Data().Knowledge()
+                    filtered
                 )
             ).Invoke();
             return patch;
@@ -158,9 +160,7 @@ namespace Xive.Comb
                     .Set(
                         new LengthOf(
                             new BytesOf(
-                                new TextOf(
-                                    new XMLCursor(this.memory.XML().Content(key, () => new XMLCursor("").AsNode())).AsNode().ToString()
-                                )
+                                this.memory.XML().Content(key, () => new XMLCursor("").AsNode()).ToString()
                             ).AsBytes()
                         ).Value()
                     ).Up()
