@@ -71,9 +71,11 @@ namespace Xive.Mnemonic
         public CachedMemories(IMnemonic origin, int maxSize, IEnumerable<string> blacklist) : this(
             origin,
             maxSize,
-            new Yaapii.Atoms.List.Mapped<string, string>(
-                entry => new Normalized(entry).AsString(),
-                blacklist
+            new SolidList<string>(
+                new Yaapii.Atoms.List.Mapped<string, string>(
+                    entry => new Normalized(entry).AsString(),
+                    blacklist
+                )
             )
         )
         { }
@@ -86,7 +88,7 @@ namespace Xive.Mnemonic
         {
             this.origin = origin;
             this.data =
-                new ScalarOf<IMemory<byte[]>>(() =>
+                new Solid<IMemory<byte[]>>(() =>
                     new CachedMemory<byte[]>(
                         origin.Data(),
                         maxSize,
@@ -95,7 +97,7 @@ namespace Xive.Mnemonic
                     )
                 );
             this.xml =
-                new ScalarOf<IMemory<XNode>>(() =>
+                new Solid<IMemory<XNode>>(() =>
                     new CachedMemory<XNode>(
                         origin.XML(),
                         maxSize,
