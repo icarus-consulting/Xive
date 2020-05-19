@@ -107,5 +107,23 @@ namespace Xive.Mnemonic.Test
 
             Assert.True(cache.Data().Content("a/file/which/is/oversized", () => new byte[0]).Length == 0);
         }
+
+        [Fact]
+        public void RemovesXml()
+        {
+            var mem = new RamMemories();
+            var cache = new CachedMemories(mem);
+            var data = new BytesOf(new InputOf("splashy")).AsBytes();
+
+            cache.XML().Update("splashy.xml", new XDocument(new XElement("splashy")));
+            cache.XML().Update("splashy.xml", new XDocument());
+
+            Assert.Contains(
+                "root",
+                cache.XML().Content("splashy.xml", () => new XElement("root")).ToString()
+            );
+
+        }
+
     }
 }

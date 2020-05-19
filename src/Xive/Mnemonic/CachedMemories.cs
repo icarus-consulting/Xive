@@ -101,10 +101,29 @@ namespace Xive.Mnemonic
                     new CachedMemory<XNode>(
                         origin.XML(),
                         maxSize,
-                        node => node.Document.Root.IsEmpty,
+                        node => CheckEmpty(node),
                         blacklist
                     )
                 );
+        }
+
+        private static bool CheckEmpty(XNode node)
+        {
+            var result = false;
+            if (node.Document == null)
+            {
+                result = true;
+            }
+            else if (node.Document.Root == null)
+            {
+                result = true;
+            }
+            else if (node.Document.Root.IsEmpty)
+            {
+                result = true;
+            }
+
+            return result;
         }
 
         public IMemory<byte[]> Data()
