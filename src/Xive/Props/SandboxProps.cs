@@ -21,20 +21,14 @@
 //SOFTWARE.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
-using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
-using Yaapii.Xambly;
-using Yaapii.Xml;
 
 namespace Xive.Props
 {
@@ -80,8 +74,12 @@ namespace Xive.Props
                     {
                         throw new ApplicationException($"A property of {scope}/{id} has an invalid format: {stringProp}");
                     }
-                    var name = parts[0].Trim();
+                    var name = new DecodedProp(parts[0].Trim()).Value();
                     var values = parts[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        values[i] = new DecodedProp(values[i]).Value();
+                    }
                     cachedProps.Refined(name, values);
                 });
                 return cachedProps;
@@ -115,7 +113,8 @@ namespace Xive.Props
             string serialized = string.Empty;
             foreach (var prop in this.memoryProps.Value().Names())
             {
-                serialized += $"{prop}:{string.Join(",", memoryProps.Value().Values(prop))}\r";
+                EncodedProps(prop);
+                serialized += $"{new EncodedProp(prop).Value()}:{string.Join(",", memoryProps.Value().Values(prop))}\r";
             }
             var data = new BytesOf(serialized).AsBytes();
 
@@ -125,6 +124,15 @@ namespace Xive.Props
                     new Normalized($"{scope}/{id}/props.cat").AsString(),
                     data
                 );
+        }
+
+        private void EncodedProps(string prop)
+        {
+            var values = new List<string>(memoryProps.Value().Values(prop));
+            for (int i = 0; i < values.Count; i++)
+            {
+                values[i] = new EncodedProp(values[i]).Value();
+            }
         }
 
         private XDocument Bootstrapped()

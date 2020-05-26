@@ -20,41 +20,40 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.IO;
-using System.Xml.Linq;
-using Xive.Cache;
-using Xive.Hive;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Xunit;
 
-namespace Xive.Mnemonic
+namespace Xive.Props.Test
 {
-    /// <summary>
-    /// Memories in Ram.
-    /// </summary>
-    public sealed class RamMemories : IMnemonic
+    public sealed class DecodedPropTests
     {
-        private readonly IMnemonic mem;
-
-        /// <summary>
-        /// Memories in Ram.
-        /// </summary>
-        public RamMemories()
+        [Fact]
+        public void ReplacesColon()
         {
-            this.mem = new SimpleMemories(new XmlRam(), new DataRam());
+            Assert.Equal(
+                ":",
+                new DecodedProp("&#42").Value()
+            );
         }
 
-        public IMemory<byte[]> Data()
+        [Fact]
+        public void ReplacesComma()
         {
-            return this.mem.Data();
+            Assert.Equal(
+                ",",
+                new DecodedProp("&#43").Value()
+            );
         }
 
-        public IProps Props(string scope, string id)
+        [Fact]
+        public void ReplacesMultiple()
         {
-            return this.mem.Props(scope, id);
-        }
-
-        public IMemory<XNode> XML()
-        {
-            return this.mem.XML();
+            Assert.Equal(
+                "this,is,a,long,text,with:colons:and:commas",
+                new DecodedProp("this&#43is&#43a&#43long&#43text&#43with&#42colons&#42and&#42commas").Value()
+            );
         }
     }
 }

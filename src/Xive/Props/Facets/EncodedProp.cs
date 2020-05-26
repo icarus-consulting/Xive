@@ -20,41 +20,42 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.IO;
-using System.Xml.Linq;
-using Xive.Cache;
-using Xive.Hive;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Yaapii.Atoms;
 
-namespace Xive.Mnemonic
+namespace Xive.Props
 {
     /// <summary>
-    /// Memories in Ram.
+    /// Replaces ':' and ',' with '&#42' and '&#43'
     /// </summary>
-    public sealed class RamMemories : IMnemonic
+    public sealed class EncodedProp : IScalar<string>
     {
-        private readonly IMnemonic mem;
+        private readonly string origin;
+        private const string replaceColon = "&#42";
+        private const string replaceComma = "&#43";
 
         /// <summary>
-        /// Memories in Ram.
+        /// Replaces ':' and ',' with '&#42' and '&#43'
         /// </summary>
-        public RamMemories()
+        public EncodedProp(string origin)
         {
-            this.mem = new SimpleMemories(new XmlRam(), new DataRam());
+            this.origin = origin;
         }
 
-        public IMemory<byte[]> Data()
+        public string Value()
         {
-            return this.mem.Data();
-        }
-
-        public IProps Props(string scope, string id)
-        {
-            return this.mem.Props(scope, id);
-        }
-
-        public IMemory<XNode> XML()
-        {
-            return this.mem.XML();
+            var result = this.origin;
+            if (result.IndexOf(':') >= 0)
+            {
+                result = result.Replace(":", replaceColon);
+            }
+            if (result.IndexOf(',') >= 0)
+            {
+                result = result.Replace(",", replaceComma);
+            }
+            return result;
         }
     }
 }
