@@ -317,7 +317,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                IHive hive = 
+                IHive hive =
                     new MemorizedHive(
                         "product",
                         new CachedMemories(
@@ -448,6 +448,27 @@ namespace Xive.Hive.Test
                         hive.HQ().Xocument("test").Value("/test/result/text()", "")
                     );
                 });
+            }
+        }
+
+        [Fact]
+        public void WritesPropsWithDecode()
+        {
+
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName, "product");
+                hive = hive.Shifted("still-parallel");
+
+                hive.Comb("an id").Props().Refined("the,:prop", "the:,value");
+                Assert.Equal(
+                    "the&#43&#42prop:the&#42&#43value\r",
+                    new TextOf(
+                        hive.Comb("an id")
+                        .Cell("props.cat")
+                        .Content()
+                    ).AsString()
+                );
             }
         }
     }

@@ -113,8 +113,7 @@ namespace Xive.Props
             string serialized = string.Empty;
             foreach (var prop in this.memoryProps.Value().Names())
             {
-                EncodedProps(prop);
-                serialized += $"{new EncodedProp(prop).Value()}:{string.Join(",", memoryProps.Value().Values(prop))}\r";
+                serialized += $"{new EncodedProp(prop).Value()}:{string.Join(",", EncodedProps(prop))}\r";
             }
             var data = new BytesOf(serialized).AsBytes();
 
@@ -126,13 +125,14 @@ namespace Xive.Props
                 );
         }
 
-        private void EncodedProps(string prop)
+        private IList<string> EncodedProps(string prop)
         {
             var values = new List<string>(memoryProps.Value().Values(prop));
             for (int i = 0; i < values.Count; i++)
             {
                 values[i] = new EncodedProp(values[i]).Value();
             }
+            return values;
         }
 
         private XDocument Bootstrapped()
