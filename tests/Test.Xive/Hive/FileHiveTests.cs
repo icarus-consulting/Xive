@@ -24,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Xml;
 using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -454,15 +455,14 @@ namespace Xive.Hive.Test
         [Fact]
         public void WritesPropsWithDecode()
         {
-
             using (var dir = new TempDirectory())
             {
                 IHive hive = new FileHive(dir.Value().FullName, "product");
                 hive = hive.Shifted("still-parallel");
 
                 hive.Comb("an id").Props().Refined("the,:prop", "the:,value");
-                Assert.Equal(
-                    "the&#43&#42prop:the&#42&#43value\r",
+                Assert.NotEqual(
+                    "the,:prop:the:,value\r",
                     new TextOf(
                         hive.Comb("an id")
                         .Cell("props.cat")

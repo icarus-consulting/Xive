@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
@@ -74,11 +75,11 @@ namespace Xive.Props
                     {
                         throw new ApplicationException($"A property of {scope}/{id} has an invalid format: {stringProp}");
                     }
-                    var name = new DecodedProp(parts[0].Trim()).Value();
+                    var name = XmlConvert.DecodeName(parts[0].Trim());
                     var values = parts[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     for (int i = 0; i < values.Length; i++)
                     {
-                        values[i] = new DecodedProp(values[i]).Value();
+                        values[i] = XmlConvert.DecodeName(values[i]);
                     }
                     cachedProps.Refined(name, values);
                 });
@@ -113,7 +114,7 @@ namespace Xive.Props
             string serialized = string.Empty;
             foreach (var prop in this.memoryProps.Value().Names())
             {
-                serialized += $"{new EncodedProp(prop).Value()}:{string.Join(",", EncodedProps(prop))}\r";
+                serialized += $"{XmlConvert.EncodeLocalName(prop)}:{string.Join(",", EncodedProps(prop))}\r";
             }
             var data = new BytesOf(serialized).AsBytes();
 
@@ -130,7 +131,7 @@ namespace Xive.Props
             var values = new List<string>(memoryProps.Value().Values(prop));
             for (int i = 0; i < values.Count; i++)
             {
-                values[i] = new EncodedProp(values[i]).Value();
+                values[i] = XmlConvert.EncodeLocalName(values[i]);
             }
             return values;
         }
