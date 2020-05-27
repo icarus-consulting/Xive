@@ -22,11 +22,13 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Xml;
 
 namespace Xive.Mnemonic
 {
@@ -107,22 +109,17 @@ namespace Xive.Mnemonic
                 );
         }
 
-        private static bool CheckEmpty(XNode node)
+        private bool CheckEmpty(XNode node)
         {
             var result = false;
-            if (node.Document == null)
+            if (node.ToString() == "")
             {
                 result = true;
             }
-            else if (node.Document.Root == null)
+            else if (new XMLCursor(node.ToString()).AsNode().Document.Root.IsEmpty)
             {
                 result = true;
             }
-            else if (node.Document.Root.IsEmpty)
-            {
-                result = true;
-            }
-
             return result;
         }
 
