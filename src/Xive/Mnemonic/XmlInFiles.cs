@@ -23,10 +23,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
@@ -109,10 +111,8 @@ namespace Xive.Mnemonic
                 if (content.Length > 0)
                 {
                     var filename = System.IO.Path.GetFileNameWithoutExtension(data);
-                    var stream = new MemoryStream(content);
-                    var head = new byte[100];
-                    stream.Read(head, 0, 100);
-                    var headtext = new TextOf(head).AsString();
+
+                    var headtext = new TextOf(new HeadOf<byte>(content, 100).ToArray()).AsString();
                     var root = $"<{filename}";
                     if (headtext.IndexOf(root) >= 0)
                     {
