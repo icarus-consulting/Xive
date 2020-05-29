@@ -66,5 +66,32 @@ namespace Xive.Comb.Test
                 new XMLSlice(new InputOf(comb.Cell("_guts.xml").Content())).Values("/items/data/item/name/text()")[0]
             );
         }
+
+        [Fact]
+        public void ReturnsItemsOnceRam()
+        {
+            var comb = new MemorizedComb("comb", new RamMemories());
+            comb.Cell("cell").Update(new InputOf("cool text"));
+            comb.Xocument("thexml.xml").Modify(new Directives().Xpath("/thexml").Add("newElement").Set("content"));
+            Assert.Equal(
+                "2",
+                comb.Xocument("_guts.xml").Value("count(/items/*/item)", "0")
+            );
+        }
+
+        [Fact]
+        public void ReturnsItemsOnceFile()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var comb = new MemorizedComb("comb", new FileMemories(temp.Value().FullName));
+                comb.Cell("cell").Update(new InputOf("cool text"));
+                comb.Xocument("thexml.xml").Modify(new Directives().Xpath("/thexml").Add("newElement").Set("content"));
+                Assert.Equal(
+                    "2",
+                    comb.Xocument("_guts.xml").Value("count(/items/*/item)", "0")
+                );
+            }
+        }
     }
 }

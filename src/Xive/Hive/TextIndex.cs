@@ -139,21 +139,20 @@ namespace Xive.Hive
         public void Remove(string id)
         {
             var prefix = new Normalized($"{scope}/{id}").AsString();
-            Parallel.ForEach(this.mem.Data().Knowledge(), dataId =>
+            foreach (var data in this.mem.Data().Knowledge())
             {
-                if (dataId.StartsWith(prefix))
+                if (data.StartsWith(prefix))
                 {
-                    this.mem.Data().Update(dataId, new byte[0]);
+                    this.mem.Data().Update(data, new byte[0]);
                 }
-            });
-            Parallel.ForEach(this.mem.XML().Knowledge(), xmlId =>
+            }
+            foreach (var xml in this.mem.XML().Knowledge())
             {
-                if (xmlId.StartsWith(prefix))
+                if (xml.StartsWith(prefix))
                 {
-                    this.mem.XML().Update(xmlId, new XDocument());
+                    this.mem.XML().Update(xml, new XDocument());
                 }
-            });
-
+            }
             lock (idCache)
             {
                 if (idCache.Count == 0)

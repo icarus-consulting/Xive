@@ -22,11 +22,13 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Xml;
 
 namespace Xive.Mnemonic
 {
@@ -71,9 +73,11 @@ namespace Xive.Mnemonic
         public CachedMemories(IMnemonic origin, int maxSize, IEnumerable<string> blacklist) : this(
             origin,
             maxSize,
-            new Yaapii.Atoms.List.Mapped<string, string>(
-                entry => new Normalized(entry).AsString(),
-                blacklist
+            new SolidList<string>(
+                new Yaapii.Atoms.List.Mapped<string, string>(
+                    entry => new Normalized(entry).AsString(),
+                    blacklist
+                )
             )
         )
         { }
@@ -86,7 +90,7 @@ namespace Xive.Mnemonic
         {
             this.origin = origin;
             this.data =
-                new ScalarOf<IMemory<byte[]>>(() =>
+                new Solid<IMemory<byte[]>>(() =>
                     new CachedMemory<byte[]>(
                         origin.Data(),
                         maxSize,
@@ -95,14 +99,28 @@ namespace Xive.Mnemonic
                     )
                 );
             this.xml =
-                new ScalarOf<IMemory<XNode>>(() =>
+                new Solid<IMemory<XNode>>(() =>
                     new CachedMemory<XNode>(
                         origin.XML(),
                         maxSize,
-                        node => node.Document.Root.IsEmpty,
+                        node => CheckEmpty(node),
                         blacklist
                     )
                 );
+        }
+
+        private bool CheckEmpty(XNode node)
+        {
+            var result = false;
+            if (node.ToString() == "")
+            {
+                result = true;
+            }
+            else if (new XMLCursor(node.ToString()).AsNode().Document.Root.IsEmpty)
+            {
+                result = true;
+            }
+            return result;
         }
 
         public IMemory<byte[]> Data()

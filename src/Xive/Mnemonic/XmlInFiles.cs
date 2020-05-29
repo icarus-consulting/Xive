@@ -23,10 +23,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
@@ -60,7 +62,7 @@ namespace Xive.Mnemonic
             if (!this.memory.Knows(name))
             {
                 result = ifAbsent();
-                if(!result.Document.Root.IsEmpty)
+                if (!result.Document.Root.IsEmpty)
                 {
                     Update(name, result);
                 }
@@ -75,7 +77,7 @@ namespace Xive.Mnemonic
 
         public IEnumerable<string> Knowledge()
         {
-            return this.memory.Knowledge();
+            return this.XmlKnowledge();
         }
 
         public bool Knows(string name)
@@ -100,6 +102,33 @@ namespace Xive.Mnemonic
             }
         }
 
+        private IEnumerable<string> XmlKnowledge()
+        {
+            var xmls = new List<string>();
+            foreach (var data in this.memory.Knowledge())
+            {
+                var content = this.memory.Content(data, () => new byte[0]);
+                if (content.Length > 0)
+                {
+                    var filename = System.IO.Path.GetFileNameWithoutExtension(data);
+
+                    var headtext = new TextOf(new HeadOf<byte>(content, 100).ToArray()).AsString();
+                    var root = $"<{filename}";
+                    if (headtext.IndexOf(root) >= 0)
+                    {
+                        xmls.Add(data);
+                    }
+                    else if (
+                        headtext.IndexOf("<?xml", StringComparison.InvariantCultureIgnoreCase) >= 0 &&
+                        headtext.IndexOf("?>", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    {
+                        xmls.Add(data);
+                    }
+                }
+            }
+            return xmls;
+        }
+
         private XNode Parsed(string name, byte[] data)
         {
             XDocument doc;
@@ -122,13 +151,10 @@ namespace Xive.Mnemonic
             {
                 try
                 {
-                    doc =
-                        XDocument.Parse(
-                            new TextOf(
-                                new InputOf(data),
-                                Encoding.UTF8
-                            ).AsString()
-                        );
+                    using (var reader = new StreamReader(new MemoryStream(data)))
+                    {
+                        doc = XDocument.Load(reader);
+                    }
                 }
                 catch (XmlException ex)
                 {

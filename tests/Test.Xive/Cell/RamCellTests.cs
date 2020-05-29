@@ -20,7 +20,9 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.IO;
+using System.Threading.Tasks;
 using Xive.Comb;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -98,6 +100,38 @@ namespace Xive.Cell.Test
                    new TextOf(cell.Content()).AsString()
                );
             }
+        }
+
+        [Fact]
+        public void IsThreadsaveWithSameCell()
+        {
+            var cell = new RamCell("my-comb");
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                cell.Update(new InputOf("my input"));
+                Assert.Equal(
+                    "my input",
+                    new TextOf(
+                        cell.Content()
+                    ).AsString()
+                );
+            });
+        }
+
+        [Fact]
+        public void IsThreadsaveWithDifferentCells()
+        {
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                var cell = new RamCell();
+                cell.Update(new InputOf("my input"));
+                Assert.Equal(
+                    "my input",
+                    new TextOf(
+                        cell.Content()
+                    ).AsString()
+                );
+            });
         }
     }
 }
