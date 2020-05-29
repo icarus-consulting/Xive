@@ -157,7 +157,7 @@ namespace Xive.Hive.Test
                             Path.Combine(
                                 dir.Value().FullName,
                                 "product",
-                                "HQ"
+                                "hq"
                             )
                         ).AsString()
                     )
