@@ -30,6 +30,7 @@ using Xive.Comb;
 using Xive.Mnemonic;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
@@ -64,9 +65,9 @@ namespace Xive.Hive
             {
                 idCache.Clear();
                 idCache.AddRange(new TextOf(cell.Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
-                if (!idCache.Contains(id.ToLower()))
+                if (!idCache.Contains(id))
                 {
-                    idCache.Add(id.ToLower());
+                    idCache.Add(id);
                 }
                 cell.Update(new InputOf(string.Join(";", idCache)));
                 return new MemorizedComb($"{scope}/{id}", this.mem);
@@ -90,7 +91,7 @@ namespace Xive.Hive
                 {
                     filtered.Add(
                         new MemorizedComb(
-                            new Normalized($"{scope.ToLower()}/{id.ToLower()}").AsString(),
+                            new Normalized($"{scope}/{id}").AsString(),
                             this.mem
                         )
                     );
@@ -132,7 +133,7 @@ namespace Xive.Hive
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
-                return idCache.Contains(id.ToLower());
+                return idCache.Contains(id);
             }
         }
 
@@ -159,7 +160,7 @@ namespace Xive.Hive
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
                 }
-                idCache.Remove(id.ToLower());
+                idCache.Remove(id);
                 Cell().Update(new InputOf(string.Join(";", idCache)));
             }
         }

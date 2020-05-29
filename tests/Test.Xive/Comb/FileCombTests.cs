@@ -150,7 +150,7 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
-        public void ReturnsGutsCaseAndSeparatorInsensitive()
+        public void ReturnsGutsSeparatorInsensitive()
         {
             using (var temp = new TempDirectory())
             {
@@ -163,7 +163,7 @@ namespace Xive.Comb.Test
                 using (var xoc = comb.Xocument("_guts.xml"))
                 {
                     Assert.Equal(
-                        @"sub/dir/some.xml",
+                        @"sub/DIR/some.xml",
                         xoc.Value("/items/xml/item/name/text()", "")
                     );
                 }

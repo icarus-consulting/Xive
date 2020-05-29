@@ -86,14 +86,14 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
-        public void IsCaseInsensitive()
+        public void IsCaseSensitive()
         {
             var comb = new RamComb("my-comb");
             using (var cell = comb.Cell("this-is/MY-cell"))
             {
                 cell.Update(new InputOf("its so cold outside"));
             }
-            using (var cell = comb.Cell("this-IS\\my-cell"))
+            using (var cell = comb.Cell("this-is\\MY-cell"))
             {
                 Assert.Equal(
                    "its so cold outside",

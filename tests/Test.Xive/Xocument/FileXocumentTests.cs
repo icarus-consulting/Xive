@@ -36,12 +36,12 @@ namespace Xive.Xocument.Test
         }
 
         [Fact]
-        public void RootNodeIsCaseInsensitive()
+        public void RootNodeIsCaseSensitive()
         {
             using (var temp = new TempDirectory())
             {
                 var xoc = new FileXocument(temp.Value().FullName + "/TheXoc.xml");
-                Assert.Equal(1, xoc.Nodes("/thexoc").Count);
+                Assert.Equal(1, xoc.Nodes("/TheXoc").Count);
             }
         }
 

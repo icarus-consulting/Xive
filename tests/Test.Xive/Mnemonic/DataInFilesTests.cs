@@ -138,5 +138,23 @@ namespace Xive.Mnemonic.Test
                 );
             }
         }
+
+        [Fact]
+        public void FindsFileCaseInsensitive()
+        {
+            using (var temp = new TempDirectory())
+            {
+                var data =
+                    new BytesOf(
+                        new InputOf("1980's")
+                    ).AsBytes();
+                var mem = new DataInFiles(temp.Value().FullName);
+                mem.Update("file/with/dir.txt", data);
+                Assert.Equal(
+                    data,
+                    mem.Content("File/wiTh/Dir.Txt", () => throw new Exception())
+                );
+            }
+        }
     }
 }

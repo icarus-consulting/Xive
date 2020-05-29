@@ -136,7 +136,7 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
-        public void ReturnsGutsCaseAndSeparatorInsensitive()
+        public void ReturnsGutsSeparatorInsensitive()
         {
             var memory = new RamMemories();
             var comb = new RamComb("my-comb", memory);
@@ -147,7 +147,7 @@ namespace Xive.Comb.Test
             using (var xoc = comb.Xocument("_guts.xml"))
             {
                 Assert.Equal(
-                    @"sub/dir/some.xml",
+                    @"sub/DIR/some.xml",
                     xoc.Value("/items/xml/item/name/text()", "")
                 );
             }

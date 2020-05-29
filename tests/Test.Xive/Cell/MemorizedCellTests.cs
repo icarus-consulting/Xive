@@ -87,14 +87,14 @@ namespace Xive.Cell.Test
         }
 
         [Fact]
-        public void IsCaseInsensitive()
+        public void IsCaseSensitive()
         {
             var mem = new RamMemories();
             using (var cell = new MemorizedCell("this-is/MY-cell", mem))
             {
                 cell.Update(new InputOf("its so cold outside"));
             }
-            using (var cell = new MemorizedCell(@"this-is\my-cell", mem))
+            using (var cell = new MemorizedCell(@"this-is\MY-cell", mem))
             {
                 Assert.Equal(
                    "its so cold outside",
