@@ -37,7 +37,7 @@ namespace Xive
         /// </summary>
         public Normalized(string name)
         {
-            this.name = new ScalarOf<string>(() => name.Replace('\\', '/').ToLower());
+            this.name = new ScalarOf<string>(() => name.Replace('\\', '/'));
         }
 
         public string AsString()

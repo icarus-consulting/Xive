@@ -56,20 +56,20 @@ namespace Xive.Hive
 
         public IIndex Catalog()
         {
-            return this.indices.GetOrAdd(scope.ToLower(), new TextIndex(scope.ToLower(), this.mem));
+            return this.indices.GetOrAdd(scope, new TextIndex(scope, this.mem));
         }
 
         public IHoneyComb Comb(string id, bool createIfAbsent = true)
         {
-            if(!Catalog().Has(id.ToLower()))
+            if (!Catalog().Has(id))
             {
                 if (createIfAbsent)
                 {
-                    Catalog().Add(id.ToLower());
+                    Catalog().Add(id);
                 }
                 else
                 {
-                    throw new ArgumentException($"Cannot access a non existing comb with id '{id.ToLower()}'");
+                    throw new ArgumentException($"Cannot access a non existing comb with id '{id}'");
                 }
             }
             return new MemorizedComb(new Normalized($"{this.scope}/{id}").AsString(), this.mem);
@@ -82,12 +82,12 @@ namespace Xive.Hive
 
         public string Scope()
         {
-            return this.scope.ToLower();
+            return this.scope;
         }
 
         public IHive Shifted(string scope)
         {
-            return new MemorizedHive(scope.ToLower(), this.mem, this.indices, this.valve);
+            return new MemorizedHive(scope, this.mem, this.indices, this.valve);
         }
     }
 }

@@ -146,7 +146,7 @@ namespace Xive.Mnemonic
             var patterns = this.patterns.Value();
             for (var i = 0; i < this.patterns.Value().Length; i++)
             {
-                if (Regex.IsMatch(name, patterns[i], RegexOptions.IgnoreCase))
+                if (Regex.IsMatch(name, patterns[i]))
                 {
                     result = true;
                     break;

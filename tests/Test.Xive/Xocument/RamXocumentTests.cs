@@ -32,10 +32,10 @@ namespace Xive.Xocument.Test
         }
 
         [Fact]
-        public void RootNodeIsCaseInsensitive()
+        public void RootNodeIsCaseSensitive()
         {
             var xoc = new RamXocument("TheXoc.xml");
-            Assert.Equal(1, xoc.Nodes("/thexoc").Count);
+            Assert.Equal(1, xoc.Nodes("/TheXoc").Count);
         }
 
         [Fact]
