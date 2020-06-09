@@ -121,7 +121,7 @@ namespace Xive.Xocument
             if (this.locked[0] > 0)
             {
                 Dispose();
-                throw new AbandonedMutexException($"A mutex has not been released for xocument '{this.name}'. Did you forget to put it into a using block before calling its methods?");
+                throw new AbandonedMutexException($"A mutex has not been released for xocument '{this.name}'.");
             }
 
         }

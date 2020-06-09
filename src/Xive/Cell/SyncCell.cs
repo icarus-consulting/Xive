@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.Threading;
 using Yaapii.Atoms;
 
 namespace Xive.Cell
@@ -29,18 +30,21 @@ namespace Xive.Cell
     /// </summary>
     public sealed class SyncCell : ICell
     {
-        private readonly ISyncValve locks;
+        private readonly ISyncValve valve;
         private readonly ICell origin;
         private readonly int[] locked;
 
         public SyncCell(ICell origin) : this(origin, new SyncGate())
         { }
 
-        public SyncCell(ICell origin, ISyncValve locks)
+        public SyncCell(ICell origin, ISyncValve valve)
         {
-            this.locks = locks;
-            this.origin = origin;
-            this.locked = new int[1] { 0 };
+            lock (this)
+            {
+                this.valve = valve;
+                this.origin = origin;
+                this.locked = new int[1] { 0 };
+            }
         }
 
         public string Name()
@@ -50,28 +54,50 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            this.locks.Mutex(this.origin.Name()).WaitOne();
-            this.locked[0]++;
-            return origin.Content();
+            byte[] result;
+            Block();
+            result = origin.Content();
+            Dispose();
+            return result;
         }
 
         public void Dispose()
         {
-            lock (this.locks.Mutex(origin.Name()))
+            lock (this.origin)
             {
-                for (int i = 0; i < this.locked[0]; i++)
+                this.origin.Dispose();
+                var locks = this.locked[0];
+                this.locked[0] = 0;
+                for (int i = 0; i < locks; i++)
                 {
-                    this.locks.Mutex(origin.Name()).ReleaseMutex();
+                    this.valve.Mutex(this.origin.Name()).ReleaseMutex();
                 }
             }
-            
+
         }
 
         public void Update(IInput content)
         {
-            this.locks.Mutex(this.origin.Name()).WaitOne();
-            this.locked[0]++;
+            Block();
             origin.Update(content);
+            Dispose();
+        }
+
+        private void Block()
+        {
+            this.valve.Mutex(this.origin.Name()).WaitOne();
+            this.locked[0]++;
+        }
+
+        ~SyncCell()
+        {
+
+            if (this.locked[0] > 0)
+            {
+                Dispose();
+                throw new AbandonedMutexException($"A mutex has not been released for cell '{this.origin.Name()}'.");
+            }
+
         }
     }
 }

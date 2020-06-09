@@ -33,7 +33,7 @@ namespace Xive.Xocument.Test
     public sealed class SyncXocumentTests
     {
         [Fact]
-        public void DeliversParallel()
+        public void ReadsExclusive()
         {
             var accesses = 0;
             var syncGate = new SyncGate();
@@ -53,31 +53,26 @@ namespace Xive.Xocument.Test
                         }),
                         syncGate
                     );
-                using (xoc)
-                {
-                    xoc.Value("/synced/text()", "");
-                }
+                xoc.Value("/synced/text()", "");
             });
         }
 
         [Fact]
-        public void WorksParallel()
+        public void ModifiesExclusive()
         {
             var syncGate = new SyncGate();
             var mem = new RamMemories();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();
-                using (var synced =
+                var synced =
                     new SyncXocument("xoc",
                         new MemorizedXocument("xoc", mem),
                         syncGate
-                    )
-                )
-                {
-                    synced.Modify(new Directives().Xpath("/xoc").Set(content));
-                    Assert.NotEmpty(synced.Value("/xoc/text()", ""));
-                }
+                    );
+
+                synced.Modify(new Directives().Xpath("/xoc").Set(content));
+                Assert.NotEmpty(synced.Value("/xoc/text()", ""));
             });
         }
     }
