@@ -21,7 +21,6 @@
 //SOFTWARE.
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -41,14 +40,12 @@ namespace Xive.Comb.Test
                 new SyncComb(
                     new RamComb("my-comb")
                 );
+            var content = "cell content";
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                var content = Guid.NewGuid().ToString();
-                using (var cell = comb.Cell("syncCell"))
-                {
-                    cell.Update(new InputOf(content));
-                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
-                }
+                var cell = comb.Cell("syncCell");
+                cell.Update(new InputOf(content));
+                Assert.Equal(content, new TextOf(cell.Content()).AsString());
             });
         }
 
