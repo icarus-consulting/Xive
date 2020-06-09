@@ -21,7 +21,6 @@
 //SOFTWARE.
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -41,14 +40,12 @@ namespace Xive.Comb.Test
                 new SyncComb(
                     new RamComb("my-comb")
                 );
+            var content = "cell content";
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                var content = Guid.NewGuid().ToString();
-                using (var cell = comb.Cell("syncCell"))
-                {
-                    cell.Update(new InputOf(content));
-                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
-                }
+                var cell = comb.Cell("syncCell");
+                cell.Update(new InputOf(content));
+                Assert.Equal(content, new TextOf(cell.Content()).AsString());
             });
         }
 
@@ -119,32 +116,6 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
-        public void WorksInParallelWithSameName()
-        {
-            var accesses = 0;
-            var func = new Func<byte[]>(() =>
-            {
-                accesses++;
-                Assert.Equal(1, accesses);
-                accesses--;
-                return new byte[0];
-            });
-            var comb1 = new SyncComb(new RamComb("my-comb"));
-            var comb2 = new SyncComb(new RamComb("my-comb"));
-            Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
-            {
-                var content = Guid.NewGuid().ToString();
-                using (var cell2 = comb2.Cell("syncCell"))
-                using (var cell1 = comb1.Cell("syncCell"))
-                {
-                    cell1.Update(new InputOf(content));
-                    cell2.Update(new InputOf(content));
-                    Assert.Equal(content, new TextOf(cell1.Content()).AsString());
-                }
-            });
-        }
-
-        [Fact]
         public void WorksWithFileCell()
         {
             using (var file = new TempDirectory())
@@ -157,14 +128,13 @@ namespace Xive.Comb.Test
                         )
                     );
 
+                var content = "my-content";
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
                 {
-                    string content = Guid.NewGuid().ToString();
-                    using (var cell = comb.Cell("myCell"))
-                    {
-                        cell.Update(new InputOf(content));
-                        Assert.Equal(content, new TextOf(cell.Content()).AsString());
-                    }
+
+                    var cell = comb.Cell("myCell");
+                    cell.Update(new InputOf(content));
+                    Assert.Equal(content, new TextOf(cell.Content()).AsString());
                 });
             }
         }
@@ -179,12 +149,9 @@ namespace Xive.Comb.Test
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
             {
-                using (var cell = comb.Cell("myCell"))
-                {
-                    cell.Update(new InputOf("cell content"));
-                    Assert.Equal("cell content", new TextOf(cell.Content()).AsString());
-
-                }
+                var cell = comb.Cell("myCell");
+                cell.Update(new InputOf("cell content"));
+                Assert.Equal("cell content", new TextOf(cell.Content()).AsString());
             });
         }
     }

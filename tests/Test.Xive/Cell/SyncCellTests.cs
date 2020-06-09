@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using Xive.Test;
 using Xunit;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 
@@ -32,44 +33,31 @@ namespace Xive.Cell.Test
     public class SyncCellTest
     {
         [Fact]
-        public void AccessIsExclusive()
+        public void ParallelAccessWorks()
         {
+            var content = new BytesOf("Works").AsBytes();
             var accesses = 0;
             var cell =
                 new FkCell(
-                    (content) => { },
+                    (update) => { },
                     () =>
                     {
                         accesses++;
                         Assert.Equal(1, accesses);
                         accesses--;
-                        return new byte[0];
+                        return content;
                     }
                 );
 
             var valve = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                using (var mutexed = new SyncCell(cell, valve))
-                {
-                    mutexed.Content();
-                }
-            });
-        }
-
-        [Fact]
-        public void WorksParallel()
-        {
-            var cell = new RamCell();
-            var gate = new SyncGate();
-            Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
-            {
-                var content = Guid.NewGuid().ToString();
-                using (var mutexed = new SyncCell(cell, gate))
-                {
-                    mutexed.Update(new InputOf(content));
-                    Assert.Equal(content, new TextOf(mutexed.Content()).AsString());
-                }
+                Assert.Equal(
+                    "Works",
+                    new TextOf(
+                        new SyncCell(cell, valve).Content()
+                    ).AsString()
+                );
             });
         }
 
@@ -80,21 +68,18 @@ namespace Xive.Cell.Test
             var gate = new SyncGate();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
-                var content = Guid.NewGuid().ToString();
-                using (var mutexed = new SyncCell(cell, gate))
-                {
-                    mutexed.Update(new InputOf(content));
-                    using (var again = new SyncCell(cell, gate))
-                    {
-                        again.Update(new InputOf(content));
-                        using (var andAgain = new SyncCell(cell, gate))
-                        {
-                            andAgain.Update(new InputOf(content));
-                            System.Threading.Thread.Sleep(1);
-                        }
-                    }
-                    Assert.Equal(content, new TextOf(mutexed.Content()).AsString());
-                }
+                var content = "ABC";
+                var first = new SyncCell(cell, gate);
+                first.Update(new InputOf(content));
+                var again = new SyncCell(cell, gate);
+                again.Update(new InputOf(content));
+                var andAgain = new SyncCell(cell, gate);
+                andAgain.Update(new InputOf(content));
+                System.Threading.Thread.Sleep(1);
+                Assert.Equal(
+                    "ABC ABC ABC",
+                    $"{new TextOf(first.Content()).AsString()} {new TextOf(again.Content()).AsString()} {new TextOf(andAgain.Content()).AsString()}"
+                );
             });
         }
 
@@ -103,14 +88,12 @@ namespace Xive.Cell.Test
         {
             var cell = new RamCell();
             var gate = new SyncGate();
-            using (var mutexed = new SyncCell(cell, gate))
-            {
-                mutexed.Update(new InputOf("its so hot outside"));
-                Assert.Equal(
-                    "its so hot outside",
-                    new TextOf(mutexed.Content()).AsString()
-                );
-            }
+            var synced = new SyncCell(cell, gate);
+                synced.Update(new InputOf("its so hot outside"));
+            Assert.Equal(
+                "its so hot outside",
+                new TextOf(synced.Content()).AsString()
+            );
         }
 
         [Fact]
@@ -122,11 +105,9 @@ namespace Xive.Cell.Test
                 var gate = new SyncGate();
                 Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
                 {
-                    using (var cell = new SyncCell(new FileCell(path), gate))
-                    {
-                        cell.Update(new InputOf("Ram cell Input"));
-                        Assert.Equal("Ram cell Input", new TextOf(cell.Content()).AsString());
-                    }
+                    var cell = new SyncCell(new FileCell(path), gate);
+                    cell.Update(new InputOf("File cell Input"));
+                    Assert.Equal("File cell Input", new TextOf(cell.Content()).AsString());
                 });
             }
         }
