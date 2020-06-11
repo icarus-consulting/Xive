@@ -30,20 +30,20 @@ namespace Xive.Mnemonic
     /// <summary>
     /// Memory for XML nodes.
     /// </summary>
-    public sealed class DataRam : IMemory<byte[]>
+    public sealed class DataRamMemory : IMemory<byte[]>
     {
         private readonly ConcurrentDictionary<string, byte[]> mem;
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public DataRam() : this(new ConcurrentDictionary<string, byte[]>())
+        public DataRamMemory() : this(new ConcurrentDictionary<string, byte[]>())
         { }
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public DataRam(ConcurrentDictionary<string, byte[]> mem)
+        public DataRamMemory(ConcurrentDictionary<string, byte[]> mem)
         {
             this.mem = mem;
         }

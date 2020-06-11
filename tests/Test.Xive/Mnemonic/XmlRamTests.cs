@@ -17,7 +17,7 @@ namespace Xive.Mnemonic.Test
         public void Memorizes()
         {
             var data = new XDocument(new XElement("root", new XText("1990's")));
-            var mem = new XmlRam();
+            var mem = new XmlRamMemory();
             mem.Content("childhood", () => data);
 
             Assert.Equal(
@@ -31,7 +31,7 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void Updates()
         {
-            var mem = new XmlRam();
+            var mem = new XmlRamMemory();
             mem.Content("childhood", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
             mem.Update("childhood", new XDocument(new XElement("root", new XElement("years", new XText("nothing")))));
 
@@ -49,7 +49,7 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void RemovesIfEmpty()
         {
-            var mem = new XmlRam();
+            var mem = new XmlRamMemory();
             mem.Content("childhood", () => new XDocument(new XElement("root", new XText("1980's"))));
             mem.Update("childhood", new XDocument(new XElement("root")));
 
@@ -59,7 +59,7 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void KnowledgeIsSeparatorInsensitive()
         {
-            var mem = new XmlRam();
+            var mem = new XmlRamMemory();
             mem.Content("childhood\\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
             Assert.Equal(
                 "childhood/subdir/file",

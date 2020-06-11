@@ -49,8 +49,8 @@ namespace Xive.Mnemonic
         {
             this.mem =
                 new SimpleMemories(
-                    new XmlInFiles(root, pipe, writeAsync),
-                    new DataInFiles(root, pipe, writeAsync)
+                    new XmlFileMemory(root, pipe, writeAsync),
+                    new DataFileMemory(root, pipe, writeAsync)
                 );
         }
 

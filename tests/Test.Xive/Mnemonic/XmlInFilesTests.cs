@@ -38,7 +38,7 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new XmlInFiles(temp.Value().FullName);
+                var mem = new XmlFileMemory(temp.Value().FullName);
                 mem.Content("childhood/puberty", () => new XDocument(new XElement("root", new XText("1990's"))));
 
                 Assert.Equal(
@@ -58,7 +58,7 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new XmlInFiles(temp.Value().FullName);
+                var mem = new XmlFileMemory(temp.Value().FullName);
                 mem.Content("childhood", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
                 mem.Update("childhood", new XDocument(new XElement("root", new XElement("years", new XText("nothing")))));
 
@@ -79,7 +79,7 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new XmlInFiles(temp.Value().FullName);
+                var mem = new XmlFileMemory(temp.Value().FullName);
                 mem.Content("childhood.xml", () => new XDocument(new XElement("childhood", new XElement("years", new XText("1980's")))));
                 Assert.Contains(
                     "childhood.xml",
@@ -93,7 +93,7 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new XmlInFiles(temp.Value().FullName);
+                var mem = new XmlFileMemory(temp.Value().FullName);
                 mem.Content("childhood", () => new XDocument(new XElement("root", new XText("1980's"))));
                 mem.Update("childhood", new XDocument(new XElement("root")));
 
@@ -106,7 +106,7 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new XmlInFiles(temp.Value().FullName);
+                var mem = new XmlFileMemory(temp.Value().FullName);
                 mem.Content("childhood\\subdir/root.xml", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
                 Assert.Equal(
                     "childhood/subdir/root.xml",

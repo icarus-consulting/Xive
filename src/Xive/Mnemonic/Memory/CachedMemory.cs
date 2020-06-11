@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
@@ -69,7 +68,7 @@ namespace Xive.Mnemonic
         /// <typeparam name="T"></typeparam>
         internal CachedMemory(IMemory<T> origin, Func<T, bool> checkEmpty, int maxSize, IScalar<IList<string>> blacklist)
         {
-            this.cache = new VersatileRam<T>(checkEmpty);
+            this.cache = new VersatileRamMemory<T>(checkEmpty);
             this.origin = origin;
             this.patterns =
                 new ScalarOf<string[]>(() =>

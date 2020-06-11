@@ -44,7 +44,7 @@ namespace Xive.Mnemonic.Test
                         new InputOf("1980's")
                     ).AsBytes();
 
-                var mem = new DataInFiles(temp.Value().FullName);
+                var mem = new DataFileMemory(temp.Value().FullName);
                 mem.Content("childhood", () => data);
 
                 Assert.Equal(
@@ -66,7 +66,7 @@ namespace Xive.Mnemonic.Test
             using (var temp = new TempDirectory())
             {
                 var data = new BytesOf(new InputOf("1980's")).AsBytes();
-                var mem = new DataInFiles(temp.Value().FullName);
+                var mem = new DataFileMemory(temp.Value().FullName);
                 mem.Update("childhood", data);
                 data = new BytesOf(new InputOf("nothing")).AsBytes();
                 mem.Update("childhood", data);
@@ -93,7 +93,7 @@ namespace Xive.Mnemonic.Test
                     new BytesOf(
                         new InputOf("1980's")
                     ).AsBytes();
-                var mem = new DataInFiles(temp.Value().FullName);
+                var mem = new DataFileMemory(temp.Value().FullName);
                 mem.Content("childhood", () => data);
                 Assert.Contains(
                     "childhood",
@@ -111,7 +111,7 @@ namespace Xive.Mnemonic.Test
                     new BytesOf(
                         new InputOf("1980's")
                     ).AsBytes();
-                var mem = new DataInFiles(temp.Value().FullName);
+                var mem = new DataFileMemory(temp.Value().FullName);
                 mem.Update("childhood", data);
                 mem.Update("childhood", new byte[0]);
 
@@ -130,7 +130,7 @@ namespace Xive.Mnemonic.Test
                     new BytesOf(
                         new InputOf("1980's")
                     ).AsBytes();
-                var mem = new DataInFiles(temp.Value().FullName);
+                var mem = new DataFileMemory(temp.Value().FullName);
                 mem.Content("childhood\\subdir/file", () => data);
                 Assert.Equal(
                     "childhood/subdir/file",

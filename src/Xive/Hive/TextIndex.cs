@@ -36,7 +36,7 @@ using Yaapii.Atoms.Text;
 namespace Xive.Hive
 {
     /// <summary>
-    /// The index of a xive, realized as a catalog xml document.
+    /// The index of a xive, realized as a simple text document.
     /// </summary>
     public sealed class TextIndex : IIndex
     {
@@ -45,7 +45,7 @@ namespace Xive.Hive
         private readonly List<string> idCache;
 
         /// <summary>
-        /// The index of a xive, realized as a catalog xml document.
+        /// The index of a xive, realized as a simple text document.
         /// </summary>
         public TextIndex(string scope, IMnemonic mem)
         {

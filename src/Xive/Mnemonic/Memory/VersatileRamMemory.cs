@@ -30,7 +30,7 @@ namespace Xive.Mnemonic
     /// Memory for anything.
     /// You must tell the memory how it can check if the given object is empty, because it will automatically remove these items.
     /// </summary>
-    public sealed class VersatileRam<T> : IMemory<T>
+    public sealed class VersatileRamMemory<T> : IMemory<T>
     {
         private readonly ConcurrentDictionary<string, T> mem;
         private readonly Func<T, bool> isEmpty;
@@ -39,14 +39,14 @@ namespace Xive.Mnemonic
         /// Memory for anything.
         /// You must tell the memory how it can check if the given object is empty, because it will automatically remove these items.
         /// </summary>
-        public VersatileRam(Func<T, bool> isEmpty) : this(new ConcurrentDictionary<string, T>(), isEmpty)
+        public VersatileRamMemory(Func<T, bool> isEmpty) : this(new ConcurrentDictionary<string, T>(), isEmpty)
         { }
 
         /// <summary>
         /// Memory for anything.
         /// You must tell the memory how it can check if the given object is empty, because it will automatically remove these items.
         /// </summary>
-        public VersatileRam(ConcurrentDictionary<string, T> mem, Func<T, bool> isEmpty)
+        public VersatileRamMemory(ConcurrentDictionary<string, T> mem, Func<T, bool> isEmpty)
         {
             this.mem = mem;
             this.isEmpty = isEmpty;

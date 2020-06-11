@@ -39,7 +39,11 @@ namespace Xive.Mnemonic
         /// </summary>
         public RamMemories()
         {
-            this.mem = new SimpleMemories(new XmlRam(), new DataRam());
+            this.mem = 
+                new SimpleMemories(
+                    new XmlRamMemory(), 
+                    new DataRamMemory()
+                );
         }
 
         public IMemory<byte[]> Data()

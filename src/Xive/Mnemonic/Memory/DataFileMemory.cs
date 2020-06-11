@@ -22,19 +22,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Yaapii.Atoms.Enumerable;
-using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Text;
 
 namespace Xive.Mnemonic
 {
     /// <summary>
     /// Data stored in files.
     /// </summary>
-    public sealed class DataInFiles : IMemory<byte[]>
+    public sealed class DataFileMemory : IMemory<byte[]>
     {
         private readonly string root;
         private readonly ISyncPipe sync;
@@ -44,7 +41,7 @@ namespace Xive.Mnemonic
         /// Data stored in files.
         /// The access to the files is exclusive for this object, but not exclusive system-wide.
         /// </summary>
-        public DataInFiles(string root) : this(root, new LocalSyncPipe())
+        public DataFileMemory(string root) : this(root, new LocalSyncPipe())
         { }
 
         /// <summary>
@@ -52,7 +49,7 @@ namespace Xive.Mnemonic
         /// The access to files made exclusive by the given pipe.
         /// </summary>
         /// <param name="writeAsync">if true, updating is done asynchronously.</param>
-        public DataInFiles(string root, ISyncPipe sync, bool writeAsync = false)
+        public DataFileMemory(string root, ISyncPipe sync, bool writeAsync = false)
         {
             this.root = root;
             this.sync = sync;

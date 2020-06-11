@@ -37,23 +37,23 @@ namespace Xive.Mnemonic
     /// <summary>
     /// Xmls stored in files.
     /// </summary>
-    public sealed class XmlInFiles : IMemory<XNode>
+    public sealed class XmlFileMemory : IMemory<XNode>
     {
-        private DataInFiles memory;
+        private DataFileMemory memory;
 
         /// <summary>
         /// Xmls stored in files.
         /// </summary>
-        public XmlInFiles(string root) : this(root, new LocalSyncPipe())
+        public XmlFileMemory(string root) : this(root, new LocalSyncPipe())
         { }
 
         /// <summary>
         /// Xmls stored in files.
         /// </summary>
         /// <param name="root">if true, when updating, the file is written asynchronously.</param>
-        public XmlInFiles(string root, ISyncPipe sync, bool writeAsync = false)
+        public XmlFileMemory(string root, ISyncPipe sync, bool writeAsync = false)
         {
-            this.memory = new DataInFiles(root, sync, writeAsync);
+            this.memory = new DataFileMemory(root, sync, writeAsync);
         }
 
         public XNode Content(string name, Func<XNode> ifAbsent)
@@ -72,7 +72,6 @@ namespace Xive.Mnemonic
                 result = Parsed(name, this.memory.Content(name, () => throw new ApplicationException($"Internal error, assumend to never access ifAbsent() method here.")));
             }
             return result;
-
         }
 
         public IEnumerable<string> Knowledge()
@@ -120,7 +119,8 @@ namespace Xive.Mnemonic
                     }
                     else if (
                         headtext.IndexOf("<?xml", StringComparison.InvariantCultureIgnoreCase) >= 0 &&
-                        headtext.IndexOf("?>", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                        headtext.IndexOf("?>", StringComparison.InvariantCultureIgnoreCase) >= 0
+                    )
                     {
                         xmls.Add(data);
                     }

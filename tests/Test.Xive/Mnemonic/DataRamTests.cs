@@ -37,7 +37,7 @@ namespace Xive.Mnemonic.Test
         public void Memorizes()
         {
             var data = new BytesOf(new InputOf("1980's")).AsBytes();
-            var mem = new DataRam();
+            var mem = new DataRamMemory();
             mem.Content("childhood", () => data);
 
             Assert.Equal(
@@ -52,7 +52,7 @@ namespace Xive.Mnemonic.Test
         public void Updates()
         {
             var data = new BytesOf(new InputOf("1980's")).AsBytes();
-            var mem = new DataRam();
+            var mem = new DataRamMemory();
             mem.Update("childhood", data);
 
             Assert.Equal(
@@ -66,7 +66,7 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void RemovesIfEmpty()
         {
-            var mem = new DataRam();
+            var mem = new DataRamMemory();
             mem.Update("childhood", new BytesOf(new InputOf("1980's")).AsBytes());
             mem.Update("childhood", new byte[0]);
 
@@ -82,7 +82,7 @@ namespace Xive.Mnemonic.Test
                     new BytesOf(
                         new InputOf("1980's")
                     ).AsBytes();
-            var mem = new DataRam();
+            var mem = new DataRamMemory();
             mem.Content("childhood\\subdir/file", () => data);
             Assert.Equal(
                 "childhood/subdir/file",

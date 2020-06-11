@@ -31,20 +31,20 @@ namespace Xive.Cache
     /// <summary>
     /// Memory for XML nodes.
     /// </summary>
-    public sealed class XmlRam : IMemory<XNode>
+    public sealed class XmlRamMemory : IMemory<XNode>
     {
         private readonly ConcurrentDictionary<string, XNode> mem;
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public XmlRam() : this(new ConcurrentDictionary<string, XNode>())
+        public XmlRamMemory() : this(new ConcurrentDictionary<string, XNode>())
         { }
 
         /// <summary>
         /// Memory for XML nodes.
         /// </summary>
-        public XmlRam(ConcurrentDictionary<string, XNode> mem)
+        public XmlRamMemory(ConcurrentDictionary<string, XNode> mem)
         {
             this.mem = mem;
         }
