@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
+using Yaapii.Atoms.List;
 using Yaapii.Atoms.Text;
 
 namespace Xive.Mnemonic.Content
@@ -57,7 +58,11 @@ namespace Xive.Mnemonic.Content
 
         public IList<string> Knowledge()
         {
-            throw new NotImplementedException();
+            return 
+                new Mapped<string,string>(
+                    file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
+                    new ListOf<string>(Directory.GetFiles(this.root, "*", SearchOption.AllDirectories))
+                );
         }
 
         public void UpdateBytes(string name, byte[] data)

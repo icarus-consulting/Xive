@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Xml.Linq;
-using Xive.Mnemonic;
 using Xive.Mnemonic.Content;
 using Xunit;
 using Yaapii.Atoms.Bytes;
@@ -115,25 +111,33 @@ namespace Xive.Test.Mnemonic.Content
         }
 
         [Fact]
-        public void NormalizesSlashes()
+        public void KnowledgeNormalizesSlashes()
         {
-            var mem = new RamContents();
-            mem.Xml(@"childhood\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
-            Assert.Equal(
-                @"childhood/subdir/file",
-                new FirstOf<string>(mem.Knowledge()).Value()
-            );
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var mem = new FileContents(root, new LocalSyncPipe());
+                mem.Xml(@"childhood\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
+                Assert.Equal(
+                    @"childhood/subdir/file",
+                    new FirstOf<string>(mem.Knowledge()).Value()
+                );
+            }
         }
 
         [Fact]
-        public void PreservesCase()
+        public void KnowledgePreservesCase()
         {
-            var mem = new RamContents();
-            mem.Xml(@"BIG\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
-            Assert.Equal(
-                "BIG/subdir/file",
-                new FirstOf<string>(mem.Knowledge()).Value()
-            );
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var mem = new FileContents(root, new LocalSyncPipe());
+                mem.Xml(@"BIG\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
+                Assert.Equal(
+                    "BIG/subdir/file",
+                    new FirstOf<string>(mem.Knowledge()).Value()
+                );
+            }
         }
     }
 }
