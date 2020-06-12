@@ -12,14 +12,32 @@ using Yaapii.Atoms.Text;
 
 namespace Xive.Mnemonic
 {
-    public sealed class RamContent : IContent
+    /// <summary>
+    /// Content in RAM.
+    /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
+    /// memory only stores bytes.
+    /// If you want to cache the parsed XML, use <see cref="CachedContent"/>.
+    /// </summary>
+    public sealed class RamContents : IContents
     {
         private readonly ConcurrentDictionary<string, byte[]> mem;
 
-        public RamContent(params KeyValuePair<string, byte[]>[] bytes) : this(new ConcurrentDictionary<string, byte[]>(bytes))
+        /// <summary>
+        /// Content in RAM.
+        /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
+        /// memory only stores bytes.
+        /// If you want to cache the parsed XML, use <see cref="CachedContent"/>.
+        /// </summary>
+        public RamContents(params KeyValuePair<string, byte[]>[] bytes) : this(new ConcurrentDictionary<string, byte[]>(bytes))
         { }
 
-        public RamContent(ConcurrentDictionary<string, byte[]> bytes)
+        /// <summary>
+        /// Content in RAM.
+        /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
+        /// memory only stores bytes.
+        /// If you want to cache the parsed XML, use <see cref="CachedContent"/>.
+        /// </summary>
+        public RamContents(ConcurrentDictionary<string, byte[]> bytes)
         {
             this.mem = bytes;
         }

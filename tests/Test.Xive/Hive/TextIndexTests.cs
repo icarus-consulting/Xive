@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
-using Xive.Hive;
 using Xive.Mnemonic;
 using Xive.Xocument;
 using Xunit;
-using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
-using Yaapii.Xml;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
 
-namespace Xive.Test.Hive
+namespace Xive.Hive.Test
 {
     public sealed class TextIndexTests
     {

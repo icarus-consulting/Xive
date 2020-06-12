@@ -8,7 +8,7 @@ namespace Xive.Mnemonic
     /// <summary>
     /// Memorized content.
     /// </summary>
-    public interface IContent
+    public interface IContents
     {
         IList<string> Knowledge();
         void UpdateXml(string name, XNode xml);

@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
-using Xive.Cache;
-using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
-namespace Xive.Test.Mnemonic.Content
+namespace Xive.Mnemonic.Content.Test
 {
     public sealed class RamContentTests
     {
@@ -16,7 +14,7 @@ namespace Xive.Test.Mnemonic.Content
         {
             Assert.Equal(
                 0x13,
-                new RamContent(
+                new RamContents(
                     new KeyValuePair<string, byte[]>("a/b/c.dat", new byte[1] { 0x13 })
                 ).Bytes("a/b/c.dat", () => new byte[0])[0]
             );
@@ -27,7 +25,7 @@ namespace Xive.Test.Mnemonic.Content
         {
             Assert.Equal(
                 0x13,
-                new RamContent()
+                new RamContents()
                     .Bytes("a/b/c.dat", () => new byte[1] { 0x13 })[0]
             );
         }
@@ -35,7 +33,7 @@ namespace Xive.Test.Mnemonic.Content
         [Fact]
         public void KnowsAbsentBytesAfterFirstRead()
         {
-            var mem = new RamContent();
+            var mem = new RamContents();
             mem.Bytes("a/b/c.dat", () => new byte[1] { 0x13 }).ToString();
 
             Assert.Equal(
@@ -49,7 +47,7 @@ namespace Xive.Test.Mnemonic.Content
         {
             Assert.Equal(
                 "<elem>content</elem>",
-                new RamContent(
+                new RamContents(
                     new KeyValuePair<string, byte[]>("a/b/c.xml", new BytesOf(new XDocument(new XElement("elem", "content")).ToString()).AsBytes())
                 ).Xml("a/b/c.xml", () => new XDocument()).ToString()
             );
@@ -60,7 +58,7 @@ namespace Xive.Test.Mnemonic.Content
         {
             Assert.Equal(
                 "<elem>content</elem>",
-                new RamContent()
+                new RamContents()
                     .Xml("a/b/c.xml", () => new XDocument(new XElement("elem", "content"))).ToString()
             );
         }
@@ -68,7 +66,7 @@ namespace Xive.Test.Mnemonic.Content
         [Fact]
         public void KnowsAbsentXmlBytesAfterFirstRead()
         {
-            var mem = new RamContent();
+            var mem = new RamContents();
             mem.Xml("a/b/c.xml", () => new XDocument(new XElement("elem", "content"))).ToString();
 
             Assert.Equal(
@@ -80,7 +78,7 @@ namespace Xive.Test.Mnemonic.Content
         [Fact]
         public void NormalizesSlashes()
         {
-            var mem = new RamContent();
+            var mem = new RamContents();
             mem.Xml(@"childhood\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
             Assert.Equal(
                 @"childhood/subdir/file",
@@ -91,7 +89,7 @@ namespace Xive.Test.Mnemonic.Content
         [Fact]
         public void PreservesCase()
         {
-            var mem = new RamContent();
+            var mem = new RamContents();
             mem.Xml(@"BIG\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
             Assert.Equal(
                 "BIG/subdir/file",
