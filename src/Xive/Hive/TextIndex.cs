@@ -24,19 +24,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
 {
     /// <summary>
-    /// The index of a xive, realized as a catalog xml document.
+    /// The index of a xive, realized as a simple text document.
     /// </summary>
     public sealed class TextIndex : IIndex
     {
@@ -45,7 +43,7 @@ namespace Xive.Hive
         private readonly List<string> idCache;
 
         /// <summary>
-        /// The index of a xive, realized as a catalog xml document.
+        /// The index of a xive, realized as a simple text document.
         /// </summary>
         public TextIndex(string scope, IMnemonic mem)
         {
@@ -140,18 +138,11 @@ namespace Xive.Hive
         public void Remove(string id)
         {
             var prefix = new Normalized($"{scope}/{id}").AsString();
-            foreach (var data in this.mem.Data().Knowledge())
+            foreach (var data in this.mem.Contents().Knowledge())
             {
                 if (data.StartsWith(prefix))
                 {
-                    this.mem.Data().Update(data, new byte[0]);
-                }
-            }
-            foreach (var xml in this.mem.XML().Knowledge())
-            {
-                if (xml.StartsWith(prefix))
-                {
-                    this.mem.XML().Update(xml, new XDocument());
+                    this.mem.Contents().UpdateBytes(data, new byte[0]);
                 }
             }
             lock (idCache)

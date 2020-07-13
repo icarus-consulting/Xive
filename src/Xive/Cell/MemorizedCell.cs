@@ -37,9 +37,11 @@ namespace Xive.Cell
         private readonly IText name;
         private readonly IScalar<IMnemonic> mem;
 
-        public MemorizedCell(string name, byte[] data, IMnemonic mem) : this(name, new ScalarOf<IMnemonic>(() =>
+        public MemorizedCell(string name, byte[] data, IMnemonic mem) : this(
+            name, 
+            new ScalarOf<IMnemonic>(() =>
             {
-                mem.Data().Update(name, data);
+                mem.Contents().UpdateBytes(name, data);
                 return mem;
             })
         )
@@ -68,7 +70,7 @@ namespace Xive.Cell
         public byte[] Content()
         {
             return
-                this.mem.Value().Data().Content(
+                this.mem.Value().Contents().Bytes(
                     this.name.AsString(),
                     () => new byte[0]
                 );
@@ -84,8 +86,8 @@ namespace Xive.Cell
                 ).AsBytes();
             this.mem
                 .Value()
-                .Data()
-                .Update(
+                .Contents()
+                .UpdateBytes(
                     this.name.AsString(),
                     data
                 );

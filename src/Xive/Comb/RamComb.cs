@@ -34,7 +34,7 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that lives in memory.
         /// </summary>
-        public RamComb(string name) : this(name, new RamMemories())
+        public RamComb(string name) : this(name, new RamMnemonic())
         { }
 
         /// <summary>

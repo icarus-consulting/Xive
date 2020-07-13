@@ -24,7 +24,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
 
 #pragma warning disable MaxPublicMethodCount // a public methods count maximum
@@ -99,8 +98,5 @@ namespace Xive.Props
         {
             return new ListOf<string>(this.props.Keys);
         }
-
-        public void Save()
-        { }
     }
 }

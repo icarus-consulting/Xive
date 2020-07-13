@@ -1,8 +1,4 @@
-﻿using System.IO;
-using System.Xml.Linq;
-using Xive.Hive;
-
-namespace Xive.Mnemonic
+﻿namespace Xive.Mnemonic
 {
     /// <summary>
     /// The memories of the xive.
@@ -18,16 +14,6 @@ namespace Xive.Mnemonic
         /// <returns></returns>
         IProps Props(string scope, string id);
 
-        /// <summary>
-        /// XML Memory.
-        /// </summary>
-        /// <returns></returns>
-        IMemory<XNode> XML();
-
-        /// <summary>
-        /// Data Memory.
-        /// </summary>
-        /// <returns></returns>
-        IMemory<byte[]> Data();
+        IContents Contents();
     }
 }

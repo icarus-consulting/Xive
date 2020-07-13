@@ -24,58 +24,57 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using Xive.Mnemonic;
+using Yaapii.Atoms.Enumerable;
 
-namespace Xive.Cache
+namespace Xive.Mnemonic.Cache
 {
     /// <summary>
-    /// Memory for XML nodes.
+    /// A cache for xml.
     /// </summary>
-    public sealed class XmlRam : IMemory<XNode>
+    public sealed class XmlCache : ICache<XNode>
     {
-        private readonly ConcurrentDictionary<string, XNode> mem;
+        ConcurrentDictionary<string, XNode> memory;
 
         /// <summary>
-        /// Memory for XML nodes.
+        /// A cache for xml.
         /// </summary>
-        public XmlRam() : this(new ConcurrentDictionary<string, XNode>())
+        public XmlCache(params KeyValuePair<string, XNode>[] contents) : this(new ManyOf<KeyValuePair<string, XNode>>(contents))
         { }
 
         /// <summary>
-        /// Memory for XML nodes.
+        /// A cache for xml.
         /// </summary>
-        public XmlRam(ConcurrentDictionary<string, XNode> mem)
+        public XmlCache(IEnumerable<KeyValuePair<string, XNode>> contents)
         {
-            this.mem = mem;
-        }
-
-        public bool Knows(string name)
-        {
-            return this.mem.ContainsKey(name);
-        }
-
-        public IEnumerable<string> Knowledge()
-        {
-            return this.mem.Keys;
+            this.memory = new ConcurrentDictionary<string, XNode>(contents);
         }
 
         public XNode Content(string name, Func<XNode> ifAbsent)
         {
-            name = new Normalized(name).AsString();
-            return this.mem.GetOrAdd(name, (key) => ifAbsent());
+            lock (this.memory)
+            {
+                return
+                    this.memory
+                        .GetOrAdd(name, (n) => ifAbsent());
+            }
         }
 
-        public void Update(string name, XNode content)
+        public void Remove(string name)
         {
-            name = new Normalized(name).AsString();
-            if (content.Document.Root == null || content.Document.Root.IsEmpty)
+            XNode unused;
+            this.memory.TryRemove(name, out unused);
+        }
+
+        public void Update(string name, Func<XNode> ifAbsent, Func<XNode> ifExisting)
+        {
+            lock (this.memory)
             {
-                XNode devNull;
-                this.mem.TryRemove(name, out devNull);
-            }
-            else
-            {
-                this.mem.AddOrUpdate(name, content, (currentName, currentContent) => content);
+                this.memory
+                    .AddOrUpdate(
+                       name,
+                       (n) => ifAbsent(),
+                       (n, existing) => ifExisting()
+                    );
             }
         }
     }

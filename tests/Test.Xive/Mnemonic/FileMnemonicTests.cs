@@ -20,26 +20,23 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Xml.Linq;
 using Xive.Comb;
 using Xive.Hive;
-using Xive.Mnemonic;
 using Xunit;
-using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
 namespace Xive.Mnemonic.Test
 {
-    public sealed class MemoriesInFilesTests
+    public sealed class FileMnemonicTests
     {
         [Fact]
         public void MemorizesProps()
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new FileMemories(temp.Value().FullName);
+                var mem = new FileMnemonic(temp.Value().FullName);
                 new TextIndex(
                     "beverage",
                     mem
@@ -47,7 +44,7 @@ namespace Xive.Mnemonic.Test
 
                 mem.Props("beverage", "fritz-kola").Refined("light", "yes please");
 
-                mem = new FileMemories(temp.Value().FullName);
+                mem = new FileMnemonic(temp.Value().FullName);
 
                 Assert.Equal(
                     "yes please",
@@ -61,13 +58,13 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new FileMemories(temp.Value().FullName);
+                var mem = new FileMnemonic(temp.Value().FullName);
                 using (var xoc = new MemorizedComb("beverage", mem).Xocument("coke.xml"))
                 {
                     xoc.Modify(new Directives().Xpath("/coke").Add("light").Set("yes please"));
                 }
 
-                mem = new FileMemories(temp.Value().FullName);
+                mem = new FileMnemonic(temp.Value().FullName);
                 using (var xoc = new MemorizedComb("beverage", mem).Xocument("coke.xml"))
                 {
                     Assert.Equal(
@@ -83,13 +80,13 @@ namespace Xive.Mnemonic.Test
         {
             using (var temp = new TempDirectory())
             {
-                var mem = new FileMemories(temp.Value().FullName);
+                var mem = new FileMnemonic(temp.Value().FullName);
                 using (var pepsi = new MemorizedComb("beverage", mem).Cell("pepsi"))
                 {
                     pepsi.Update(new InputOf("Empty"));
                 }
 
-                mem = new FileMemories(temp.Value().FullName);
+                mem = new FileMnemonic(temp.Value().FullName);
                 using (var pepsi = new MemorizedComb("beverage", mem).Cell("pepsi"))
                 {
                     Assert.Equal(
@@ -99,29 +96,6 @@ namespace Xive.Mnemonic.Test
                         ).AsString()
                     );
                 }
-            }
-        }
-
-        [Fact]
-        public void DeliversXmlWithHead()
-        {
-            using (var temp = new TempDirectory())
-            {
-                var mem = new FileMemories(temp.Value().FullName);
-                mem.Data().Update("childhood.xml",
-                    new BytesOf(
-                        string.Concat(
-                            new XDeclaration("1.0", "UTF-8", "no"),
-                            new XElement("root",
-                                new XElement("years", new XText("1980's"))
-                            )
-                        )
-                    ).AsBytes()
-                );
-                Assert.Contains(
-                    "childhood.xml",
-                    mem.XML().Knowledge()
-                );
             }
         }
     }

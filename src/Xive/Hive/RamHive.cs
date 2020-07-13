@@ -33,7 +33,7 @@ public sealed class RamHive : HiveEnvelope
     /// <summary>
     /// A hive which stores contents in RAM.
     /// </summary>
-    public RamHive(string scope) : this(scope, new RamMemories())
+    public RamHive(string scope) : this(scope, new RamMnemonic())
     { }
 
     /// <summary>

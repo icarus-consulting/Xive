@@ -112,62 +112,27 @@ namespace Xive.Comb
         private Directives GutsDirectives()
         {
             var patch = new Directives().Add("items");
-            patch.Add("data");
-            patch = WithData(patch);
-            patch.Up().Add("xml");
-            patch = WithXml(patch);
-            return patch;
-        }
-
-        private Directives WithData(Directives patch)
-        {
-            var dataKnowledge = this.memory.Data().Knowledge();
-            var xmlKnowledge = this.memory.XML().Knowledge();
-            var filtered = new Filtered<string>((item) => !new Contains<string>(xmlKnowledge, item).Value(), dataKnowledge);
+            var knowledge = this.memory.Contents().Knowledge();
             new Each<string>(
                 (key) =>
-                    patch.Add("item")
-                    .Add("name")
-                    .Set(key.Substring((this.name.AsString() + "/").Length))
-                    .Up()
-                    .Add("size")
-                    .Set(
-                        new LengthOf(
-                            this.memory
-                            .Data()
-                            .Content(key, () => new byte[0])
-                        ).Value()
-                    )
-                    .Up()
-                    .Up(),
+                    patch
+                        .Add("item")
+                        .Add("name")
+                        .Set(key.Substring((this.name.AsString() + "/").Length))
+                        .Up()
+                        .Add("size")
+                        .Set(
+                            new LengthOf(
+                                this.memory
+                                .Contents()
+                                .Bytes(key, () => new byte[0])
+                            ).Value()
+                        )
+                        .Up()
+                        .Up(),
                 new Filtered<string>(
                     (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
-                    filtered
-                )
-            ).Invoke();
-            return patch;
-        }
-
-        private Directives WithXml(Directives patch)
-        {
-            new Each<string>(
-                (key) =>
-                    patch.Add("item")
-                    .Add("name")
-                    .Set(key.Substring((this.name.AsString() + "/").Length))
-                    .Up()
-                    .Add("size")
-                    .Set(
-                        new LengthOf(
-                            new BytesOf(
-                                this.memory.XML().Content(key, () => new XMLCursor("").AsNode()).ToString()
-                            ).AsBytes()
-                        ).Value()
-                    ).Up()
-                    .Up(),
-                new Filtered<string>(
-                    (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
-                    this.memory.XML().Knowledge()
+                    knowledge
                 )
             ).Invoke();
             return patch;

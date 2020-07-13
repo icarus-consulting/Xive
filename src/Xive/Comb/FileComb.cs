@@ -35,7 +35,7 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that is stored in a file.
         /// </summary>
-        public FileComb(string root, string name) : this(name, new FileMemories(root))
+        public FileComb(string root, string name) : this(name, new FileMnemonic(root))
         { }
 
         /// <summary>

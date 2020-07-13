@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xive.Mnemonic;
+﻿using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.Collection;
 using Yaapii.Atoms.IO;
@@ -13,31 +10,41 @@ namespace Xive.Comb.Test
     public sealed class MemorizedCombTests
     {
         [Fact]
-        public void KnowledgeXmlOnce()
+        public void GutsIncludeXocuments()
         {
-            var comb = new MemorizedComb("the name", new RamMemories());
-            comb.Cell("cell").Update(new InputOf("cool text"));
-            comb.Xocument("xocument").Modify(new Directives().Xpath("xocument").Add("root").Set("also cool"));
+            var comb = new MemorizedComb("the name", new RamMnemonic());
+            comb.Xocument("xocument")
+                .Modify(
+                    new Directives()
+                        .Xpath("xocument")
+                        .Add("root")
+                        .Set("also cool")
+                );
 
-            var values = comb.Xocument("_guts.xml").Values("/items/*/item/name/text()");
+            var values = 
+                comb.Xocument("_guts.xml")
+                    .Values("/items/item/name/text()");
+
             Assert.Single(new Filtered<string>((text) => text.Equals("xocument"), values));
         }
 
         [Fact]
-        public void KnowledgeDataOnce()
+        public void GutsIncludeData()
         {
-            var comb = new MemorizedComb("the name", new RamMemories());
+            var comb = new MemorizedComb("the name", new RamMnemonic());
             comb.Cell("cell").Update(new InputOf("cool text"));
-            comb.Xocument("xocument").Modify(new Directives().Xpath("xocument").Add("root").Set("also cool"));
 
-            var values = comb.Xocument("_guts.xml").Values("/items/*/item/name/text()");
+            var values = 
+                comb.Xocument("_guts.xml")
+                    .Values("/items/item/name/text()");
+
             Assert.Single(new Filtered<string>((text) => text.Equals("cell"), values));
         }
 
         [Fact]
-        public void ReturnsNormalizedName()
+        public void NormalizesName()
         {
-            var comb = new MemorizedComb("name\\with/diff", new RamMemories());
+            var comb = new MemorizedComb("name\\with/diff", new RamMnemonic());
             Assert.Equal(
                 "name/with/diff",
                 comb.Name()
@@ -48,7 +55,7 @@ namespace Xive.Comb.Test
         public void HasProps()
         {
             var name = "name";
-            var comb = new MemorizedComb(name, new RamMemories());
+            var comb = new MemorizedComb(name, new RamMnemonic());
             comb.Props().Refined("testprop", "first");
             Assert.Equal(
                 "first",
@@ -57,39 +64,29 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
-        public void ReturnsGutsAsCell()
-        {
-            var comb = new MemorizedComb("comb", new RamMemories());
-            comb.Cell("cell").Update(new InputOf("cool text"));
-            Assert.Equal(
-                "cell",
-                new XMLSlice(new InputOf(comb.Cell("_guts.xml").Content())).Values("/items/data/item/name/text()")[0]
-            );
-        }
-
-        [Fact]
-        public void ReturnsItemsOnceRam()
-        {
-            var comb = new MemorizedComb("comb", new RamMemories());
-            comb.Cell("cell").Update(new InputOf("cool text"));
-            comb.Xocument("thexml.xml").Modify(new Directives().Xpath("/thexml").Add("newElement").Set("content"));
-            Assert.Equal(
-                "2",
-                comb.Xocument("_guts.xml").Value("count(/items/*/item)", "0")
-            );
-        }
-
-        [Fact]
-        public void ReturnsItemsOnceFile()
+        public void MergesIfNameEqual()
         {
             using (var temp = new TempDirectory())
             {
-                var comb = new MemorizedComb("comb", new FileMemories(temp.Value().FullName));
-                comb.Cell("cell").Update(new InputOf("cool text"));
-                comb.Xocument("thexml.xml").Modify(new Directives().Xpath("/thexml").Add("newElement").Set("content"));
+                var comb =
+                    new MemorizedComb("comb",
+                        new FileMnemonic(temp.Value().FullName)
+                    );
+
+                comb.Cell("some-data")
+                    .Update(new InputOf("<some-data/>"));
+
+                comb.Xocument("some-data")
+                    .Modify(
+                        new Directives()
+                            .Xpath("/some-data")
+                            .Add("newElement").Set("content")
+                        );
+
                 Assert.Equal(
-                    "2",
-                    comb.Xocument("_guts.xml").Value("count(/items/*/item)", "0")
+                    "1",
+                    comb.Xocument("_guts.xml")
+                        .Value("count(/items/item)", "0")
                 );
             }
         }

@@ -1,28 +1,23 @@
 ﻿using System.Collections.Concurrent;
-using System.IO;
-using System.Xml.Linq;
 using Xive.Mnemonic;
 using Xive.Props;
-using Xive.Xocument;
 
 namespace Xive.Cache
 {
     /// <summary>
     /// Simple Memories.
     /// </summary>
-    public sealed class SimpleMemories : IMnemonic
+    public sealed class SimpleMnemonic : IMnemonic
     {
-        private readonly IMemory<XNode> xmlMem;
-        private readonly IMemory<byte[]> dataMem;
+        private readonly IContents contentMem;
         private readonly ConcurrentDictionary<string, IProps> propsMem;
 
         /// <summary>
         /// Simple Memories.
         /// </summary>
-        public SimpleMemories(IMemory<XNode> xmlMem, IMemory<byte[]> dataMem)
+        public SimpleMnemonic(IContents contents)
         {
-            this.xmlMem = xmlMem;
-            this.dataMem = dataMem;
+            this.contentMem = contents;
             this.propsMem = new ConcurrentDictionary<string, IProps>();
         }
 
@@ -33,19 +28,14 @@ namespace Xive.Cache
                     $"{scope}/{id}",
                     key =>
                     {
-                        return new SandboxProps(this, scope, id);
+                        return new SandboxProps2(this, scope, id);
                     }
                 );
         }
 
-        public IMemory<XNode> XML()
+        public IContents Contents()
         {
-            return this.xmlMem;
-        }
-
-        public IMemory<byte[]> Data()
-        {
-            return this.dataMem;
+            return this.contentMem;
         }
     }
 }

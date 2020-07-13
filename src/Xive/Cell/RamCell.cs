@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -48,7 +47,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell() : this(
             new Solid<string>(() => Guid.NewGuid().ToString()),
-            new Solid<IMnemonic>(() => new RamMemories())
+            new Solid<IMnemonic>(() => new RamMnemonic())
         )
         { }
 
@@ -74,8 +73,8 @@ namespace Xive.Cell
             new Live<string>(() => path),
             new Solid<IMnemonic>(() =>
             {
-                var mem = new RamMemories();
-                mem.Data().Update(path, content.AsBytes());
+                var mem = new RamMnemonic();
+                mem.Contents().UpdateBytes(path, content.AsBytes());
                 return mem;
             })
         )
@@ -91,9 +90,9 @@ namespace Xive.Cell
             path,
             new Solid<IMnemonic>(() =>
             {
-                var mem = new RamMemories();
-                mem.Data()
-                    .Update(
+                var mem = new RamMnemonic();
+                mem.Contents()
+                    .UpdateBytes(
                         path.Value(),
                         new BytesOf(
                             new InputOf(content)
@@ -114,9 +113,9 @@ namespace Xive.Cell
             new Live<string>(path),
             new Solid<IMnemonic>(() =>
             {
-                var mem = new RamMemories();
-                mem.Data()
-                    .Update(
+                var mem = new RamMnemonic();
+                mem.Contents()
+                    .UpdateBytes(
                         path,
                         new BytesOf(
                             new InputOf(content)
@@ -133,7 +132,7 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(string path) : this(path, new RamMemories())
+        public RamCell(string path) : this(path, new RamMnemonic())
         { }
 
         /// <summary>
@@ -178,8 +177,8 @@ namespace Xive.Cell
         {
             return
                 this.mem.Value()
-                    .Data()
-                    .Content(
+                    .Contents()
+                    .Bytes(
                         new Normalized(this.name.Value()).AsString(),
                         () => new byte[0]
                     );
@@ -194,15 +193,15 @@ namespace Xive.Cell
                 stream.Seek(0, SeekOrigin.Begin);
                 this.mem
                     .Value()
-                    .Data()
-                    .Update(
+                    .Contents()
+                    .UpdateBytes(
                         name,
                         new BytesOf(new InputOf(stream)).AsBytes()
                     );
             }
             else
             {
-                this.mem.Value().Data().Update(name, new byte[0]);
+                this.mem.Value().Contents().UpdateBytes(name, new byte[0]);
             }
         }
 

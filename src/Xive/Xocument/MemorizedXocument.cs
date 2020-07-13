@@ -28,7 +28,7 @@ namespace Xive.Xocument
             this.memories = memories;
             this.node =
                 new Live<XNode>(() =>
-                    memories.XML().Content(name, () =>
+                    memories.Contents().Xml(name, () =>
                         new XDocument(
                             new XElement(this.root.Value())
                         )
@@ -58,7 +58,7 @@ namespace Xive.Xocument
         {
             var copy = new XDocument(this.node.Value().Document.Root);
             new Xambler(dirs).ApplyQuietly(copy);
-            this.memories.XML().Update(this.name, copy);
+            this.memories.Contents().UpdateXml(this.name, copy);
         }
 
         public XNode Node()

@@ -24,11 +24,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using System.Xml;
 using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
-using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 using Yaapii.Xambly;
 
@@ -321,8 +319,8 @@ namespace Xive.Hive.Test
                 IHive hive =
                     new MemorizedHive(
                         "product",
-                        new CachedMemories(
-                            new FileMemories(dir.Value().FullName, true)
+                        new CachedMnemonic(
+                            new FileMnemonic(dir.Value().FullName)
                         )
                     ).Shifted("machine");
 

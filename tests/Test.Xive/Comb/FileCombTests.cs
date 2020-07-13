@@ -150,32 +150,11 @@ namespace Xive.Comb.Test
         }
 
         [Fact]
-        public void ReturnsGutsSeparatorInsensitive()
-        {
-            using (var temp = new TempDirectory())
-            {
-                var memory = new FileMemories(temp.Value().FullName);
-                var comb = new FileComb("my-comb", memory);
-                using (var xoc = comb.Xocument("sub\\DIR/some.xml"))
-                {
-                    xoc.Modify(new Directives().Xpath("/some").Add("test"));
-                }
-                using (var xoc = comb.Xocument("_guts.xml"))
-                {
-                    Assert.Equal(
-                        @"sub/DIR/some.xml",
-                        xoc.Value("/items/xml/item/name/text()", "")
-                    );
-                }
-            }
-        }
-
-        [Fact]
         public void HasProps()
         {
             using (var temp = new TempDirectory())
             {
-                var memory = new FileMemories(temp.Value().FullName);
+                var memory = new FileMnemonic(temp.Value().FullName);
                 var comb = new FileComb("my-comb", memory);
                 comb.Props().Refined("name", "value");
                 Assert.Equal(
@@ -190,7 +169,7 @@ namespace Xive.Comb.Test
         {
             using (var temp = new TempDirectory())
             {
-                var memory = new FileMemories(temp.Value().FullName);
+                var memory = new FileMnemonic(temp.Value().FullName);
                 var comb = new FileComb("my-comb", memory);
                 comb.Props().Refined("name", "value", "value2");
                 Assert.Equal(
@@ -205,7 +184,7 @@ namespace Xive.Comb.Test
         {
             using (var temp = new TempDirectory())
             {
-                var memory = new FileMemories(temp.Value().FullName);
+                var memory = new FileMnemonic(temp.Value().FullName);
                 var comb = new FileComb("my-comb", memory);
                 comb.Props().Refined("name", "value", "value2");
                 comb.Props().Refined("name");
