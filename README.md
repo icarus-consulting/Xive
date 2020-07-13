@@ -32,12 +32,14 @@ Some of them:
 - Save data in files
 - Save data in memory
 - Simplify xml reading and writing
-- Provide mutexed access to files
+- Provide threadsafe access to files
 - Simplify your entity-unit testing
 
 
 ## What Xive cannot do
-- Replace a database in speed (but most of the times, a database is overkill)
+- Replace a relational database
+
+  
 
 ## Designing Apps using Xive
 
@@ -284,3 +286,30 @@ The memory contains xmls, cells, properties and if needed the indexcatalog of th
 
 Mnemonic can be in files, or in ram.
 Mnemonic can be cached (with options to max size of cached cells and a blacklist for items not to cache)
+
+
+
+Please note that a mnemonic by default does not do any caching.
+
+So if you use *RamMnemonic* or *FileMnemonic*, the data is always read when you access it.
+
+### Why a cache for Ram?
+
+You might ask yourself why a RamMnemonic needs a cache when it is already in memory. The reason is that the RamMnemonic stores its data as byte[]. If you want to access it as an XML, the bytes need to be parsed to have an XML document. This parsing can be avoided by using a cache. The cache remembers the parsed XML document.
+
+### Build a cached mnemonic
+
+This is an example for a Cached Mnemonic which has a list of ignored files which will not be cached:
+
+```csharp
+var customXive =
+	new MemorizedHive("demo",
+		new CachedMnemonic(
+            new RamMnemonic(),
+            "a/*/ignored/*",
+            "b/*/ignored/*"
+            "c/*/ignored/*"
+        )
+	);
+```
+
