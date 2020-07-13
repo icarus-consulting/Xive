@@ -2,9 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Xive.Mnemonic.Cache;
 using Xunit;
 using Yaapii.Atoms.Bytes;
-using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
@@ -45,12 +45,10 @@ namespace Xive.Mnemonic.Content.Test
                 0x13,
                 new CachedContents(
                     new RamContents(),
-                    new ConcurrentDictionary<string, byte[]>(
-                        new ManyOf<KeyValuePair<string, byte[]>>(
-                            new KeyValuePair<string, byte[]>("a/b/c.dat", new byte[1] { 0x13 })
-                        )
+                    new BytesCache(
+                        new KeyValuePair<string, byte[]>("a/b/c.dat", new byte[1] { 0x13 })
                     ),
-                    new ConcurrentDictionary<string, XNode>()
+                    new XmlCache()
                 ).Bytes("a/b/c.dat", () => throw new ApplicationException("This must not occur"))[0]
             );
         }
@@ -62,11 +60,9 @@ namespace Xive.Mnemonic.Content.Test
                 "<test>rest</test>",
                 new CachedContents(
                     new RamContents(),
-                    new ConcurrentDictionary<string, byte[]>(),
-                    new ConcurrentDictionary<string, XNode>(
-                        new ManyOf<KeyValuePair<string, XNode>>(
-                            new KeyValuePair<string, XNode>("a/b/c.xml", new XDocument(new XElement("test", "rest")))
-                        )
+                    new BytesCache(),
+                    new XmlCache(
+                        new KeyValuePair<string, XNode>("a/b/c.xml", new XDocument(new XElement("test", "rest")))
                     )
                 ).Xml("a/b/c.xml", () => throw new ApplicationException("This must not occur"))
                 .ToString(SaveOptions.DisableFormatting)
@@ -175,20 +171,6 @@ namespace Xive.Mnemonic.Content.Test
         }
 
         [Fact]
-        public void RemovesBytesFromCacheIfEmpty()
-        {
-            var bytesCache = new ConcurrentDictionary<string, byte[]>();
-            var xmlCache = new ConcurrentDictionary<string, XNode>();
-            var contents = new CachedContents(new RamContents(), bytesCache, xmlCache);
-            contents.Xml("a/b/c.xml", () => new XDocument(new XElement("first", "time")));
-            contents.UpdateXml("a/b/c.xml", new XDocument());
-
-            Assert.False(
-                xmlCache.ContainsKey("a/b/c.xml")
-            );
-        }
-
-        [Fact]
         public void RemovesBytesFromOriginIfEmpty()
         {
             var mem = new ConcurrentDictionary<string, byte[]>();
@@ -201,17 +183,43 @@ namespace Xive.Mnemonic.Content.Test
             );
         }
 
+
+        [Fact]
+        public void RemovesBytesFromCacheIfEmpty()
+        {
+            var removed = string.Empty;
+            var contents =
+                new CachedContents(
+                    new RamContents(),
+                    new FkCache<byte[]>(name => removed = name),
+                    new XmlCache()
+                );
+            contents.UpdateBytes("a/b/c.dat", new byte[0]);
+
+            Assert.Equal(
+                "a/b/c.dat",
+                removed
+            );
+        }
+
         [Fact]
         public void RemovesXNodeFromCacheIfEmpty()
         {
-            var bytesCache = new ConcurrentDictionary<string, byte[]>();
-            var xmlCache = new ConcurrentDictionary<string, XNode>();
-            var contents = new CachedContents(new RamContents(), bytesCache, xmlCache);
-            contents.Xml("a/b/c.xml", () => new XDocument(new XElement("first", "time")));
+            var removed = string.Empty;
+            var contents = 
+                new CachedContents(
+                    new RamContents(),
+                    new BytesCache(),
+                    new FkCache<XNode>(
+                        name => removed = name
+                    )
+                );
+
             contents.UpdateXml("a/b/c.xml", new XDocument());
 
-            Assert.False(
-                xmlCache.ContainsKey("a/b/c.xml")
+            Assert.Equal(
+                "a/b/c.xml",
+                removed
             );
         }
 

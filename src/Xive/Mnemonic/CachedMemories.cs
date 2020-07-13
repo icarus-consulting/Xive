@@ -197,7 +197,9 @@ namespace Xive.Mnemonic
             this.contents =
                 new Solid<IContents>(() =>
                     new CachedContents(
-                        origin.Contents()
+                        origin.Contents(),
+                        ignoredNames,
+                        maxSize
                     )
                 );
         }
@@ -209,7 +211,7 @@ namespace Xive.Mnemonic
 
         public IContents Contents()
         {
-            return this.origin.Contents();
+            return this.contents.Value();
         }
     }
 }
