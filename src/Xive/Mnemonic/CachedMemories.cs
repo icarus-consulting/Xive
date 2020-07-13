@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Xive.Mnemonic.Content;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.List;
@@ -101,13 +102,13 @@ namespace Xive.Mnemonic
                     new CachedMemory<XNode>(
                         origin.XML(),
                         maxSize,
-                        node => CheckEmpty(node),
+                        node => IsEmpty(node),
                         blacklist
                     )
                 );
         }
 
-        private bool CheckEmpty(XNode node)
+        private bool IsEmpty(XNode node)
         {
             var result = false;
             if (node.ToString() == "")
@@ -134,6 +135,81 @@ namespace Xive.Mnemonic
         public IMemory<XNode> XML()
         {
             return this.xml.Value();
+        }
+    }
+
+    /// <summary>
+    /// Memories which a stored in a cache.
+    /// Update is transferred to the origin memories.
+    /// </summary>
+    public sealed class CachedMemories2 : IMnemonic2
+    {
+        private readonly IMnemonic2 origin;
+        private readonly IScalar<IContents> contents;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="maxSize"></param>
+        public CachedMemories2(IMnemonic2 origin, params string[] items) : this(origin, int.MaxValue, new List<string>(new ManyOf<string>(items)))
+        { }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="maxSize"></param>
+        public CachedMemories2(IMnemonic2 origin) : this(origin, int.MaxValue, new List<string>())
+        { }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="maxSize"></param>
+        public CachedMemories2(IMnemonic2 origin, int maxSize) : this(origin, maxSize, new List<string>())
+        { }
+
+        /// <summary>
+        /// Memories which a stored in a cache.
+        /// Update is transferred to the origin memories.
+        /// </summary>
+        public CachedMemories2(IMnemonic2 origin, int maxSize, IEnumerable<string> ignoredNames) : this(
+            origin,
+            maxSize,
+            new SolidList<string>(
+                new Yaapii.Atoms.List.Mapped<string, string>(
+                    entry => new Normalized(entry).AsString(),
+                    ignoredNames
+                )
+            )
+        )
+        { }
+
+        /// <summary>
+        /// Memories which a stored in a cache.
+        /// Update is transferred to the origin memories.
+        /// </summary>
+        internal CachedMemories2(IMnemonic2 origin, int maxSize, IList<string> ignoredNames)
+        {
+            this.origin = origin;
+            this.contents =
+                new Solid<IContents>(() =>
+                    new CachedContents(
+                        origin.Contents()
+                    )
+                );
+        }
+
+        public IProps Props(string scope, string id)
+        {
+            return this.origin.Props(scope, id); //props are already cached by design.
+        }
+
+        public IContents Contents()
+        {
+            return this.origin.Contents();
         }
     }
 }

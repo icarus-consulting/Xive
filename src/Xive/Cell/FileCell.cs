@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -35,7 +34,7 @@ namespace Xive.Cell
     /// </summary>
     public sealed class FileCell : ICell
     {
-        private readonly IScalar<IMnemonic> mem;
+        private readonly IScalar<IMnemonic2> mem;
         private readonly IScalar<string> name;
 
         /// <summary>
@@ -55,14 +54,14 @@ namespace Xive.Cell
                 }
                 return name;
             }),
-            new ScalarOf<IMnemonic>(() =>
+            new ScalarOf<IMnemonic2>(() =>
             {
                 if (!Path.IsPathRooted(path))
                 {
                     throw new ArgumentException($"Cannot use '{path}' as FileCell path because the path must be rooted.");
                 }
                 var root = Path.GetDirectoryName(path);
-                return new FileMemories(root);
+                return new FileMemories2(root);
             })
         )
         { }
@@ -70,7 +69,7 @@ namespace Xive.Cell
         /// <summary>
         /// A cell which exists physically as a file.
         /// </summary>
-        private FileCell(IScalar<string> name, ScalarOf<IMnemonic> mem)
+        private FileCell(IScalar<string> name, ScalarOf<IMnemonic2> mem)
         {
             this.mem = mem;
             this.name = name;
@@ -86,8 +85,8 @@ namespace Xive.Cell
             return
                 this.mem
                     .Value()
-                    .Data()
-                    .Content(this.name.Value(), () => new byte[0]);
+                    .Contents()
+                    .Bytes(this.name.Value(), () => new byte[0]);
         }
 
         public void Update(IInput content)
@@ -96,11 +95,11 @@ namespace Xive.Cell
             if (stream.Length > 0)
             {
                 stream.Seek(0, SeekOrigin.Begin);
-                this.mem.Value().Data().Update(this.name.Value(), new BytesOf(content).AsBytes());
+                this.mem.Value().Contents().UpdateBytes(this.name.Value(), new BytesOf(content).AsBytes());
             }
             else
             {
-                this.mem.Value().Data().Update(this.name.Value(), new byte[0]);
+                this.mem.Value().Contents().UpdateBytes(this.name.Value(), new byte[0]);
             }
         }
 

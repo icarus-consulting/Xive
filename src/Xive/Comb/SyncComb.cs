@@ -26,7 +26,7 @@ using Xive.Xocument;
 namespace Xive.Comb
 {
     /// <summary>
-    /// A comb that accesses cells systemwide exclusively.
+    /// A threadsafe comb.
     /// </summary>
     public sealed class SyncComb : IHoneyComb
     {
@@ -34,13 +34,13 @@ namespace Xive.Comb
         private readonly ISyncValve syncValve;
 
         /// <summary>
-        /// A comb that accesses cells systemwide exclusively.
+        /// A threadsafe comb.
         /// </summary>
         public SyncComb(IHoneyComb comb) : this(comb, new SyncGate())
         { }
 
         /// <summary>
-        /// A comb that accesses cells systemwide exclusively.
+        /// A threadsafe comb.
         /// </summary>
         public SyncComb(IHoneyComb comb, ISyncValve syncValve)
         {

@@ -1,9 +1,7 @@
 ﻿using System.Collections.Concurrent;
-using System.IO;
 using System.Xml.Linq;
 using Xive.Mnemonic;
 using Xive.Props;
-using Xive.Xocument;
 
 namespace Xive.Cache
 {
@@ -46,6 +44,41 @@ namespace Xive.Cache
         public IMemory<byte[]> Data()
         {
             return this.dataMem;
+        }
+    }
+
+    /// <summary>
+    /// Simple Memories.
+    /// </summary>
+    public sealed class SimpleMemories2 : IMnemonic2
+    {
+        private readonly IContents contentMem;
+        private readonly ConcurrentDictionary<string, IProps> propsMem;
+
+        /// <summary>
+        /// Simple Memories.
+        /// </summary>
+        public SimpleMemories2(IContents contents)
+        {
+            this.contentMem = contents;
+            this.propsMem = new ConcurrentDictionary<string, IProps>();
+        }
+
+        public IProps Props(string scope, string id)
+        {
+            return
+                this.propsMem.GetOrAdd(
+                    $"{scope}/{id}",
+                    key =>
+                    {
+                        return new SandboxProps2(this, scope, id);
+                    }
+                );
+        }
+
+        public IContents Contents()
+        {
+            return this.contentMem;
         }
     }
 }

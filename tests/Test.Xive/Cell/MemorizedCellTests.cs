@@ -20,7 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.IO;
 using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.IO;
@@ -33,8 +32,8 @@ namespace Xive.Cell.Test
         [Fact]
         public void InitializesWithMemory()
         {
-            var mem = new RamMemories();
-            mem.Data().Update("my-cell", new byte[1] { 0x02 });
+            var mem = new RamMemories2();
+            mem.Contents().UpdateBytes("my-cell", new byte[1] { 0x02 });
 
             using (var cell = new MemorizedCell("my-cell", mem))
             {
@@ -48,7 +47,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void ResetsStreamAfterUpdate()
         {
-            using (var cell = new MemorizedCell("my-cell", new RamMemories()))
+            using (var cell = new MemorizedCell("my-cell", new RamMemories2()))
             {
                 var content = new InputOf("its so hot outside");
                 cell.Update(content);
@@ -59,7 +58,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void CanUpdate()
         {
-            using (var cell = new MemorizedCell("my-cell", new RamMemories()))
+            using (var cell = new MemorizedCell("my-cell", new RamMemories2()))
             {
                 cell.Update(new InputOf("its so hot outside"));
                 Assert.Equal(
@@ -72,7 +71,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void IsInsensitiveToSeparatorChars()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             using (var cell = new MemorizedCell("this-is/my-cell", mem))
             {
                 cell.Update(new InputOf("its so hot outside"));
@@ -89,7 +88,7 @@ namespace Xive.Cell.Test
         [Fact]
         public void IsCaseSensitive()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             using (var cell = new MemorizedCell("this-is/MY-cell", mem))
             {
                 cell.Update(new InputOf("its so cold outside"));

@@ -61,7 +61,7 @@ namespace Xive.Xocument.Test
         public void ModifiesExclusive()
         {
             var syncGate = new SyncGate();
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = Guid.NewGuid().ToString();

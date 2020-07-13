@@ -51,7 +51,13 @@ namespace Xive.Mnemonic
 
         public IList<string> Knowledge()
         {
-            return new ListOf<string>(this.mem.Keys);
+            return
+                new ListOf<string>(
+                    new Mapped<string, string>(
+                        name => new Normalized(name).AsString(),
+                        this.mem.Keys
+                    )
+                );
         }
 
         public void UpdateBytes(string name, byte[] data)
@@ -85,7 +91,7 @@ namespace Xive.Mnemonic
             if (!this.mem.Keys.Contains(name))
             {
                 result = ifAbsent();
-                if (!result.Document.Root.IsEmpty)
+                if (result.Document.Elements().GetEnumerator().MoveNext())
                 {
                     UpdateXml(name, result);
                 }

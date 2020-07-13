@@ -98,20 +98,12 @@ namespace Xive.Comb.Test
                 );
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
-                var content = ":xocument";
-                using (var xoc = comb.Xocument("synced"))
-                {
-                    xoc.Node();
-                    xoc.Modify(new Directives().Xpath("/synced").Set(content));
-                    Assert.Equal(content, xoc.Value("/synced/text()", ""));
-                }
-
-                content = ":cell";
-                using (var cell = comb.Cell("synced"))
-                {
-                    cell.Update(new InputOf($"<synced>{content}</synced>"));
-                    Assert.Equal($"<synced>{content}</synced>", new TextOf(cell.Content()).AsString());
-                }
+                var xoc = comb.Xocument("synced");
+                xoc.Node();
+                Assert.Equal("<synced />", xoc.Node().ToString());
+                var cell = comb.Cell("synced");
+                cell.Update(new InputOf($"<synced />"));
+                Assert.Equal($"<synced />", new TextOf(cell.Content()).AsString());
             });
         }
 

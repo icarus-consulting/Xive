@@ -61,4 +61,33 @@ namespace Xive.Mnemonic
             return this.mem.XML();
         }
     }
+
+    /// <summary>
+    /// Memories in Ram.
+    /// </summary>
+    public sealed class RamMemories2 : IMnemonic2
+    {
+        private readonly IMnemonic2 mem;
+
+        /// <summary>
+        /// Memories in Ram.
+        /// </summary>
+        public RamMemories2()
+        {
+            this.mem =
+                new SimpleMemories2(
+                    new RamContents()
+                );
+        }
+
+        public IProps Props(string scope, string id)
+        {
+            return this.mem.Props(scope, id);
+        }
+
+        public IContents Contents()
+        {
+            return this.mem.Contents();
+        }
+    }
 }

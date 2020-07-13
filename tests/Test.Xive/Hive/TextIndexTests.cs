@@ -16,7 +16,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void AddsItems()
         {
-            var idx = new TextIndex("test", new RamMemories());
+            var idx = new TextIndex("test", new RamMemories2());
             idx.Add("123");
             Assert.True(idx.Has("123"));
         }
@@ -24,7 +24,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemovesFromIndex()
         {
-            var idx = new TextIndex("test", new RamMemories());
+            var idx = new TextIndex("test", new RamMemories2());
             idx.Add("123");
             idx.Remove("123");
             Assert.False(idx.Has("123"));
@@ -33,27 +33,27 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemovesCells()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123").Cell("xunit-test").Update(new InputOf("content"));
             idx.Remove("123");
-            Assert.DoesNotContain($"test/123/xunit-test", mem.Data().Knowledge());
+            Assert.DoesNotContain($"test/123/xunit-test", mem.Contents().Knowledge());
         }
 
         [Fact]
         public void RemovesXmls()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123").Xocument("xunit-test").Modify(new Directives().Xpath("/xunit-test").Add("content").Set("boo"));
             idx.Remove("123");
-            Assert.DoesNotContain($"test/123/xunit-test", mem.XML().Knowledge());
+            Assert.DoesNotContain($"test/123/xunit-test", mem.Contents().Knowledge());
         }
 
         [Fact]
         public void FiltersItems()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123");
             idx.Add("456");
@@ -68,7 +68,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void FindsSingleItem()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123")
                 .Cell("zäll")
@@ -89,7 +89,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RejectsUnknownSingleItem()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
 
             Assert.Throws<ArgumentException>(() =>
@@ -100,7 +100,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void CachesItems()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123");
 
@@ -116,11 +116,11 @@ namespace Xive.Hive.Test
         [Fact]
         public void ReloadsCacheAfterAdd()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123");
 
-            mem.Data().Update("test/hq/catalog.cat", new byte[0]);
+            mem.Contents().UpdateBytes("test/hq/catalog.cat", new byte[0]);
             idx.Add("456"); //trigger reloading from file by updating index
 
             Assert.False(idx.Has("123"));
@@ -129,11 +129,11 @@ namespace Xive.Hive.Test
         [Fact]
         public void ReloadsCacheAfterRemove()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             idx.Add("123");
 
-            mem.Data().Update("test/hq/catalog.cat", new byte[0]);
+            mem.Contents().UpdateBytes("test/hq/catalog.cat", new byte[0]);
 
             idx.Add("456");
             idx.Remove("456"); //trigger reloading from file by updating index
@@ -144,7 +144,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void WorksWithLargeData()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             var random = new Random();
             for (int i = 0; i < 1000; i++)
@@ -165,7 +165,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemovesWithLargeData()
         {
-            var mem = new RamMemories();
+            var mem = new RamMemories2();
             var idx = new TextIndex("test", mem);
             var random = new Random();
             var numbers = new List<string>();

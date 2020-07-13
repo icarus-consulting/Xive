@@ -1,16 +1,31 @@
 ﻿using System.IO;
 using System.Xml.Linq;
-using Xive.Mnemonic.Content;
 using Xunit;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
-namespace Xive.Test.Mnemonic.Content
+namespace Xive.Mnemonic.Content.Test
 {
     public sealed class FileContentsTests
     {
+        [Fact]
+        public void DeliversKnowledge()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var directory = $"{root}/a/b\\c";
+                Directory.CreateDirectory(directory);
+                File.WriteAllText(Path.Combine(directory, "content.dat"), "Kßeiv");
+                Assert.Contains(
+                    "a/b/c/content.dat",
+                    new FileContents(root, new LocalSyncPipe()).Knowledge()
+                );
+            }
+        }
+
         [Fact]
         public void DeliversBytes()
         {

@@ -33,13 +33,13 @@ public sealed class RamHive : HiveEnvelope
     /// <summary>
     /// A hive which stores contents in RAM.
     /// </summary>
-    public RamHive(string scope) : this(scope, new RamMemories())
+    public RamHive(string scope) : this(scope, new RamMemories2())
     { }
 
     /// <summary>
     /// A hive which stores contents in RAM.
     /// </summary>
-    internal RamHive(string scope, IMnemonic mem) : base(
+    internal RamHive(string scope, IMnemonic2 mem) : base(
         new ScalarOf<IHive>(() => 
             new MemorizedHive(scope, mem)
         )

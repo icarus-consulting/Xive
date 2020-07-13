@@ -30,12 +30,12 @@ public sealed class FileHive : HiveEnvelope
     /// <summary>
     /// A hive whose contents are stored in files.
     /// </summary>
-    public FileHive(string root, string scope) : this(scope, new FileMemories(root))
+    public FileHive(string root, string scope) : this(scope, new FileMemories2(root))
     { }
 
     /// <summary>
     /// A hive whose contents are stored in files.
     /// </summary>
-    internal FileHive(string scope, IMnemonic mem) : base(new ScalarOf<IHive>(() => new MemorizedHive(scope, mem)))
+    internal FileHive(string scope, IMnemonic2 mem) : base(new ScalarOf<IHive>(() => new MemorizedHive(scope, mem)))
     { }
 }

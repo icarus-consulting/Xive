@@ -21,6 +21,31 @@ namespace Xive.Mnemonic.Content.Test
         }
 
         [Fact]
+        public void DeliversKnowledge()
+        {
+            Assert.Contains(
+                "a/b/c.dat",
+                new RamContents(
+                    new KeyValuePair<string, byte[]>(@"a/b/c.dat", new byte[1] { 0x13 })
+                ).Knowledge()
+            );
+        }
+
+        [Fact]
+        public void UpdatesKnowledge()
+        {
+            var mem =
+                new RamContents(
+                    new KeyValuePair<string, byte[]>(@"a/b/c.dat", new byte[1] { 0x13 })
+                );
+
+            mem.UpdateBytes("a/b/c.dat", new byte[0]);
+            Assert.Empty(
+                mem.Knowledge()
+            );
+        }
+
+        [Fact]
         public void DeliversAbsentBytes()
         {
             Assert.Equal(

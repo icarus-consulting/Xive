@@ -35,13 +35,13 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that is stored in a file.
         /// </summary>
-        public FileComb(string root, string name) : this(name, new FileMemories(root))
+        public FileComb(string root, string name) : this(name, new FileMemories2(root))
         { }
 
         /// <summary>
         /// A comb that is stored in a file.
         /// </summary>
-        internal FileComb(string name, IMnemonic mem)
+        internal FileComb(string name, IMnemonic2 mem)
         {
             this.core = new MemorizedComb(name, mem);
         }

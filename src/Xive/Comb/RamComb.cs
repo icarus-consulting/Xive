@@ -34,13 +34,13 @@ namespace Xive.Comb
         /// <summary>
         /// A comb that lives in memory.
         /// </summary>
-        public RamComb(string name) : this(name, new RamMemories())
+        public RamComb(string name) : this(name, new RamMemories2())
         { }
 
         /// <summary>
         /// A comb that lives in memory.
         /// </summary>
-        internal RamComb(string name, IMnemonic mem)
+        internal RamComb(string name, IMnemonic2 mem)
         {
             this.core = new MemorizedComb(name, mem);
         }

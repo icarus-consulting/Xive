@@ -22,6 +22,7 @@
 
 using System.Xml.Linq;
 using Xive.Cache;
+using Xive.Mnemonic.Content;
 
 namespace Xive.Mnemonic
 {
@@ -67,6 +68,45 @@ namespace Xive.Mnemonic
         public IMemory<XNode> XML()
         {
             return this.mem.XML();
+        }
+    }
+
+    /// <summary>
+    /// Memories in Files.
+    /// </summary>
+    public sealed class FileMemories2 : IMnemonic2
+    {
+        private readonly SimpleMemories2 mem;
+
+        /// <summary>
+        /// Memories in Files.
+        /// </summary>
+        /// <param name="writeAsync">if true, when updating a memory, the file is written asynchronously. 
+        /// Use this in combination with a cache, because the cache is up-to-date, no matter when the file is written.</param>
+        public FileMemories2(string root, bool writeAsync = false) : this(root, new LocalSyncPipe())
+        { }
+
+        /// <summary>
+        /// Memories in Files.
+        /// </summary>
+        /// <param name="writeAsync">if true, when updating a memory, the file is written asynchronously. 
+        /// Use this in combination with a cache, because the cache is up-to-date, no matter when the file is written.</param>
+        public FileMemories2(string root, ISyncPipe pipe, bool writeAsync = false)
+        {
+            this.mem =
+                new SimpleMemories2(
+                    new FileContents(root, pipe, writeAsync)
+                );
+        }
+
+        public IProps Props(string scope, string id)
+        {
+            return this.mem.Props(scope, id);
+        }
+
+        public IContents Contents()
+        {
+            return this.mem.Contents();
         }
     }
 }

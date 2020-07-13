@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -37,7 +36,7 @@ namespace Xive.Cell
     public sealed class RamCell : ICell
     {
         private readonly IScalar<string> name;
-        private readonly IScalar<IMnemonic> mem;
+        private readonly IScalar<IMnemonic2> mem;
         private readonly string id;
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell() : this(
             new Solid<string>(() => Guid.NewGuid().ToString()),
-            new Solid<IMnemonic>(() => new RamMemories())
+            new Solid<IMnemonic2>(() => new RamMemories2())
         )
         { }
 
@@ -72,10 +71,10 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, IBytes content) : this(
             new Live<string>(() => path),
-            new Solid<IMnemonic>(() =>
+            new Solid<IMnemonic2>(() =>
             {
-                var mem = new RamMemories();
-                mem.Data().Update(path, content.AsBytes());
+                var mem = new RamMemories2();
+                mem.Contents().UpdateBytes(path, content.AsBytes());
                 return mem;
             })
         )
@@ -89,11 +88,11 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(IScalar<string> path, MemoryStream content) : this(
             path,
-            new Solid<IMnemonic>(() =>
+            new Solid<IMnemonic2>(() =>
             {
-                var mem = new RamMemories();
-                mem.Data()
-                    .Update(
+                var mem = new RamMemories2();
+                mem.Contents()
+                    .UpdateBytes(
                         path.Value(),
                         new BytesOf(
                             new InputOf(content)
@@ -112,11 +111,11 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, MemoryStream content) : this(
             new Live<string>(path),
-            new Solid<IMnemonic>(() =>
+            new Solid<IMnemonic2>(() =>
             {
-                var mem = new RamMemories();
-                mem.Data()
-                    .Update(
+                var mem = new RamMemories2();
+                mem.Contents()
+                    .UpdateBytes(
                         path,
                         new BytesOf(
                             new InputOf(content)
@@ -133,7 +132,7 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(string path) : this(path, new RamMemories())
+        public RamCell(string path) : this(path, new RamMemories2())
         { }
 
         /// <summary>
@@ -143,9 +142,9 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="cellMemory">map with content for many items</param>
-        public RamCell(string path, IMnemonic mem) : this(
+        public RamCell(string path, IMnemonic2 mem) : this(
             new Live<string>(path),
-            new Live<IMnemonic>(mem)
+            new Live<IMnemonic2>(mem)
         )
         { }
 
@@ -156,7 +155,7 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="itemMap">map with content for many items</param>
-        internal RamCell(IScalar<string> name, IScalar<IMnemonic> mem)
+        internal RamCell(IScalar<string> name, IScalar<IMnemonic2> mem)
         {
             lock (mem)
             {
@@ -178,8 +177,8 @@ namespace Xive.Cell
         {
             return
                 this.mem.Value()
-                    .Data()
-                    .Content(
+                    .Contents()
+                    .Bytes(
                         new Normalized(this.name.Value()).AsString(),
                         () => new byte[0]
                     );
@@ -194,15 +193,15 @@ namespace Xive.Cell
                 stream.Seek(0, SeekOrigin.Begin);
                 this.mem
                     .Value()
-                    .Data()
-                    .Update(
+                    .Contents()
+                    .UpdateBytes(
                         name,
                         new BytesOf(new InputOf(stream)).AsBytes()
                     );
             }
             else
             {
-                this.mem.Value().Data().Update(name, new byte[0]);
+                this.mem.Value().Contents().UpdateBytes(name, new byte[0]);
             }
         }
 

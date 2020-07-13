@@ -21,10 +21,8 @@
 //SOFTWARE.
 
 using System;
-using System.IO;
 using System.Xml.Linq;
 using Xive.Cell;
-using Xive.Mnemonic;
 using Xunit;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
@@ -77,8 +75,8 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void BlacklistsItems()
         {
-            var mem = new RamMemories();
-            var cache = new CachedMemories(mem, "a/*/blacklisted/*");
+            var mem = new RamMemories2();
+            var cache = new CachedMemories2(mem, "a/*/blacklisted/*");
             var cell =
                     new MemorizedCell(
                         "a/file\\which/is\\blacklisted/data.dat",
@@ -86,16 +84,17 @@ namespace Xive.Mnemonic.Test
                     );
 
             cell.Content();
-            mem.Data().Update("a/file\\which/is\\blacklisted/data.dat", new byte[128]);
+            mem.Contents().UpdateBytes("a/file\\which/is\\blacklisted/data.dat", new byte[128]);
 
-            Assert.False(cache.Data().Knows("a/file\\which/is\\blacklisted/data.dat"));
+            throw new NotImplementedException();
+            Assert.False(cache.Contents().Knowledge().Contains("a/file\\which/is\\blacklisted/data.dat"));
         }
 
         [Fact]
         public void DoesNotCacheOversized()
         {
-            var mem = new RamMemories();
-            var cache = new CachedMemories(mem, 4);
+            var mem = new RamMemories2();
+            var cache = new CachedMemories2(mem, 4);
             var cell =
                 new MemorizedCell(
                     "a/file/which/is/oversized",
@@ -103,27 +102,26 @@ namespace Xive.Mnemonic.Test
                 );
             cell.Update(new InputOf(new byte[128]));
             cell.Content();
-            mem.Data().Update("a/file/which/is/oversized", new byte[0]);
+            mem.Contents().UpdateBytes("a/file/which/is/oversized", new byte[0]);
 
-            Assert.True(cache.Data().Content("a/file/which/is/oversized", () => new byte[0]).Length == 0);
+            throw new NotImplementedException();
+            Assert.True(cache.Contents().Bytes("a/file/which/is/oversized", () => new byte[0]).Length == 0);
         }
 
         [Fact]
         public void RemovesXml()
         {
-            var mem = new RamMemories();
-            var cache = new CachedMemories(mem);
+            var mem = new RamMemories2();
+            var cache = new CachedMemories2(mem);
             var data = new BytesOf(new InputOf("splashy")).AsBytes();
 
-            cache.XML().Update("splashy.xml", new XDocument(new XElement("splashy")));
-            cache.XML().Update("splashy.xml", new XDocument());
+            cache.Contents().UpdateXml("splashy.xml", new XDocument(new XElement("splashy")));
+            cache.Contents().UpdateXml("splashy.xml", new XDocument());
 
-            Assert.Contains(
-                "root",
-                cache.XML().Content("splashy.xml", () => new XElement("root")).ToString()
+            Assert.Equal(
+                "<root />",
+                cache.Contents().Xml("splashy.xml", () => new XDocument(new XElement("root"))).ToString()
             );
-
         }
-
     }
 }

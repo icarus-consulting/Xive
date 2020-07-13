@@ -14,7 +14,7 @@ namespace Xive.Xocument
     /// </summary>
     public sealed class MemorizedXocument : IXocument
     {
-        private readonly IMnemonic memories;
+        private readonly IMnemonic2 memories;
         private readonly IScalar<XNode> node;
         private readonly IScalar<string> root;
         private readonly string name;
@@ -22,13 +22,13 @@ namespace Xive.Xocument
         /// <summary>
         /// A xocument stored in memories.
         /// </summary>
-        public MemorizedXocument(string name, IMnemonic memories)
+        public MemorizedXocument(string name, IMnemonic2 memories)
         {
             this.name = name;
             this.memories = memories;
             this.node =
                 new Live<XNode>(() =>
-                    memories.XML().Content(name, () =>
+                    memories.Contents().Xml(name, () =>
                         new XDocument(
                             new XElement(this.root.Value())
                         )
@@ -58,7 +58,7 @@ namespace Xive.Xocument
         {
             var copy = new XDocument(this.node.Value().Document.Root);
             new Xambler(dirs).ApplyQuietly(copy);
-            this.memories.XML().Update(this.name, copy);
+            this.memories.Contents().UpdateXml(this.name, copy);
         }
 
         public XNode Node()

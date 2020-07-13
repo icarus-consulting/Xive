@@ -321,8 +321,8 @@ namespace Xive.Hive.Test
                 IHive hive =
                     new MemorizedHive(
                         "product",
-                        new CachedMemories(
-                            new FileMemories(dir.Value().FullName, true)
+                        new CachedMemories2(
+                            new FileMemories2(dir.Value().FullName, true)
                         )
                     ).Shifted("machine");
 
