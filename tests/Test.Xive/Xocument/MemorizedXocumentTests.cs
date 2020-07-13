@@ -35,7 +35,7 @@ namespace Xive.Xocument.Test
         [InlineData("B")]
         public void ReadsContent(string expected)
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             mem.Contents()
                 .UpdateXml(
                     "xml-xocks",
@@ -53,7 +53,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void ModifiesContent()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             mem.Contents()
                 .UpdateXml(
                     "xml-xocks",
@@ -79,7 +79,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void FindsNodes()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             mem.Contents()
                 .UpdateXml(
                     "xml-xocks",
@@ -99,7 +99,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void HasNodeContent()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             mem.Contents()
                 .UpdateXml(
                     "xml-xocks",

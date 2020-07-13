@@ -42,7 +42,7 @@ namespace Xive.Xocument
                 return
                     new MemorizedXocument(
                         name,
-                        new FileMemories2(root)
+                        new FileMnemonic(root)
                     );
             })
         )

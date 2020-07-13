@@ -39,7 +39,7 @@ namespace Xive.Props
     /// </summary>
     public sealed class SandboxProps : IProps
     {
-        private readonly IMnemonic mem;
+        private readonly IContents mem;
         private readonly IScalar<IProps> memoryProps;
         private readonly string id;
         private readonly string scope;
@@ -49,7 +49,7 @@ namespace Xive.Props
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
-        public SandboxProps(IMnemonic mem, string scope, string id)
+        public SandboxProps(IContents mem, string scope, string id)
         {
             this.id = id;
             this.scope = scope;
@@ -59,8 +59,7 @@ namespace Xive.Props
                 var stringProps =
                     new TextOf(
                         this.mem
-                            .Data()
-                            .Content(
+                            .Bytes(
                                 new Normalized($"{scope}/{id}/props.cat").AsString(),
                                 () => new byte[0]
                             )
@@ -118,8 +117,7 @@ namespace Xive.Props
             var data = new BytesOf(serialized).AsBytes();
 
             this.mem
-                .Data()
-                .Update(
+                .UpdateBytes(
                     new Normalized($"{scope}/{id}/props.cat").AsString(),
                     data
                 );
@@ -143,7 +141,7 @@ namespace Xive.Props
     /// </summary>
     public sealed class SandboxProps2 : IProps
     {
-        private readonly IMnemonic2 mem;
+        private readonly IMnemonic mem;
         private readonly IScalar<IProps> memoryProps;
         private readonly string id;
         private readonly string scope;
@@ -153,7 +151,7 @@ namespace Xive.Props
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
-        public SandboxProps2(IMnemonic2 mem, string scope, string id)
+        public SandboxProps2(IMnemonic mem, string scope, string id)
         {
             this.id = id;
             this.scope = scope;

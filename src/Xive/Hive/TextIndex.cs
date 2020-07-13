@@ -39,13 +39,13 @@ namespace Xive.Hive
     public sealed class TextIndex : IIndex
     {
         private readonly string scope;
-        private readonly IMnemonic2 mem;
+        private readonly IMnemonic mem;
         private readonly List<string> idCache;
 
         /// <summary>
         /// The index of a xive, realized as a simple text document.
         /// </summary>
-        public TextIndex(string scope, IMnemonic2 mem)
+        public TextIndex(string scope, IMnemonic mem)
         {
             this.mem = mem;
             this.scope = scope;

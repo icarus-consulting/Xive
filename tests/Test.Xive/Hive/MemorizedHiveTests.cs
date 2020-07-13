@@ -37,7 +37,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemembersComb()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             new MemorizedHive("in-memory", mem)
                 .Catalog()
                 .Add("123");
@@ -54,7 +54,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversProps()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("in-memory", mem);
             hive.Catalog()
                 .Add("123");
@@ -74,7 +74,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void ShiftsScope()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("in-memory", mem);
             hive.Catalog()
                 .Add("123");
@@ -86,7 +86,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DistinguishesScope()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("in-memory", mem);
             hive.Catalog()
                 .Add("123");
@@ -100,7 +100,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void PrependsScopeToCombName()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("prepend-this", mem);
             hive.Catalog()
                 .Add("123");
@@ -115,7 +115,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQXocument()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("in-memory", mem);
             hive.HQ().Cell("A").Update(new InputOf(new byte[1] { 0xAB }));
 
@@ -128,7 +128,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemembersCombs()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("in-memory", mem);
             hive.Catalog().Add("123");
             hive.Catalog().Add("456");
@@ -152,7 +152,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void RemembersXocument()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("animal", mem);
             hive.Catalog().Add("123");
             hive.Catalog().Add("456");
@@ -177,7 +177,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void AddsInParallel()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("cars", mem);
 
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
@@ -191,7 +191,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void WritesPropsInParallel()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("cars", mem);
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>
@@ -205,7 +205,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void WritesPropsWhenShifted()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("X", mem);
 
             Parallel.For(0, 256, (i) =>
@@ -224,7 +224,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void WritesComplexInParallel()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("X", mem);
 
             Parallel.For(0, 256, i =>
@@ -260,7 +260,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQInParallelAfterShift()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             IHive hive = new MemorizedHive("cars", mem);
             hive = hive.Shifted("still-parallel");
 
@@ -281,7 +281,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void DeliversHQInParallel()
         {
-            var mem = new RamMemories2();
+            var mem = new RamMnemonic();
             var hive = new MemorizedHive("cars", mem);
 
             Parallel.For(0, Environment.ProcessorCount << 4, i =>

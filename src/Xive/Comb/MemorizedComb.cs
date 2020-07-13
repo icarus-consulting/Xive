@@ -39,13 +39,13 @@ namespace Xive.Comb
     public sealed class MemorizedComb : IHoneyComb
     {
         private readonly IText name;
-        private readonly IMnemonic2 memory;
+        private readonly IMnemonic memory;
 
         /// <summary>
         /// A comb which exists in memory.
         /// By using this ctor, every RamComb with the same name will have the same contents.
         /// </summary>
-        public MemorizedComb(string name, IMnemonic2 mem)
+        public MemorizedComb(string name, IMnemonic mem)
         {
             this.name = new Normalized(name);
             this.memory = mem;

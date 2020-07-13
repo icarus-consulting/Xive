@@ -31,13 +31,13 @@ using Yaapii.Xml;
 
 namespace Xive.Mnemonic.Test
 {
-    public sealed class CachedMemoriesTests
+    public sealed class CachedMnemonicTests
     {
         [Fact]
         public void CachesBytesOnRead()
         {
-            var mem = new RamMemories2();
-            var cache = new CachedMemories2(mem);
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem);
             var data = new BytesOf(new InputOf("splashy")).AsBytes();
 
             cache.Contents().Bytes("cashy", () => data); //read 1
@@ -47,7 +47,8 @@ namespace Xive.Mnemonic.Test
                 "splashy",
                 new TextOf(
                     new InputOf(
-                        cache.Contents().Bytes("cashy", () => throw new ApplicationException($"Assumed to have memory"))
+                        cache.Contents()
+                            .Bytes("cashy", () => throw new ApplicationException($"Assumed to have memory"))
                     )
                 ).AsString()
             );
@@ -58,8 +59,8 @@ namespace Xive.Mnemonic.Test
         public void CachesXmlOnRead()
         {
             var xml = (XNode)new XDocument(new XElement("root", new XText("potato")));
-            var mem = new RamMemories2();
-            var cache = new CachedMemories2(mem);
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem);
 
             cache.Contents().Xml("cashy", () => xml); //read 1
             mem.Contents().UpdateXml("cashy", (XNode)new XDocument(new XElement("root", new XText(""))));
@@ -67,7 +68,8 @@ namespace Xive.Mnemonic.Test
             Assert.Contains(
                 "potato",
                 new XMLCursor(
-                    cache.Contents().Xml("cashy", () => throw new ApplicationException($"Assumed to have memory"))
+                    cache.Contents()
+                        .Xml("cashy", () => throw new ApplicationException($"Assumed to have memory"))
                 ).Values("/root/text()")
             );
         }
@@ -75,8 +77,8 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void IgnoresItems()
         {
-            var mem = new RamMemories2();
-            var cache = new CachedMemories2(mem, "a/*/blacklisted/*");
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem, "a/*/blacklisted/*");
             var cell =
                     new MemorizedCell(
                         "a/file\\which/is\\blacklisted/data.dat",
@@ -93,8 +95,8 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void DoesNotCacheOversized()
         {
-            var mem = new RamMemories2();
-            var cache = new CachedMemories2(mem, 4);
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem, 4);
             var cell =
                 new MemorizedCell(
                     "a/file/which/is/oversized",
@@ -110,8 +112,8 @@ namespace Xive.Mnemonic.Test
         [Fact]
         public void RemovesXml()
         {
-            var mem = new RamMemories2();
-            var cache = new CachedMemories2(mem);
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem);
             var data = new BytesOf(new InputOf("splashy")).AsBytes();
 
             cache.Contents().UpdateXml("splashy.xml", new XDocument(new XElement("splashy")));

@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Xive.Mnemonic;
+using Xive.Mnemonic.Content;
 using Xunit;
 
 namespace Xive.Props.Test
@@ -33,7 +34,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsNames()
         {
-            var props = new SandboxProps(new RamMemories(), "scope", "id");
+            var props = new SandboxProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value");
             Assert.Equal(
                 new List<string>() { "the prop" },
@@ -44,7 +45,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsValue()
         {
-            var props = new SandboxProps(new RamMemories(), "scope", "id");
+            var props = new SandboxProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value");
             Assert.Equal(
                 "the value",
@@ -55,7 +56,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsValues()
         {
-            var props = new SandboxProps(new RamMemories(), "scope", "id");
+            var props = new SandboxProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value", "another value");
             Assert.Equal(
                 new List<string>() { "the value", "another value" },
@@ -66,7 +67,7 @@ namespace Xive.Props.Test
         [Fact]
         public void AcceptsCommaInValues()
         {
-            var props = new SandboxProps(new RamMemories(), "scope", "id");
+            var props = new SandboxProps(new RamContents(), "scope", "id");
             props.Refined("the,:prop", "the,:value", "another,:value");
             Assert.Equal(
                 new List<string>() { "the,:value", "another,:value" },
@@ -77,7 +78,7 @@ namespace Xive.Props.Test
         [Fact]
         public void AcceptsCommaInValue()
         {
-            var props = new SandboxProps(new RamMemories(), "scope", "id");
+            var props = new SandboxProps(new RamContents(), "scope", "id");
             props.Refined("the,:prop", "the,:value");
             Assert.Equal(
                 "the,:value",

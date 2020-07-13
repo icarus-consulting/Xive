@@ -10,13 +10,13 @@ using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Text;
 
-namespace Xive.Mnemonic
+namespace Xive.Mnemonic.Content
 {
     /// <summary>
     /// Content in RAM.
     /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
     /// memory only stores bytes.
-    /// If you want to cache the parsed XML, use <see cref="CachedContent"/>.
+    /// If you want to cache the parsed XML, use <see cref="CachedXmlContents"/>.
     /// </summary>
     public sealed class RamContents : IContents
     {
@@ -26,7 +26,7 @@ namespace Xive.Mnemonic
         /// Content in RAM.
         /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
         /// memory only stores bytes.
-        /// If you want to cache the parsed XML, use <see cref="CachedContent"/>.
+        /// If you want to cache the parsed XML, use <see cref="CachedXmlContents"/>.
         /// </summary>
         public RamContents(params KeyValuePair<string, byte[]>[] bytes) : this(new ConcurrentDictionary<string, byte[]>(bytes))
         { }
@@ -35,7 +35,16 @@ namespace Xive.Mnemonic
         /// Content in RAM.
         /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
         /// memory only stores bytes.
-        /// If you want to cache the parsed XML, use <see cref="CachedContent"/>.
+        /// If you want to cache the parsed XML, use <see cref="CachedXmlContents"/>.
+        /// </summary>
+        public RamContents() : this(new ConcurrentDictionary<string, byte[]>())
+        { }
+
+        /// <summary>
+        /// Content in RAM.
+        /// Please note that when you read XML, the xml will get parsed every time it is read, because this 
+        /// memory only stores bytes.
+        /// If you want to cache the parsed XML, use <see cref="CachedXmlContents"/>.
         /// </summary>
         public RamContents(ConcurrentDictionary<string, byte[]> bytes)
         {

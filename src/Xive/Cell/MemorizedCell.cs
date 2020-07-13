@@ -35,11 +35,11 @@ namespace Xive.Cell
     public sealed class MemorizedCell : ICell
     {
         private readonly IText name;
-        private readonly IScalar<IMnemonic2> mem;
+        private readonly IScalar<IMnemonic> mem;
 
-        public MemorizedCell(string name, byte[] data, IMnemonic2 mem) : this(
+        public MemorizedCell(string name, byte[] data, IMnemonic mem) : this(
             name, 
-            new ScalarOf<IMnemonic2>(() =>
+            new ScalarOf<IMnemonic>(() =>
             {
                 mem.Contents().UpdateBytes(name, data);
                 return mem;
@@ -50,13 +50,13 @@ namespace Xive.Cell
         /// <summary>
         /// A cell whose content is stored in memory.
         /// </summary>
-        public MemorizedCell(string name, IMnemonic2 mem) : this(name, new ScalarOf<IMnemonic2>(mem))
+        public MemorizedCell(string name, IMnemonic mem) : this(name, new ScalarOf<IMnemonic>(mem))
         { }
 
         /// <summary>
         /// A cell whose content is stored in memory.
         /// </summary>
-        private MemorizedCell(string name, ScalarOf<IMnemonic2> mem)
+        private MemorizedCell(string name, ScalarOf<IMnemonic> mem)
         {
             this.name = new Normalized(name);
             this.mem = mem;

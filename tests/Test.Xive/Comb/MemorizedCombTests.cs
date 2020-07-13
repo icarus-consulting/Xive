@@ -12,7 +12,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void GutsIncludeXocuments()
         {
-            var comb = new MemorizedComb("the name", new RamMemories2());
+            var comb = new MemorizedComb("the name", new RamMnemonic());
             comb.Xocument("xocument")
                 .Modify(
                     new Directives()
@@ -31,7 +31,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void GutsIncludeData()
         {
-            var comb = new MemorizedComb("the name", new RamMemories2());
+            var comb = new MemorizedComb("the name", new RamMnemonic());
             comb.Cell("cell").Update(new InputOf("cool text"));
 
             var values = 
@@ -44,7 +44,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void NormalizesName()
         {
-            var comb = new MemorizedComb("name\\with/diff", new RamMemories2());
+            var comb = new MemorizedComb("name\\with/diff", new RamMnemonic());
             Assert.Equal(
                 "name/with/diff",
                 comb.Name()
@@ -55,7 +55,7 @@ namespace Xive.Comb.Test
         public void HasProps()
         {
             var name = "name";
-            var comb = new MemorizedComb(name, new RamMemories2());
+            var comb = new MemorizedComb(name, new RamMnemonic());
             comb.Props().Refined("testprop", "first");
             Assert.Equal(
                 "first",
@@ -70,7 +70,7 @@ namespace Xive.Comb.Test
             {
                 var comb =
                     new MemorizedComb("comb",
-                        new FileMemories2(temp.Value().FullName)
+                        new FileMnemonic(temp.Value().FullName)
                     );
 
                 comb.Cell("some-data")

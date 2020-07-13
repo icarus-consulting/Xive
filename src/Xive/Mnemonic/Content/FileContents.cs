@@ -30,6 +30,15 @@ namespace Xive.Mnemonic.Content
         /// NAlso note that when you read XML, the xml will get parsed every time it is read.
         /// If you want to cache the parsed bytes and parsed XML, use <see cref="CachedContent"/>.
         /// </summary>
+        public FileContents(string root, bool writeAsync = false) : this(root, new LocalSyncPipe(), writeAsync)
+        { }
+
+        /// <summary>
+        /// Content in files.
+        /// Please note that every time you read, the file will be read from disk.
+        /// NAlso note that when you read XML, the xml will get parsed every time it is read.
+        /// If you want to cache the parsed bytes and parsed XML, use <see cref="CachedContent"/>.
+        /// </summary>
         public FileContents(string root, ISyncPipe sync, bool writeAsync = false)
         {
             this.root = root;
@@ -58,8 +67,8 @@ namespace Xive.Mnemonic.Content
 
         public IList<string> Knowledge()
         {
-            return 
-                new Mapped<string,string>(
+            return
+                new Mapped<string, string>(
                     file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
                     new ListOf<string>(Directory.GetFiles(this.root, "*", SearchOption.AllDirectories))
                 );
@@ -92,10 +101,13 @@ namespace Xive.Mnemonic.Content
             if (!File.Exists(System.IO.Path.Combine(this.root, name)))
             {
                 result = ifAbsent();
-                if (result.Document.Elements().GetEnumerator().MoveNext())
+                this.sync.Flush(name, () =>
                 {
-                    UpdateXml(name, result);
-                }
+                    if (result.Document.Elements().GetEnumerator().MoveNext())
+                    {
+                        UpdateXml(name, result);
+                    }
+                });
             }
             else
             {

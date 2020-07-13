@@ -154,7 +154,7 @@ namespace Xive.Comb.Test
         {
             using (var temp = new TempDirectory())
             {
-                var memory = new FileMemories2(temp.Value().FullName);
+                var memory = new FileMnemonic(temp.Value().FullName);
                 var comb = new FileComb("my-comb", memory);
                 comb.Props().Refined("name", "value");
                 Assert.Equal(
@@ -169,7 +169,7 @@ namespace Xive.Comb.Test
         {
             using (var temp = new TempDirectory())
             {
-                var memory = new FileMemories2(temp.Value().FullName);
+                var memory = new FileMnemonic(temp.Value().FullName);
                 var comb = new FileComb("my-comb", memory);
                 comb.Props().Refined("name", "value", "value2");
                 Assert.Equal(
@@ -184,7 +184,7 @@ namespace Xive.Comb.Test
         {
             using (var temp = new TempDirectory())
             {
-                var memory = new FileMemories2(temp.Value().FullName);
+                var memory = new FileMnemonic(temp.Value().FullName);
                 var comb = new FileComb("my-comb", memory);
                 comb.Props().Refined("name", "value", "value2");
                 comb.Props().Refined("name");

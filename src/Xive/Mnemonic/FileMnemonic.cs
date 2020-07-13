@@ -20,49 +20,37 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using Xive.Mnemonic;
+using Xive.Cache;
+using Xive.Mnemonic.Content;
 
-namespace Xive.Comb
+namespace Xive.Mnemonic
 {
     /// <summary>
-    /// A comb that lives in memory.
+    /// Memories in Ram.
     /// </summary>
-    public sealed class RamComb : IHoneyComb
+    public sealed class FileMnemonic : IMnemonic
     {
-        private readonly IHoneyComb core;
+        private readonly IMnemonic mem;
 
         /// <summary>
-        /// A comb that lives in memory.
+        /// Memories in Ram.
         /// </summary>
-        public RamComb(string name) : this(name, new RamMnemonic())
-        { }
-
-        /// <summary>
-        /// A comb that lives in memory.
-        /// </summary>
-        internal RamComb(string name, IMnemonic mem)
+        public FileMnemonic(string root)
         {
-            this.core = new MemorizedComb(name, mem);
+            this.mem =
+                new SimpleMnemonic(
+                    new FileContents(root, new LocalSyncPipe())
+                );
         }
 
-        public ICell Cell(string name)
+        public IProps Props(string scope, string id)
         {
-            return this.core.Cell(name);
+            return this.mem.Props(scope, id);
         }
 
-        public string Name()
+        public IContents Contents()
         {
-            return this.core.Name();
-        }
-
-        public IProps Props()
-        {
-            return this.core.Props();
-        }
-
-        public IXocument Xocument(string name)
-        {
-            return this.core.Xocument(name);
+            return this.mem.Contents();
         }
     }
 }

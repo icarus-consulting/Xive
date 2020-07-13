@@ -34,7 +34,7 @@ namespace Xive.Xocument
             new ScalarOf<IXocument>(() =>
                 new MemorizedXocument(
                     name,
-                    new RamMemories2()
+                    new RamMnemonic()
                 )
             )
         )

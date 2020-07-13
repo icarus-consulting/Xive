@@ -36,7 +36,7 @@ namespace Xive.Cell
     public sealed class RamCell : ICell
     {
         private readonly IScalar<string> name;
-        private readonly IScalar<IMnemonic2> mem;
+        private readonly IScalar<IMnemonic> mem;
         private readonly string id;
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Xive.Cell
         /// </summary>
         public RamCell() : this(
             new Solid<string>(() => Guid.NewGuid().ToString()),
-            new Solid<IMnemonic2>(() => new RamMemories2())
+            new Solid<IMnemonic>(() => new RamMnemonic())
         )
         { }
 
@@ -71,9 +71,9 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, IBytes content) : this(
             new Live<string>(() => path),
-            new Solid<IMnemonic2>(() =>
+            new Solid<IMnemonic>(() =>
             {
-                var mem = new RamMemories2();
+                var mem = new RamMnemonic();
                 mem.Contents().UpdateBytes(path, content.AsBytes());
                 return mem;
             })
@@ -88,9 +88,9 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(IScalar<string> path, MemoryStream content) : this(
             path,
-            new Solid<IMnemonic2>(() =>
+            new Solid<IMnemonic>(() =>
             {
-                var mem = new RamMemories2();
+                var mem = new RamMnemonic();
                 mem.Contents()
                     .UpdateBytes(
                         path.Value(),
@@ -111,9 +111,9 @@ namespace Xive.Cell
         /// </summary>
         public RamCell(string path, MemoryStream content) : this(
             new Live<string>(path),
-            new Solid<IMnemonic2>(() =>
+            new Solid<IMnemonic>(() =>
             {
-                var mem = new RamMemories2();
+                var mem = new RamMnemonic();
                 mem.Contents()
                     .UpdateBytes(
                         path,
@@ -132,7 +132,7 @@ namespace Xive.Cell
         /// If you create two cells with the same path using this ctor,
         /// they will not have the same content.
         /// </summary>
-        public RamCell(string path) : this(path, new RamMemories2())
+        public RamCell(string path) : this(path, new RamMnemonic())
         { }
 
         /// <summary>
@@ -142,9 +142,9 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="cellMemory">map with content for many items</param>
-        public RamCell(string path, IMnemonic2 mem) : this(
+        public RamCell(string path, IMnemonic mem) : this(
             new Live<string>(path),
-            new Live<IMnemonic2>(mem)
+            new Live<IMnemonic>(mem)
         )
         { }
 
@@ -155,7 +155,7 @@ namespace Xive.Cell
         /// </summary>
         /// <param name="path">path to the item (key to the map)</param>
         /// <param name="itemMap">map with content for many items</param>
-        internal RamCell(IScalar<string> name, IScalar<IMnemonic2> mem)
+        internal RamCell(IScalar<string> name, IScalar<IMnemonic> mem)
         {
             lock (mem)
             {

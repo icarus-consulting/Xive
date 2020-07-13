@@ -22,6 +22,7 @@
 
 using System.IO;
 using Xive.Mnemonic;
+using Xive.Mnemonic.Content;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
@@ -34,18 +35,18 @@ namespace Xive.Cell
     public sealed class CachedCell : ICell
     {
         private readonly ICell origin;
-        private readonly IMnemonic mem;
+        private readonly IContents mem;
 
         /// <summary>
         /// A cell which is cached in memory.
         /// </summary>
-        public CachedCell(ICell origin) : this(origin, new RamMemories())
+        public CachedCell(ICell origin) : this(origin, new RamContents())
         { }
 
         /// <summary>
         /// A cell which is cached in memory.
         /// </summary>
-        internal CachedCell(ICell origin, IMnemonic cache)
+        internal CachedCell(ICell origin, IContents cache)
         {
             this.origin = origin;
             this.mem = cache;
@@ -56,8 +57,7 @@ namespace Xive.Cell
         {
             return
                 this.mem
-                    .Data()
-                    .Content(
+                    .Bytes(
                         this.origin.Name(),
                         () => this.origin.Content()
                     );
@@ -75,8 +75,7 @@ namespace Xive.Cell
             {
                 stream.Seek(0, SeekOrigin.Begin);
                 this.mem
-                    .Data()
-                    .Update(
+                    .UpdateBytes(
                         this.origin.Name(), 
                         new BytesOf(new InputOf(stream)).AsBytes()
                     );
@@ -84,14 +83,12 @@ namespace Xive.Cell
             else
             {
                 this.mem
-                    .Data()
-                    .Update(this.origin.Name(), new byte[0]);
+                    .UpdateBytes(this.origin.Name(), new byte[0]);
             }
             this.origin.Update(
                 new InputOf(
                     this.mem
-                        .Data()
-                        .Content(this.origin.Name(), () => new byte[0])
+                        .Bytes(this.origin.Name(), () => new byte[0])
                 )
             );
         }

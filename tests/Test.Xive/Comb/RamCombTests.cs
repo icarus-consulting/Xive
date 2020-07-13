@@ -36,7 +36,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersCell()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             new RamComb("my-comb", memory)
                 .Cell("my-cell")
                 .Update(new InputOf("larva"));
@@ -56,7 +56,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersXocument()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             new RamComb("my-comb", memory)
                 .Xocument("xoctor.xml")
                 .Modify(
@@ -76,7 +76,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersProps()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             new RamComb("my-comb", memory)
                 .Props()
                 .Refined("beer", "astra");
@@ -92,7 +92,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void DeliversXocument()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("some.xml"))
             {
@@ -106,7 +106,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemembersSubPathXocument()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/dir/some.xml"))
             {
@@ -124,7 +124,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void XocumentRootSkipsSubDir()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             var comb = new RamComb("my-comb", memory);
             using (var xoc = comb.Xocument("sub/some.xml"))
             {
@@ -138,7 +138,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void HasProps()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             var comb = new RamComb("my-comb", memory);
             comb.Props().Refined("name", "value");
             Assert.Equal(
@@ -151,7 +151,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void HasArrayProps()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             var comb = new RamComb("my-comb", memory);
             comb.Props().Refined("name", "value", "value2");
             Assert.Equal(
@@ -164,7 +164,7 @@ namespace Xive.Comb.Test
         [Fact]
         public void RemovesProp()
         {
-            var memory = new RamMemories2();
+            var memory = new RamMnemonic();
             var comb = new RamComb("my-comb", memory);
             comb.Props().Refined("name", "value", "value2");
             comb.Props().Refined("name");

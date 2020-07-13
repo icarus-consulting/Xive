@@ -20,62 +20,25 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.IO;
-using System.Xml.Linq;
 using Xive.Cache;
-using Xive.Hive;
+using Xive.Mnemonic.Content;
 
 namespace Xive.Mnemonic
 {
     /// <summary>
     /// Memories in Ram.
     /// </summary>
-    public sealed class RamMemories : IMnemonic
+    public sealed class RamMnemonic : IMnemonic
     {
         private readonly IMnemonic mem;
 
         /// <summary>
         /// Memories in Ram.
         /// </summary>
-        public RamMemories()
-        {
-            this.mem = 
-                new SimpleMemories(
-                    new XmlRamMemory(), 
-                    new DataRamMemory()
-                );
-        }
-
-        public IMemory<byte[]> Data()
-        {
-            return this.mem.Data();
-        }
-
-        public IProps Props(string scope, string id)
-        {
-            return this.mem.Props(scope, id);
-        }
-
-        public IMemory<XNode> XML()
-        {
-            return this.mem.XML();
-        }
-    }
-
-    /// <summary>
-    /// Memories in Ram.
-    /// </summary>
-    public sealed class RamMemories2 : IMnemonic2
-    {
-        private readonly IMnemonic2 mem;
-
-        /// <summary>
-        /// Memories in Ram.
-        /// </summary>
-        public RamMemories2()
+        public RamMnemonic()
         {
             this.mem =
-                new SimpleMemories2(
+                new SimpleMnemonic(
                     new RamContents()
                 );
         }
