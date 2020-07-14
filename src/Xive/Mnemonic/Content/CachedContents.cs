@@ -97,7 +97,6 @@ namespace Xive.Mnemonic.Content
                 if (isEmpty)
                 {
                     this.byteCache.Remove(name);
-                    this.origin.UpdateBytes(name, data);
                 }
                 else
                 {
@@ -105,13 +104,10 @@ namespace Xive.Mnemonic.Content
                         .Update(
                             name, 
                             () => data,
-                            () =>
-                            {
-                                this.origin.UpdateBytes(name, data);
-                                return data;
-                            }
+                            () => data
                         );
                 }
+                this.origin.UpdateBytes(name, data);
                 InvalidateKnowledge();
             }
         }
@@ -125,23 +121,17 @@ namespace Xive.Mnemonic.Content
                 if (isEmpty)
                 {
                     this.xmlCache.Remove(name);
-                    this.origin.UpdateXml(name, xml);
                 }
                 else
                 {
-                    var elem = new FirstOf<XElement>(xml.Document.Elements()).Value();
-
                     this.xmlCache
                         .Update(
                             name,
                             () => xml,
-                            () =>
-                            {
-                                this.origin.UpdateXml(name, xml);
-                                return xml;
-                            }
+                            () => xml
                         );
                 }
+                this.origin.UpdateXml(name, xml);
                 InvalidateKnowledge();
             }
         }
