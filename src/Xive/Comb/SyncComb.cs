@@ -31,21 +31,21 @@ namespace Xive.Comb
     public sealed class SyncComb : IHoneyComb
     {
         private readonly IHoneyComb comb;
-        private readonly ISyncValve syncValve;
+        private readonly ISyncPipe sync;
 
         /// <summary>
         /// A threadsafe comb.
         /// </summary>
-        public SyncComb(IHoneyComb comb) : this(comb, new SyncGate())
+        public SyncComb(IHoneyComb comb) : this(comb, new LocalSyncPipe())
         { }
 
         /// <summary>
         /// A threadsafe comb.
         /// </summary>
-        public SyncComb(IHoneyComb comb, ISyncValve syncValve)
+        public SyncComb(IHoneyComb comb, ISyncPipe sync)
         {
             this.comb = comb;
-            this.syncValve = syncValve;
+            this.sync = sync;
         }
 
         public string Name()
@@ -58,7 +58,7 @@ namespace Xive.Comb
 
         public ICell Cell(string name)
         {
-            return new SyncCell(comb.Cell(name), this.syncValve);
+            return new SyncCell(comb.Cell(name), this.sync);
         }
 
         public IXocument Xocument(string name)
@@ -67,7 +67,7 @@ namespace Xive.Comb
                 new SyncXocument(
                     $"{comb.Name()}/{name}",
                     this.comb.Xocument(name),
-                    this.syncValve
+                    this.sync
                 );
         }
 

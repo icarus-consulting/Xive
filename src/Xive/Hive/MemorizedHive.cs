@@ -34,24 +34,22 @@ namespace Xive.Hive
     {
         private readonly string scope;
         private readonly ConcurrentDictionary<string, IIndex> indices;
-        private readonly ISyncValve valve;
         private readonly IMnemonic mem;
 
         /// <summary>
         /// A hive which is memorized in the given memories.
         /// </summary>
-        public MemorizedHive(string scope, IMnemonic memories) : this(scope, memories, new ConcurrentDictionary<string, IIndex>(), new SyncGate())
+        public MemorizedHive(string scope, IMnemonic memories) : this(scope, memories, new ConcurrentDictionary<string, IIndex>())
         { }
 
         /// <summary>
         /// A hive which is memorized in the given memories.
         /// </summary>
-        public MemorizedHive(string scope, IMnemonic memories, ConcurrentDictionary<string, IIndex> indices, ISyncValve valve)
+        public MemorizedHive(string scope, IMnemonic memories, ConcurrentDictionary<string, IIndex> indices)
         {
             this.scope = scope;
             this.mem = memories;
             this.indices = indices;
-            this.valve = valve;
         }
 
         public IIndex Catalog()
@@ -87,7 +85,7 @@ namespace Xive.Hive
 
         public IHive Shifted(string scope)
         {
-            return new MemorizedHive(scope, this.mem, this.indices, this.valve);
+            return new MemorizedHive(scope, this.mem, this.indices);
         }
     }
 }

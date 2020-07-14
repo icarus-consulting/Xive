@@ -36,7 +36,7 @@ namespace Xive.Xocument.Test
         public void ReadsExclusive()
         {
             var accesses = 0;
-            var syncGate = new SyncGate();
+            var syncGate = new LocalSyncPipe();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 var xoc =
@@ -60,7 +60,7 @@ namespace Xive.Xocument.Test
         [Fact]
         public void ModifiesExclusive()
         {
-            var syncGate = new SyncGate();
+            var syncGate = new LocalSyncPipe();
             var mem = new RamMnemonic();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {

@@ -49,7 +49,7 @@ namespace Xive.Cell.Test
                     }
                 );
 
-            var valve = new SyncGate();
+            var valve = new LocalSyncPipe();
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
             {
                 Assert.Equal(
@@ -65,7 +65,7 @@ namespace Xive.Cell.Test
         public void DoesNotBlockItself()
         {
             var cell = new RamCell();
-            var gate = new SyncGate();
+            var gate = new LocalSyncPipe();
             Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
             {
                 var content = "ABC";
@@ -87,7 +87,7 @@ namespace Xive.Cell.Test
         public void WorksWithRamCell()
         {
             var cell = new RamCell();
-            var gate = new SyncGate();
+            var gate = new LocalSyncPipe();
             var synced = new SyncCell(cell, gate);
                 synced.Update(new InputOf("its so hot outside"));
             Assert.Equal(
@@ -102,7 +102,7 @@ namespace Xive.Cell.Test
             using (var file = new TempFile())
             {
                 var path = file.Value();
-                var gate = new SyncGate();
+                var gate = new LocalSyncPipe();
                 Parallel.For(0, Environment.ProcessorCount << 4, (current) =>
                 {
                     var cell = new SyncCell(new FileCell(path), gate);

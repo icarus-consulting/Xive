@@ -20,10 +20,8 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System;
 using System.Collections.Generic;
-using System.Text;
-using Xive.Mnemonic;
+using Xive.Cache;
 using Xive.Mnemonic.Content;
 using Xunit;
 
@@ -34,7 +32,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsNames()
         {
-            var props = new SandboxProps(new RamContents(), "scope", "id");
+            var props = new SandboxProps(new SimpleMnemonic(new RamContents()), "scope", "id");
             props.Refined("the prop", "the value");
             Assert.Equal(
                 new List<string>() { "the prop" },

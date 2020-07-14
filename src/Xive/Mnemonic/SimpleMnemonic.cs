@@ -28,7 +28,7 @@ namespace Xive.Cache
                     $"{scope}/{id}",
                     key =>
                     {
-                        return new SandboxProps2(this, scope, id);
+                        return new SandboxProps(this, scope, id);
                     }
                 );
         }

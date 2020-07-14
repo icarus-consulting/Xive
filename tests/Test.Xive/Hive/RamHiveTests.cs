@@ -141,7 +141,7 @@ namespace Xive.Hive.Test
         [Fact]
         public void AddsInParallel()
         {
-            var valve = new SyncGate();
+            var valve = new LocalSyncPipe();
             var hive = new RamHive("testRamHive");
 
             Parallel.For(0, Environment.ProcessorCount << 4, (i) =>
