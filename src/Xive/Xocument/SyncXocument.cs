@@ -81,7 +81,7 @@ namespace Xive.Xocument
         public IList<string> Values(string xpath)
         {
             IList<string> result = new List<string>();
-            this.sync.Flush(this.name, () => this.origin.Values(xpath));
+            this.sync.Flush(this.name, () => result = this.origin.Values(xpath));
             return result;
         }
 
