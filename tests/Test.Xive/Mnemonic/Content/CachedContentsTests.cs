@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Xive.Mnemonic.Cache;
 using Xunit;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
@@ -26,6 +27,25 @@ namespace Xive.Mnemonic.Content.Test
         }
 
         [Fact]
+        public void UpdatesOriginIfIgnored()
+        {
+            var contents = new RamContents();
+            new CachedContents(
+                contents,
+                new ManyOf<string>("a/*"),
+                Int64.MaxValue
+            ).UpdateBytes(
+                "a/b/c.dat",
+                new byte[1] { 0x13 }
+            );
+
+            Assert.Equal(
+                0x13,
+                contents.Bytes("a/b/c.dat", () => new byte[0])[0]
+            );
+        }
+
+        [Fact]
         public void DeliversXNodeFromBytes()
         {
             Assert.Equal(
@@ -35,6 +55,25 @@ namespace Xive.Mnemonic.Content.Test
                         new KeyValuePair<string, byte[]>("a/b/c.xml", new BytesOf(new XDocument(new XElement("elem", "content")).ToString()).AsBytes())
                     )
                 ).Xml("a/b/c.xml", () => new XDocument()).ToString()
+            );
+        }
+
+        [Fact]
+        public void UpdatesXNodeIfIgnored()
+        {
+            var contents = new RamContents();
+            new CachedContents(
+                contents,
+                new ManyOf<string>("a/*"),
+                Int64.MaxValue
+            ).UpdateXml(
+                "a/b/c.dat",
+                new XDocument(new XElement("elem", "content"))
+            );
+
+            Assert.Equal(
+                "<elem>content</elem>",
+                contents.Xml("a/b/c.dat", () => new XDocument()).ToString()
             );
         }
 
