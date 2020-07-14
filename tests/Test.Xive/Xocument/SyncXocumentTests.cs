@@ -58,6 +58,22 @@ namespace Xive.Xocument.Test
         }
 
         [Fact]
+        public void ReadsValues()
+        {
+            var xoc =
+                new SyncXocument("synced",
+                    new RamXocument("synced"),
+                    new LocalSyncPipe()
+                );
+            xoc.Modify(new Directives().Xpath("/synced").Set("here"));
+
+            Assert.Equal(
+                "here",
+                xoc.Values("/synced/text()")[0]
+            );
+        }
+
+        [Fact]
         public void ModifiesExclusive()
         {
             var syncGate = new LocalSyncPipe();

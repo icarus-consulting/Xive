@@ -146,5 +146,18 @@ namespace Xive.Comb.Test
                 Assert.Equal("cell content", new TextOf(cell.Content()).AsString());
             });
         }
+
+        [Fact]
+        public void WorksWithRamXocument()
+        {
+            var comb =
+                new SyncComb(
+                    new RamComb("myRamComb")
+                );
+            
+            var xoc = comb.Xocument("test");
+            xoc.Modify(new Directives().Xpath("/test").Add("root").Add("items").Add("item").Attr("id", "123"));
+            Assert.Equal("123", xoc.Values("/test/root/items/item/@id")[0]);
+        }
     }
 }
