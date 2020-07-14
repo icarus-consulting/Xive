@@ -20,7 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using System.Threading;
 using Yaapii.Atoms;
 
 namespace Xive.Cell
@@ -30,21 +29,14 @@ namespace Xive.Cell
     /// </summary>
     public sealed class SyncCell : ICell
     {
-        private readonly ISyncValve valve;
+        private readonly ISyncPipe sync;
         private readonly ICell origin;
         private readonly int[] locked;
 
-        public SyncCell(ICell origin) : this(origin, new SyncGate())
-        { }
-
-        public SyncCell(ICell origin, ISyncValve valve)
+        public SyncCell(ICell origin, ISyncPipe sync)
         {
-            lock (this)
-            {
-                this.valve = valve;
-                this.origin = origin;
-                this.locked = new int[1] { 0 };
-            }
+            this.sync = sync;
+            this.origin = origin;
         }
 
         public string Name()
@@ -54,50 +46,25 @@ namespace Xive.Cell
 
         public byte[] Content()
         {
-            byte[] result;
-            Block();
-            result = origin.Content();
-            Dispose();
+            byte[] result = new byte[0];
+            this.sync.Flush(origin.Name(), () =>
+            {
+                result = origin.Content();
+            });
             return result;
         }
 
         public void Dispose()
         {
-            lock (this.origin)
-            {
-                this.origin.Dispose();
-                var locks = this.locked[0];
-                this.locked[0] = 0;
-                for (int i = 0; i < locks; i++)
-                {
-                    this.valve.Mutex(this.origin.Name()).ReleaseMutex();
-                }
-            }
 
         }
 
         public void Update(IInput content)
         {
-            Block();
-            origin.Update(content);
-            Dispose();
-        }
-
-        private void Block()
-        {
-            this.valve.Mutex(this.origin.Name()).WaitOne();
-            this.locked[0]++;
-        }
-
-        ~SyncCell()
-        {
-
-            if (this.locked[0] > 0)
+            this.sync.Flush(origin.Name(), () =>
             {
-                Dispose();
-                throw new AbandonedMutexException($"A mutex has not been released for cell '{this.origin.Name()}'.");
-            }
-
+                origin.Update(content);
+            });
         }
     }
 }

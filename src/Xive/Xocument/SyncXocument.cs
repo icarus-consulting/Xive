@@ -36,93 +36,57 @@ namespace Xive.Xocument
     {
         private readonly string name;
         private readonly IXocument origin;
-        private readonly ISyncValve valve;
+        private readonly ISyncPipe sync;
         private readonly int[] locked;
 
         /// <summary>
         /// A Xocument which is accessed exclusively.
         /// </summary>
-        public SyncXocument(string name, IXocument origin, ISyncValve sync)
+        public SyncXocument(string name, IXocument origin, ISyncPipe sync)
         {
             lock (this)
             {
                 this.name = name;
                 this.origin = origin;
-                this.valve = sync;
-                this.locked = new int[1] { 0 };
+                this.sync = sync;
             }
         }
 
         public void Modify(IEnumerable<IDirective> dirs)
         {
-            Block();
-            this.origin.Modify(dirs);
-            Dispose();
+            this.sync.Flush(this.name, () => this.origin.Modify(dirs));
         }
 
         public XNode Node()
         {
-            Block();
-            XNode node = this.origin.Node();
-            Dispose();
-            return node;
+            XNode result = new XDocument();
+            this.sync.Flush(this.name, () => result = this.origin.Node());
+            return result;
         }
 
         public IList<IXML> Nodes(string xpath)
         {
-            IList<IXML> result;
-            Block();
-            result = this.origin.Nodes(xpath);
-            Dispose();
+            IList<IXML> result = new List<IXML>();
+            this.sync.Flush(this.name, () => result = this.origin.Nodes(xpath));
             return result;
         }
 
         public string Value(string xpath, string def)
         {
             string result = String.Empty;
-            Block();
-            result = this.origin.Value(xpath, def);
-            Dispose();
+            this.sync.Flush(this.name, () => result = this.origin.Value(xpath, def));
             return result;
         }
 
         public IList<string> Values(string xpath)
         {
-            IList<string> result;
-            Block();
-            result = this.origin.Values(xpath);
-            Dispose();
+            IList<string> result = new List<string>();
+            this.sync.Flush(this.name, () => this.origin.Values(xpath));
             return result;
         }
 
         public void Dispose()
         {
-            lock (this.origin)
-            {
-                this.origin.Dispose();
-                var locks = this.locked[0];
-                this.locked[0] = 0;
-                for (int i = 0; i < locks; i++)
-                {
-                    this.valve.Mutex(this.name).ReleaseMutex();
-                }
-            }
-        }
-
-        private void Block()
-        {
-            this.valve.Mutex(this.name).WaitOne();
-            this.locked[0]++;
-        }
-
-        ~SyncXocument()
-        {
-
-            if (this.locked[0] > 0)
-            {
-                Dispose();
-                throw new AbandonedMutexException($"A mutex has not been released for xocument '{this.name}'.");
-            }
 
         }
     }

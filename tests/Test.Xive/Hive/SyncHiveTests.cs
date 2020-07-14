@@ -53,7 +53,7 @@ namespace Xive.Hive.Test
         {
             using (var dir = new TempDirectory())
             {
-                var valve = new SyncGate();
+                var valve = new LocalSyncPipe();
                 var hive = new FileHive(dir.Value().FullName, "product");
                 hive.Catalog().Add("2CV");
                 Parallel.For(0, Environment.ProcessorCount << 4, i =>
