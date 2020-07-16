@@ -27,7 +27,18 @@ namespace Xive.Mnemonic.Content.Test
                 "a/b/c.dat",
                 new RamContents(
                     new KeyValuePair<string, byte[]>(@"a/b/c.dat", new byte[1] { 0x13 })
-                ).Knowledge()
+                ).Knowledge("")
+            );
+        }
+
+        [Fact]
+        public void FiltersKnowledge()
+        {
+            Assert.Single(
+                new RamContents(
+                    new KeyValuePair<string, byte[]>(@"a/b/c.dat", new byte[1] { 0x13 }),
+                    new KeyValuePair<string, byte[]>(@"a/c/b.dat", new byte[1] { 0x13 })
+                ).Knowledge("a/b")
             );
         }
 
@@ -41,7 +52,7 @@ namespace Xive.Mnemonic.Content.Test
 
             mem.UpdateBytes("a/b/c.dat", new byte[0]);
             Assert.Empty(
-                mem.Knowledge()
+                mem.Knowledge("")
             );
         }
 
@@ -107,7 +118,7 @@ namespace Xive.Mnemonic.Content.Test
             mem.Xml(@"childhood\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
             Assert.Equal(
                 @"childhood/subdir/file",
-                new FirstOf<string>(mem.Knowledge()).Value()
+                new FirstOf<string>(mem.Knowledge("")).Value()
             );
         }
 
@@ -118,7 +129,7 @@ namespace Xive.Mnemonic.Content.Test
             mem.Xml(@"BIG\subdir/file", () => new XDocument(new XElement("root", new XElement("years", new XText("1980's")))));
             Assert.Equal(
                 "BIG/subdir/file",
-                new FirstOf<string>(mem.Knowledge()).Value()
+                new FirstOf<string>(mem.Knowledge("")).Value()
             );
         }
     }

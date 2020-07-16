@@ -65,14 +65,20 @@ namespace Xive.Mnemonic.Content
             return result;
         }
 
-        public IList<string> Knowledge()
+        public IList<string> Knowledge(string filter = "")
         {
             return
                 new Mapped<string, string>(
                     file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
-                    new ListOf<string>(Directory.GetFiles(this.root, "*", SearchOption.AllDirectories))
+                    new ListOf<string>(
+                        Directory.GetFiles(
+                            System.IO.Path.Combine(this.root, filter), 
+                            "*", 
+                            SearchOption.AllDirectories
+                        )
+                    )
                 );
-        }
+      }
 
         public void UpdateBytes(string name, byte[] data)
         {

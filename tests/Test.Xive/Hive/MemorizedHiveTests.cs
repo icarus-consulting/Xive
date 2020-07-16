@@ -94,7 +94,7 @@ namespace Xive.Hive.Test
             var shifted = hive.Shifted("twilight-zone");
             shifted.Catalog().Add("789");
 
-            Assert.Contains("twilight-zone/hq/catalog.cat", mem.Contents().Knowledge());
+            Assert.Contains("twilight-zone/hq/catalog.cat", mem.Contents().Knowledge(""));
         }
 
         [Fact]

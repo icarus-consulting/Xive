@@ -60,9 +60,9 @@ namespace Xive.Mnemonic.Content
                 );
         }
 
-        public IList<string> Knowledge()
+        public IList<string> Knowledge(string filter = "")
         {
-            return this.origin.Knowledge();
+            return this.origin.Knowledge(filter);
         }
 
         public byte[] Bytes(string name, Func<byte[]> ifAbsent)

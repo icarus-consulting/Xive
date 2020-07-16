@@ -10,7 +10,11 @@ namespace Xive.Mnemonic
     /// </summary>
     public interface IContents
     {
-        IList<string> Knowledge();
+        /// <summary>
+        /// Lists all content paths, that start with the given filter string
+        /// </summary>
+        /// <returns></returns>
+        IList<string> Knowledge(string filter = "");
         void UpdateXml(string name, XNode xml);
         void UpdateBytes(string name, byte[] data);
         XNode Xml(string name, Func<XNode> ifAbsent);

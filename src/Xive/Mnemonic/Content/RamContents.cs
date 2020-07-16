@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Text;
@@ -58,15 +59,18 @@ namespace Xive.Mnemonic.Content
             return result;
         }
 
-        public IList<string> Knowledge()
+        public IList<string> Knowledge(string filter)
         {
-            return
-                new ListOf<string>(
-                    new Mapped<string, string>(
-                        name => new Normalized(name).AsString(),
-                        this.mem.Keys
-                    )
+            IEnumerable<string> result =
+                new Yaapii.Atoms.Enumerable.Mapped<string, string>(
+                    name => new Normalized(name).AsString(),
+                    this.mem.Keys
                 );
+            if(filter != "")
+            {
+                result = new Filtered<string>(name => name.StartsWith(filter), result);
+            }
+            return new ListOf<string>(result);
         }
 
         public void UpdateBytes(string name, byte[] data)

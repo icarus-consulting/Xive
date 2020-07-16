@@ -138,7 +138,7 @@ namespace Xive.Hive
         public void Remove(string id)
         {
             var prefix = new Normalized($"{scope}/{id}").AsString();
-            foreach (var data in this.mem.Contents().Knowledge())
+            foreach (var data in this.mem.Contents().Knowledge(prefix))
             {
                 if (data.StartsWith(prefix))
                 {

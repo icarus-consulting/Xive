@@ -15,7 +15,6 @@ namespace Xive.Mnemonic.Content
         private readonly IContents origin;
         private readonly ICache<byte[]> byteCache;
         private readonly ICache<XNode> xmlCache;
-        private readonly ConcurrentBag<IList<string>> knowledgeMem;
 
         /// <summary>
         /// Contents which are cached.
@@ -56,22 +55,14 @@ namespace Xive.Mnemonic.Content
         /// <param name="xmlCache"></param>
         public CachedContents(IContents origin, ICache<byte[]> byteCache, ICache<XNode> xmlCache)
         {
-            this.knowledgeMem = new ConcurrentBag<IList<string>>();
             this.origin = origin;
             this.byteCache = byteCache;
             this.xmlCache = xmlCache;
         }
 
-        public IList<string> Knowledge()
+        public IList<string> Knowledge(string filter = "")
         {
-            lock (this.knowledgeMem)
-            {
-                if (this.knowledgeMem.IsEmpty)
-                {
-                    this.knowledgeMem.Add(this.origin.Knowledge());
-                }
-                return this.knowledgeMem.ToArray()[0];
-            }
+            return this.origin.Knowledge(filter);
         }
 
         public byte[] Bytes(string name, Func<byte[]> ifAbsent)
@@ -108,7 +99,6 @@ namespace Xive.Mnemonic.Content
                         );
                 }
                 this.origin.UpdateBytes(name, data);
-                InvalidateKnowledge();
             }
         }
 
@@ -132,14 +122,7 @@ namespace Xive.Mnemonic.Content
                         );
                 }
                 this.origin.UpdateXml(name, xml);
-                InvalidateKnowledge();
             }
-        }
-
-        private void InvalidateKnowledge()
-        {
-            IList<string> unused;
-            this.knowledgeMem.TryTake(out unused);
         }
     }
 }
