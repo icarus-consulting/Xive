@@ -72,7 +72,7 @@ namespace Xive.Mnemonic.Content
                     file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
                     new ListOf<string>(
                         Directory.GetFiles(
-                            System.IO.Path.Combine(this.root, filter), 
+                            new Normalized(System.IO.Path.Combine(this.root, filter)).AsString(), 
                             "*", 
                             SearchOption.AllDirectories
                         )
