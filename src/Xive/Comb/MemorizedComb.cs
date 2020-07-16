@@ -112,7 +112,7 @@ namespace Xive.Comb
         private Directives GutsDirectives()
         {
             var patch = new Directives().Add("items");
-            var knowledge = this.memory.Contents().Knowledge();
+            var knowledge = this.memory.Contents().Knowledge(this.name.AsString());
             new Each<string>(
                 (key) =>
                     patch
@@ -130,10 +130,7 @@ namespace Xive.Comb
                         )
                         .Up()
                         .Up(),
-                new Filtered<string>(
-                    (path) => path.Substring(0, this.name.AsString().Length) == this.name.AsString(),
-                    knowledge
-                )
+                knowledge
             ).Invoke();
             return patch;
         }

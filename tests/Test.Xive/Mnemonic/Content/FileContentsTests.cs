@@ -27,6 +27,24 @@ namespace Xive.Mnemonic.Content.Test
         }
 
         [Fact]
+        public void FiltersKnowledge()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var dir1 = $"{root}/a/b\\c";
+                var dir2 = $"{root}/c/b\\a";
+                Directory.CreateDirectory(dir1);
+                Directory.CreateDirectory(dir2);
+                File.WriteAllText(Path.Combine(dir1, "content.dat"), "Kßeiv");
+                File.WriteAllText(Path.Combine(dir2, "content.dat"), "Kßeiv");
+                Assert.Single(
+                    new FileContents(root, new LocalSyncPipe()).Knowledge("a")
+                );
+            }
+        }
+
+        [Fact]
         public void DeliversBytes()
         {
             using (var dir = new TempDirectory())
