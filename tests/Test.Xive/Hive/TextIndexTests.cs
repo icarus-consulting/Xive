@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xive.Mnemonic;
 using Xive.Xocument;
 using Xunit;
@@ -13,6 +14,20 @@ namespace Xive.Hive.Test
 {
     public sealed class TextIndexTests
     {
+        [Fact]
+        public void IsThreadSafe()
+        {
+            var idx = new TextIndex("test", new RamMnemonic());
+
+            Parallel.For(0, 100, i =>
+            {
+                idx.Add(i.ToString());
+                idx.List();
+            });
+
+            Assert.True(idx.List().Count == 100);
+        }
+
         [Fact]
         public void AddsItems()
         {
