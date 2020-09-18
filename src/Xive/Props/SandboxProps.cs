@@ -63,7 +63,7 @@ namespace Xive.Props
             this.id = id;
             this.scope = scope;
             this.mem = mem;
-            this.memoryProps = new ScalarOf<IProps>(() =>
+            this.memoryProps = new Solid<IProps>(() =>
             {
                 var stringProps =
                     new TextOf(
