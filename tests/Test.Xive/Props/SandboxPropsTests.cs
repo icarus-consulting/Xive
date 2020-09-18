@@ -20,10 +20,14 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Xive.Cache;
 using Xive.Mnemonic.Content;
 using Xunit;
+using Yaapii.Atoms.IO;
 
 namespace Xive.Props.Test
 {
@@ -49,6 +53,31 @@ namespace Xive.Props.Test
                 "the value",
                 props.Value("the prop")
             );
+        }
+
+        [Fact]
+        public void IsThreadSafe()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var contents =
+                    new CachedContents(
+                        new FileContents(dir.Value().FullName)
+                    );
+                var props = new SandboxProps(contents, "scope", "id");
+                props.Refined("the prop", "the value");
+
+                Parallel.For(0, 1000, i =>
+                {
+                    Thread.Sleep(new Random().Next(0,100));
+                    props.Value(i.ToString());
+                    Assert.Equal(
+                        "the value",
+                        new SandboxProps(contents, "scope", "id").Value("the prop")
+                    );
+                });
+            }
+            
         }
 
         [Fact]
