@@ -54,13 +54,13 @@ namespace Xive.Hive
 
         public IHoneyComb Add(string id)
         {
-            var cell = Cell();
             if (id.Contains("\r"))
             {
                 throw new ArgumentException($"Cannot use id with character \\r inside. This is reserved for internal usage.");
             }
             lock (idCache)
             {
+                var cell = Cell();
                 idCache.Clear();
                 idCache.AddRange(new TextOf(cell.Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
                 if (!idCache.Contains(id))
@@ -76,14 +76,16 @@ namespace Xive.Hive
         {
             var filtered = new ConcurrentBag<IHoneyComb>();
             var fltrs = new List<IHiveFilter>(filters);
+            IList<string> ids;
             lock (idCache)
             {
                 if (idCache.Count == 0)
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
                 }
+                ids = new List<string>(idCache);
             }
-            Parallel.ForEach(idCache, (id) =>
+            Parallel.ForEach(ids, (id) =>
             {
                 if (filters.Length == 0)
                 {
