@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xive.Mnemonic;
 using Xive.Xocument;
@@ -19,14 +20,14 @@ namespace Xive.Hive.Test
         {
             var idx = new TextIndex("test", new RamMnemonic());
 
-            Parallel.For(0, 10000, i =>
+            Parallel.For(0, 100, i =>
             {
                 idx.Add(i.ToString());
-                idx.List();
+                idx.List().ToArray();
             });
 
             Assert.Equal(
-                10000,
+                100,
                 idx.List().Count
             );
         }

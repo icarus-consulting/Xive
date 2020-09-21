@@ -103,7 +103,7 @@ namespace Xive.Hive
                                     filters
                                 )
                             ).Value(),
-                            idCache
+                            idCache.ToArray()
                         )
                     )
                 );
