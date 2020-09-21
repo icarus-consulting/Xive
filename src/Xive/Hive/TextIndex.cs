@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Text;
@@ -75,17 +76,14 @@ namespace Xive.Hive
         public IList<IHoneyComb> List(params IHiveFilter[] filters)
         {
             var filtered = new ConcurrentBag<IHoneyComb>();
-            var fltrs = new List<IHiveFilter>(filters);
-            IList<string> ids;
             lock (idCache)
             {
                 if (idCache.Count == 0)
                 {
                     idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
                 }
-                ids = new List<string>(idCache);
             }
-            Parallel.ForEach(ids, (id) =>
+            Parallel.ForEach(idCache.ToArray(), (id) =>
             {
                 if (filters.Length == 0)
                 {
@@ -98,18 +96,23 @@ namespace Xive.Hive
                 }
                 else
                 {
-                    Parallel.ForEach(fltrs, (filter) =>
+                    var isMatch = true;
+                    Parallel.ForEach(filters, (filter) =>
                     {
-                        if (filter.Matches(this.mem.Props(scope, id)))
+                        if (!filter.Matches(this.mem.Props(scope, id)))
                         {
-                            filtered.Add(
+                            isMatch = false;
+                        }
+                    });
+                    if(isMatch)
+                    {
+                        filtered.Add(
                             new MemorizedComb(
                                 new Normalized($"{scope}/{id}").AsString(),
                                 this.mem
                             )
                         );
-                        }
-                    });
+                    }
                 }
 
             });

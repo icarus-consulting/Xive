@@ -72,11 +72,20 @@ namespace Xive.Hive.Test
             var idx = new TextIndex("test", mem);
             idx.Add("123");
             idx.Add("456");
+            idx.Add("789");
+            mem.Props("test", "123").Refined("id", "123");
             mem.Props("test", "123").Refined("works", "true");
+            mem.Props("test", "456").Refined("id", "456");
             mem.Props("test", "456").Refined("works", "false");
+            mem.Props("test", "789").Refined("id", "789");
+            mem.Props("test", "789").Refined("works", "false");
 
             Assert.Equal(
-                "test/456", idx.List(new IndexFilterOf(props => props.Value("works", "") == "false"))[0].Name()
+                1,
+                idx.List(
+                    new IndexFilterOf(props => props.Value("works", "") == "false"),
+                    new IndexFilterOf(props => props.Value("id", "") != "456")
+                ).Count
             );
         }
 
