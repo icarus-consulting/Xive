@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xive.Mnemonic;
 using Xive.Xocument;
@@ -22,10 +23,13 @@ namespace Xive.Hive.Test
             Parallel.For(0, 100, i =>
             {
                 idx.Add(i.ToString());
-                idx.List();
+                idx.List().ToArray();
             });
 
-            Assert.True(idx.List().Count == 100);
+            Assert.Equal(
+                100,
+                idx.List().Count
+            );
         }
 
         [Fact]
@@ -136,35 +140,7 @@ namespace Xive.Hive.Test
             );
             Assert.True(idx.Has("123"));
         }
-
-        [Fact]
-        public void ReloadsCacheAfterAdd()
-        {
-            var mem = new RamMnemonic();
-            var idx = new TextIndex("test", mem);
-            idx.Add("123");
-
-            mem.Contents().UpdateBytes("test/hq/catalog.cat", new byte[0]);
-            idx.Add("456"); //trigger reloading from file by updating index
-
-            Assert.False(idx.Has("123"));
-        }
-
-        [Fact]
-        public void ReloadsCacheAfterRemove()
-        {
-            var mem = new RamMnemonic();
-            var idx = new TextIndex("test", mem);
-            idx.Add("123");
-
-            mem.Contents().UpdateBytes("test/hq/catalog.cat", new byte[0]);
-
-            idx.Add("456");
-            idx.Remove("456"); //trigger reloading from file by updating index
-
-            Assert.False(idx.Has("123"));
-        }
-
+        
         [Fact]
         public void WorksWithLargeData()
         {
