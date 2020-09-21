@@ -27,9 +27,12 @@ using System.Threading.Tasks;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
+using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.Func;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
+using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
@@ -62,8 +65,10 @@ namespace Xive.Hive
             lock (idCache)
             {
                 var cell = Cell();
-                idCache.Clear();
-                idCache.AddRange(new TextOf(cell.Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                if (idCache.Count == 0)
+                {
+                    idCache.AddRange(IdsFromCell());
+                }
                 if (!idCache.Contains(id))
                 {
                     idCache.Add(id);
@@ -75,48 +80,33 @@ namespace Xive.Hive
 
         public IList<IHoneyComb> List(params IHiveFilter[] filters)
         {
-            var filtered = new ConcurrentBag<IHoneyComb>();
+            var filtered = new List<IHoneyComb>();
             lock (idCache)
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                    idCache.AddRange(IdsFromCell());
                 }
             }
-            Parallel.ForEach(idCache.ToArray(), (id) =>
-            {
-                if (filters.Length == 0)
-                {
-                    filtered.Add(
+            return
+                new ListOf<IHoneyComb>(
+                    new Yaapii.Atoms.Enumerable.Mapped<string, IHoneyComb>(id =>
                         new MemorizedComb(
-                            new Normalized($"{scope}/{id}").AsString(),
+                            $"{scope}/{id}",
                             this.mem
+                        ),
+                        new Filtered<string>(id =>
+                            filters.Length == 0 || 
+                            new And(
+                                new Yaapii.Atoms.Enumerable.Mapped<IHiveFilter, bool>(
+                                    filter => filter.Matches(this.mem.Props(scope, id)),
+                                    filters
+                                )
+                            ).Value(),
+                            idCache
                         )
-                    );
-                }
-                else
-                {
-                    var isMatch = true;
-                    Parallel.ForEach(filters, (filter) =>
-                    {
-                        if (!filter.Matches(this.mem.Props(scope, id)))
-                        {
-                            isMatch = false;
-                        }
-                    });
-                    if(isMatch)
-                    {
-                        filtered.Add(
-                            new MemorizedComb(
-                                new Normalized($"{scope}/{id}").AsString(),
-                                this.mem
-                            )
-                        );
-                    }
-                }
-
-            });
-            return new ListOf<IHoneyComb>(filtered);
+                    )
+                );
         }
 
         public IHoneyComb Comb(string id)
@@ -134,7 +124,7 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
+                    idCache.AddRange(IdsFromCell());
                 }
                 return idCache.Contains(id);
             }
@@ -154,11 +144,20 @@ namespace Xive.Hive
             {
                 if (idCache.Count == 0)
                 {
-                    idCache.AddRange(new TextOf(Cell().Content()).AsString().Split(';'));
+                    idCache.AddRange(IdsFromCell());
                 }
                 idCache.Remove(id);
                 Cell().Update(new InputOf(string.Join(";", idCache)));
             }
+        }
+        
+        private IEnumerable<string> IdsFromCell()
+        {
+            return
+                new TextOf(Cell().Content()).AsString().Split(
+                    new char[] { ';' },
+                    StringSplitOptions.RemoveEmptyEntries
+                );
         }
 
         private ICell Cell()
