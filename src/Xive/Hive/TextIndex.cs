@@ -21,19 +21,15 @@
 //SOFTWARE.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Text;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
-using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
-using Yaapii.Atoms.Func;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Scalar;
-using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
 {
@@ -96,7 +92,7 @@ namespace Xive.Hive
                             this.mem
                         ),
                         new Filtered<string>(id =>
-                            filters.Length == 0 || 
+                            filters.Length == 0 ||
                             new And(
                                 new Yaapii.Atoms.Enumerable.Mapped<IHiveFilter, bool>(
                                     filter => filter.Matches(this.mem.Props(scope, id)),
@@ -150,11 +146,11 @@ namespace Xive.Hive
                 Cell().Update(new InputOf(string.Join(";", idCache)));
             }
         }
-        
+
         private IEnumerable<string> IdsFromCell()
         {
             return
-                new TextOf(Cell().Content()).AsString().Split(
+                Encoding.UTF8.GetString(Cell().Content()).Split(
                     new char[] { ';' },
                     StringSplitOptions.RemoveEmptyEntries
                 );

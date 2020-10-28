@@ -72,13 +72,13 @@ namespace Xive.Mnemonic.Content
                     file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
                     new ListOf<string>(
                         Directory.GetFiles(
-                            new Normalized(System.IO.Path.Combine(this.root, filter)).AsString(), 
-                            "*", 
+                            new Normalized(System.IO.Path.Combine(this.root, filter)).AsString(),
+                            "*",
                             SearchOption.AllDirectories
                         )
                     )
                 );
-      }
+        }
 
         public void UpdateBytes(string name, byte[] data)
         {
@@ -97,7 +97,7 @@ namespace Xive.Mnemonic.Content
 
         public void UpdateXml(string name, XNode xml)
         {
-            this.UpdateBytes(name, new BytesOf(xml.ToString()).AsBytes());
+            this.UpdateBytes(name, new BytesOf(xml.ToString(), Encoding.UTF8).AsBytes());
         }
 
         public XNode Xml(string name, Func<XNode> ifAbsent)
