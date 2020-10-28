@@ -28,7 +28,9 @@ using System.Xml;
 using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Props
 {
@@ -65,14 +67,17 @@ namespace Xive.Props
             this.memoryProps = new Solid<IProps>(() =>
             {
                 var stringProps =
-                    Encoding.UTF8.GetString(
-                        this.mem
-                            .Contents()
-                            .Bytes(
-                                new Normalized($"{scope}/{id}/props.cat").AsString(),
-                                () => new byte[0]
-                            )
-                    );
+                    new TextOf(
+                        new BytesOf(
+                            this.mem
+                                .Contents()
+                                .Bytes(
+                                    new Normalized($"{scope}/{id}/props.cat").AsString(),
+                                    () => new byte[0]
+                                )
+                        ),
+                        Encoding.UTF8
+                    ).AsString();
 
                 var cachedProps = new RamProps();
                 Parallel.ForEach(stringProps.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries), (stringProp) =>

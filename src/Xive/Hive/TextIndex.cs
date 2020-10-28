@@ -26,10 +26,12 @@ using System.Text;
 using Xive.Cell;
 using Xive.Comb;
 using Xive.Mnemonic;
+using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
 using Yaapii.Atoms.Scalar;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
 {
@@ -150,7 +152,13 @@ namespace Xive.Hive
         private IEnumerable<string> IdsFromCell()
         {
             return
-                Encoding.UTF8.GetString(Cell().Content()).Split(
+                new TextOf(
+                    new BytesOf(
+                        Cell().Content()
+                    ),
+                    Encoding.UTF8
+                ).AsString()
+                .Split(
                     new char[] { ';' },
                     StringSplitOptions.RemoveEmptyEntries
                 );
