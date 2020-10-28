@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Xive.Cache;
@@ -46,7 +47,7 @@ namespace Xive.Props
         private readonly string scope;
 
         /// <summary>
-        /// Props which are read into memory from internal xml document _catalog.xml in the given comb.
+        /// Props which are read into memory from internal xml document props.cat in the given comb.
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
@@ -54,7 +55,7 @@ namespace Xive.Props
         { }
 
         /// <summary>
-        /// Props which are read into memory from internal xml document _catalog.xml in the given comb.
+        /// Props which are read into memory from internal xml document props.cat in the given comb.
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
@@ -67,13 +68,16 @@ namespace Xive.Props
             {
                 var stringProps =
                     new TextOf(
-                        this.mem
-                            .Contents()
-                            .Bytes(
-                                new Normalized($"{scope}/{id}/props.cat").AsString(),
-                                () => new byte[0]
-                            )
-                        ).AsString();
+                        new BytesOf(
+                            this.mem
+                                .Contents()
+                                .Bytes(
+                                    new Normalized($"{scope}/{id}/props.cat").AsString(),
+                                    () => new byte[0]
+                                )
+                        ),
+                        Encoding.UTF8
+                    ).AsString();
 
                 var cachedProps = new RamProps();
                 Parallel.ForEach(stringProps.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries), (stringProp) =>
@@ -124,7 +128,7 @@ namespace Xive.Props
             {
                 serialized += $"{XmlConvert.EncodeLocalName(prop)}:{string.Join(",", EncodedProps(prop))}\r";
             }
-            var data = new BytesOf(serialized).AsBytes();
+            var data = Encoding.UTF8.GetBytes(serialized);
 
             this.mem
                 .Contents()
