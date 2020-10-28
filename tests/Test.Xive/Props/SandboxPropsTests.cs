@@ -22,6 +22,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xive.Cache;
@@ -69,7 +71,7 @@ namespace Xive.Props.Test
 
                 Parallel.For(0, 1000, i =>
                 {
-                    Thread.Sleep(new Random().Next(0,100));
+                    Thread.Sleep(new Random().Next(0, 100));
                     props.Value(i.ToString());
                     Assert.Equal(
                         "the value",
@@ -77,7 +79,7 @@ namespace Xive.Props.Test
                     );
                 });
             }
-            
+
         }
 
         [Fact]
@@ -111,6 +113,30 @@ namespace Xive.Props.Test
                 "the,:value",
                 props.Value("the,:prop")
             );
+        }
+
+        [Fact]
+        public void ReadsPropsInUtf8()
+        {
+            using (var temp = new TempDirectory())
+            {
+                Directory.CreateDirectory(Path.Combine(temp.Value().FullName, "scope", "id"));
+                File.WriteAllBytes(
+                    Path.Combine(temp.Value().FullName, "scope", "id", "props.cat"),
+                    Encoding.UTF8.GetBytes("prop:specialäüö#+.-?=)(")
+                );
+                var props = new SandboxProps(
+                    new FileContents(
+                        temp.Value().FullName
+                    ),
+                    "scope",
+                    "id"
+                );
+                Assert.Equal(
+                    "specialäüö#+.-?=)(",
+                    props.Value("prop")
+                );
+            }
         }
     }
 }
