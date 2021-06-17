@@ -15,6 +15,8 @@ environment:
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
 build_script:
+  - sh: chmod +x build.sh
+  - sh: ./build.sh
   - ps: .\build.ps1
 test: off
 artifacts:
@@ -26,7 +28,7 @@ deploy:
       #branch: master
       appveyor_repo_tag: true
     api_key:
-      secure: 7RxiAmoG2CBmwCi8Cjg/cLb+n7K2bc8o3MBEwfz7L00AqiDcSTbixEBzQhQCuT+J
+      secure: LxvD0QqULNgY5XtjQPrBlvQDOVacEkfkZILXVJbY2YPpwSQJLkbXF8QYtx7EMtL6
     skip_symbols: false
     artifact: /.*\.nupkg/
 
