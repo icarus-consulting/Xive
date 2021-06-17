@@ -9,7 +9,7 @@ configuration: Release
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   GITHUB_TOKEN:
-    secure: tvoyJ/iv8Y+9VaKvOFvxegvQFBNqPkhiwghS8lQDsrt7B/1MWU4e8uOHQzfTU580
+    secure: o19fsTCbpIvyHbJfTaImgMr3OI6RHg2J+UdelQ1BIsc4o01+rCLuMc0lO+bhWL53
   CODECOV_TOKEN:
     secure: 2/6E5a1yzv5Wp1yRpHGDybeKyjdyJlO2xiRxuT4TBGBJcbSfjOrMRsFpMd/X334f
 # Do not build feature branch with open Pull Requests
