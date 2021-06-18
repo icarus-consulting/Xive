@@ -4,7 +4,7 @@
 version: 1.0.{build}
 image:
   - Visual Studio 2017
-  - Previous Ubuntu1804
+  - Ubuntu
 configuration: Release
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
@@ -18,10 +18,8 @@ build_script:
   - sh: chmod +x build.sh
   - sh: ./build.sh
   - ps: .\build.ps1
+cmd: nuget sources Add -Name "MyNuget" -Source https://api.nuget.org/v3/index.json
 test: off
-nuget:
-  account_feed: true
-  project_feed: true
 artifacts:
 - path: '.\artifacts\**\*.nupkg'
 deploy:
