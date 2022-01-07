@@ -469,5 +469,19 @@ namespace Xive.Hive.Test
                 );
             }
         }
+
+        [Fact]
+        public void RemovesUnfilledComb()
+        {
+            using (var dir = new TempDirectory())
+            {
+                var hive = new FileHive(dir.Value().FullName, "product");
+                hive.Catalog().Add("2CV");
+                hive.Catalog().Remove("2CV");
+                Assert.Empty(
+                    hive.Catalog().List()
+                );
+            }
+        }
     }
 }

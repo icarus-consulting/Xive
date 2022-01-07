@@ -67,17 +67,24 @@ namespace Xive.Mnemonic.Content
 
         public IList<string> Knowledge(string filter = "")
         {
-            return
-                new Mapped<string, string>(
-                    file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
-                    new ListOf<string>(
-                        Directory.GetFiles(
-                            new Normalized(System.IO.Path.Combine(this.root, filter)).AsString(),
-                            "*",
-                            SearchOption.AllDirectories
+            var directory = new Normalized(System.IO.Path.Combine(this.root, filter)).AsString();
+
+            IList<string> result = new ListOf<string>();
+            if(Directory.Exists(directory))
+            {
+                result =
+                    new Mapped<string, string>(
+                        file => new Normalized(file.Substring(this.root.Length + "/".Length)).AsString(),
+                        new ListOf<string>(
+                            Directory.GetFiles(
+                                new Normalized(System.IO.Path.Combine(this.root, filter)).AsString(),
+                                "*",
+                                SearchOption.AllDirectories
+                            )
                         )
-                    )
-                );
+                    );
+            }
+            return result;
         }
 
         public void UpdateBytes(string name, byte[] data)

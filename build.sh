@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 ##########################################################################
 # This is the Cake bootstrapper script for Linux and OS X.
 # This file was downloaded from https://github.com/cake-build/resources
@@ -17,6 +18,10 @@ PACKAGES_CONFIG_MD5=$TOOLS_DIR/packages.config.md5sum
 ADDINS_PACKAGES_CONFIG=$ADDINS_DIR/packages.config
 MODULES_PACKAGES_CONFIG=$MODULES_DIR/packages.config
 
+export CAKE_PATHS_TOOLS=$TOOLS_DIR
+export CAKE_PATHS_ADDINS=$ADDINS_DIR
+export CAKE_PATHS_MODULES=$MODULES_DIR
+
 # Define md5sum or md5 depending on Linux/OSX
 MD5_EXE=
 if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -26,7 +31,7 @@ else
 fi
 
 # Define default arguments.
-SCRIPT="build.cake"
+SCRIPT=$SCRIPT_DIR/build.cake
 CAKE_ARGUMENTS=()
 
 # Parse arguments.
@@ -114,3 +119,8 @@ fi
 
 # Start Cake
 exec mono "$CAKE_EXE" $SCRIPT "${CAKE_ARGUMENTS[@]}"
+
+# Clean up environment variables that were created earlier in this bootstrapper
+unset CAKE_PATHS_TOOLS
+unset CAKE_PATHS_ADDINS
+unset CAKE_PATHS_MODULES
