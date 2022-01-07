@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -123,12 +124,12 @@ namespace Xive.Props
 
         private void Save()
         {
-            string serialized = string.Empty;
+            var builder = new StringBuilder();
             foreach (var prop in this.memoryProps.Value().Names())
             {
-                serialized += $"{XmlConvert.EncodeLocalName(prop)}:{string.Join(",", EncodedProps(prop))}\r";
+                builder.Append($"{XmlConvert.EncodeLocalName(prop)}:{string.Join(",", EncodedProps(prop))}\r");
             }
-            var data = Encoding.UTF8.GetBytes(serialized);
+            var data = new BytesOf(builder, Encoding.UTF8).AsBytes();
 
             this.mem
                 .Contents()
