@@ -21,10 +21,12 @@
 //SOFTWARE.
 
 using System;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xive.Cell;
 using Xunit;
 using Yaapii.Atoms.Bytes;
+using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
 using Yaapii.Xml;
@@ -56,6 +58,37 @@ namespace Xive.Mnemonic.Test
         }
 
         [Fact]
+        public void CachesPropsOnRead()
+        {
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem);
+
+            mem.Props("scope", "id").Refined("key", "cashy");
+            cache.Props("scope", "id").Value("key"); //read 1
+            mem.Props("scope", "id").Refined("key");
+
+            Assert.Equal(
+                "cashy",
+               cache.Props("scope", "id").Value("key")
+            );
+        }
+
+        [Fact]
+        public void InitsCacheProps()
+        {
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem);
+
+            mem.Props("scope", "id").Refined("key1", "cashy");
+            mem.Props("scope", "id").Refined("key2", "slashy");
+
+            Assert.Equal(
+                new ManyOf("key1", "key2"),
+                new Sorted<string>(cache.Props("scope", "id").Names())
+            );
+        }
+
+        [Fact]
         public void CachesXmlOnRead()
         {
             var xml = (XNode)new XDocument(new XElement("root", new XText("potato")));
@@ -72,6 +105,21 @@ namespace Xive.Mnemonic.Test
                         .Xml("cashy", () => throw new ApplicationException($"Assumed to have memory"))
                 ).Values("/root/text()")
             );
+        }
+
+        [Fact]
+        public void CachesPropsThreadSafe()
+        {
+            var cache = new CachedMnemonic(new RamMnemonic());
+
+            Parallel.For(0, Environment.ProcessorCount << 4, i =>
+            {
+                cache.Props("scope", i.ToString()).Refined("key", "value");
+                Assert.Equal(
+                    "value",
+                    cache.Props("scope", i.ToString()).Value("key")
+                );
+            });
         }
 
         [Fact]

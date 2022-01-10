@@ -21,8 +21,11 @@
 //SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Xive.Mnemonic.Content;
+using Xive.Props;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Enumerable;
 using Yaapii.Atoms.Scalar;
@@ -35,6 +38,7 @@ namespace Xive.Mnemonic
     public sealed class CachedMnemonic : IMnemonic
     {
         private readonly IScalar<IContents> contents;
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>> props;
         private readonly IMnemonic origin;
 
         /// <summary>
@@ -60,6 +64,7 @@ namespace Xive.Mnemonic
         /// </summary>
         public CachedMnemonic(IMnemonic origin, IEnumerable<string> ignored, long maxSize)
         {
+            this.props = new ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>>();
             this.contents = new ScalarOf<IContents>(() => new CachedContents(origin.Contents(), ignored, maxSize));
             this.origin = origin;
         }
@@ -71,7 +76,24 @@ namespace Xive.Mnemonic
 
         public IProps Props(string scope, string id)
         {
-            return this.origin.Props(scope, id);
+            var key = $"{scope}::{id}";
+            lock (this.props)
+            {
+                var originProps = this.origin.Props(scope, id);
+                return
+                    new CachedProps(
+                        originProps,
+                        this.props.GetOrAdd(key, k =>
+                        {
+                            var result = new ConcurrentDictionary<string, string[]>();
+                            foreach(var name in originProps.Names())
+                            {
+                                result.TryAdd(name, originProps.Values(name).ToArray());
+                            }
+                            return result;
+                        })
+                    );
+            }
         }
     }
 }
