@@ -20,8 +20,10 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using System.Collections.Concurrent;
 using Xive.Cache;
 using Xive.Mnemonic.Content;
+using Xive.Props;
 
 namespace Xive.Mnemonic
 {
@@ -30,27 +32,30 @@ namespace Xive.Mnemonic
     /// </summary>
     public sealed class RamMnemonic : IMnemonic
     {
-        private readonly IMnemonic mem;
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>> props;
+        private readonly IContents contents;
 
         /// <summary>
         /// Memories in Ram.
         /// </summary>
         public RamMnemonic()
         {
-            this.mem =
-                new SimpleMnemonic(
-                    new RamContents()
-                );
+            this.props = new ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>>();
+            this.contents = new RamContents();
         }
 
         public IProps Props(string scope, string id)
         {
-            return this.mem.Props(scope, id);
+            lock (this.props)
+            {
+                var key = $"{scope}::{id}";
+                return new RamProps(this.props.GetOrAdd(key, k => new ConcurrentDictionary<string, string[]>()));
+            }
         }
 
         public IContents Contents()
         {
-            return this.mem.Contents();
+            return this.contents;
         }
     }
 }
