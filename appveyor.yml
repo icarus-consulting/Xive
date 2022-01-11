@@ -1,9 +1,9 @@
 #------------------------------------------------------------#
 #     CI Build Configuration for master branch pre-release   #
 #------------------------------------------------------------#
-version: 1.0.{build}
+version: "{build}"
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
   - Ubuntu
 configuration: Release
 environment:
@@ -12,24 +12,17 @@ environment:
     secure: o19fsTCbpIvyHbJfTaImgMr3OI6RHg2J+UdelQ1BIsc4o01+rCLuMc0lO+bhWL53
   CODECOV_TOKEN:
     secure: 2/6E5a1yzv5Wp1yRpHGDybeKyjdyJlO2xiRxuT4TBGBJcbSfjOrMRsFpMd/X334f
+  NUGET_TOKEN:
+    secure: ZDvc2hL3H+4ubTi1cibTM+XeOJVXEzhuMCnDxOL8Hs2e9unfRUHrCwYC52IVjXjh
+  APPVEYOR_TOKEN:
+    secure: wVt1RgJAnhNTyIjtK9yFkQbEEM+fBk1TLUzo0j3pe2U=
 # Do not build feature branch with open Pull Requests
 skip_branch_with_pr: true
+nuget:
+  account_feed: true
 build_script:
   - sh: nuget sources Add -Name "MyNuget" -Source https://api.nuget.org/v3/index.json
   - sh: chmod +x build.sh
   - sh: ./build.sh
   - ps: .\build.ps1
 test: off
-artifacts:
-- path: '.\artifacts\**\*.nupkg'
-deploy:
-  - provider: NuGet
-    name: Nuget feed
-    on:
-      #branch: master
-      appveyor_repo_tag: true
-    api_key:
-      secure: LxvD0QqULNgY5XtjQPrBlvQDOVacEkfkZILXVJbY2YPpwSQJLkbXF8QYtx7EMtL6
-    skip_symbols: false
-    artifact: /.*\.nupkg/
-
