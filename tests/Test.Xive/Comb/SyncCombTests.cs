@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2020 ICARUS Consulting GmbH
+//Copyright (c) 2022 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -154,7 +154,7 @@ namespace Xive.Comb.Test
                 new SyncComb(
                     new RamComb("myRamComb")
                 );
-            
+
             var xoc = comb.Xocument("test");
             xoc.Modify(new Directives().Xpath("/test").Add("root").Add("items").Add("item").Attr("id", "123"));
             Assert.Equal("123", xoc.Values("/test/root/items/item/@id")[0]);

@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2020 ICARUS Consulting GmbH
+//Copyright (c) 2022 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,7 @@ namespace Xive.Cell.Test
             var cell = new RamCell();
             var gate = new LocalSyncPipe();
             var synced = new SyncCell(cell, gate);
-                synced.Update(new InputOf("its so hot outside"));
+            synced.Update(new InputOf("its so hot outside"));
             Assert.Equal(
                 "its so hot outside",
                 new TextOf(synced.Content()).AsString()
