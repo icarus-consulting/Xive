@@ -26,19 +26,18 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Xive.Cache;
 using Xive.Mnemonic.Content;
 using Xunit;
 using Yaapii.Atoms.IO;
 
 namespace Xive.Props.Test
 {
-    public sealed class SandboxPropsTests
+    public sealed class FilePropsTests
     {
         [Fact]
         public void ReturnsNames()
         {
-            var props = new SandboxProps(new RamContents(), "scope", "id");
+            var props = new FileProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value");
             Assert.Equal(
                 new List<string>() { "the prop" },
@@ -49,7 +48,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsValue()
         {
-            var props = new SandboxProps(new RamContents(), "scope", "id");
+            var props = new FileProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value");
             Assert.Equal(
                 "the value",
@@ -66,7 +65,7 @@ namespace Xive.Props.Test
                     new CachedContents(
                         new FileContents(dir.Value().FullName)
                     );
-                var props = new SandboxProps(contents, "scope", "id");
+                var props = new FileProps(contents, "scope", "id");
                 props.Refined("the prop", "the value");
 
                 Parallel.For(0, 1000, i =>
@@ -75,7 +74,7 @@ namespace Xive.Props.Test
                     props.Value(i.ToString());
                     Assert.Equal(
                         "the value",
-                        new SandboxProps(contents, "scope", "id").Value("the prop")
+                        new FileProps(contents, "scope", "id").Value("the prop")
                     );
                 });
             }
@@ -85,7 +84,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsValues()
         {
-            var props = new SandboxProps(new RamContents(), "scope", "id");
+            var props = new FileProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value", "another value");
             Assert.Equal(
                 new List<string>() { "the value", "another value" },
@@ -96,7 +95,7 @@ namespace Xive.Props.Test
         [Fact]
         public void AcceptsCommaInValues()
         {
-            var props = new SandboxProps(new RamContents(), "scope", "id");
+            var props = new FileProps(new RamContents(), "scope", "id");
             props.Refined("the,:prop", "the,:value", "another,:value");
             Assert.Equal(
                 new List<string>() { "the,:value", "another,:value" },
@@ -107,7 +106,7 @@ namespace Xive.Props.Test
         [Fact]
         public void AcceptsCommaInValue()
         {
-            var props = new SandboxProps(new RamContents(), "scope", "id");
+            var props = new FileProps(new RamContents(), "scope", "id");
             props.Refined("the,:prop", "the,:value");
             Assert.Equal(
                 "the,:value",
@@ -125,7 +124,7 @@ namespace Xive.Props.Test
                     Path.Combine(temp.Value().FullName, "scope", "id", "props.cat"),
                     Encoding.UTF8.GetBytes("prop:specialäüö#+.-?=)(")
                 );
-                var props = new SandboxProps(
+                var props = new FileProps(
                     new FileContents(
                         temp.Value().FullName
                     ),

@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using Xive.Cache;
 using Xive.Mnemonic;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
@@ -39,7 +38,7 @@ namespace Xive.Props
     /// Props are read from memory.
     /// Props are updated into the comb.
     /// </summary>
-    public sealed class SandboxProps : IProps
+    public sealed class FileProps : IProps
     {
         private readonly IContents mem;
         private readonly IScalar<IProps> memoryProps;
@@ -51,7 +50,7 @@ namespace Xive.Props
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
-        public SandboxProps(IContents mem, string scope, string id)
+        public FileProps(IContents mem, string scope, string id)
         {
             this.id = id;
             this.scope = scope;
