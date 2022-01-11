@@ -10,7 +10,6 @@ namespace Xive.Cache
     public sealed class SimpleMnemonic : IMnemonic
     {
         private readonly IContents contentMem;
-        private readonly ConcurrentDictionary<string, IProps> propsMem;
 
         /// <summary>
         /// Simple Memories.
@@ -18,19 +17,11 @@ namespace Xive.Cache
         public SimpleMnemonic(IContents contents)
         {
             this.contentMem = contents;
-            this.propsMem = new ConcurrentDictionary<string, IProps>();
         }
 
         public IProps Props(string scope, string id)
         {
-            return
-                this.propsMem.GetOrAdd(
-                    $"{scope}/{id}",
-                    key =>
-                    {
-                        return new SandboxProps(this, scope, id);
-                    }
-                );
+            return new SandboxProps(this.contentMem, scope, id);
         }
 
         public IContents Contents()

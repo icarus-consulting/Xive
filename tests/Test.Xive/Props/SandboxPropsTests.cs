@@ -38,7 +38,7 @@ namespace Xive.Props.Test
         [Fact]
         public void ReturnsNames()
         {
-            var props = new SandboxProps(new SimpleMnemonic(new RamContents()), "scope", "id");
+            var props = new SandboxProps(new RamContents(), "scope", "id");
             props.Refined("the prop", "the value");
             Assert.Equal(
                 new List<string>() { "the prop" },

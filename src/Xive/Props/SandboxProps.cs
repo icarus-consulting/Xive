@@ -41,7 +41,7 @@ namespace Xive.Props
     /// </summary>
     public sealed class SandboxProps : IProps
     {
-        private readonly IMnemonic mem;
+        private readonly IContents mem;
         private readonly IScalar<IProps> memoryProps;
         private readonly string id;
         private readonly string scope;
@@ -51,15 +51,7 @@ namespace Xive.Props
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
-        public SandboxProps(IContents mem, string scope, string id) : this(new SimpleMnemonic(mem), scope, id)
-        { }
-
-        /// <summary>
-        /// Props which are read into memory from internal xml document props.cat in the given comb.
-        /// Props are read from memory.
-        /// Props are updated into the comb.
-        /// </summary>
-        public SandboxProps(IMnemonic mem, string scope, string id)
+        public SandboxProps(IContents mem, string scope, string id)
         {
             this.id = id;
             this.scope = scope;
@@ -70,7 +62,6 @@ namespace Xive.Props
                     new TextOf(
                         new BytesOf(
                             this.mem
-                                .Contents()
                                 .Bytes(
                                     new Normalized($"{scope}/{id}/props.cat").AsString(),
                                     () => new byte[0]
@@ -131,7 +122,6 @@ namespace Xive.Props
             var data = new BytesOf(builder, Encoding.UTF8).AsBytes();
 
             this.mem
-                .Contents()
                 .UpdateBytes(
                     new Normalized($"{scope}/{id}/props.cat").AsString(),
                     data
