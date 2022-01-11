@@ -1,6 +1,6 @@
 ﻿//MIT License
 
-//Copyright (c) 2020 ICARUS Consulting GmbH
+//Copyright (c) 2022 ICARUS Consulting GmbH
 
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ namespace Xive.Cell
                 stream.Seek(0, SeekOrigin.Begin);
                 this.mem
                     .UpdateBytes(
-                        this.origin.Name(), 
+                        this.origin.Name(),
                         new BytesOf(new InputOf(stream)).AsBytes()
                     );
             }
