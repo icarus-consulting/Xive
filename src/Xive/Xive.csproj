@@ -2,7 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DocumentationFile>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\Xive.xml</DocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>ICARUS Consulting GmbH</Authors>
+    <Description>A true Object Oriented data storage for .NET</Description>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) 2022 ICARUS Consulting GmbH</Copyright>
+    <PackageProjectUrl>https://github.com/icarus-consulting/Xive</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/icarus-consulting/Xive.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>https://github.com/icarus-consulting/Xive/releases</PackageReleaseNotes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\LICENSE">
+      <PackagePath></PackagePath>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Yaapii.Atoms" Version="2.1.3" />
