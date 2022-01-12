@@ -8,7 +8,7 @@ image:
 # configuration: Release
 environment:
   GITHUB_TOKEN:
-    secure: o19fsTCbpIvyHbJfTaImgMr3OI6RHg2J+UdelQ1BIsc4o01+rCLuMc0lO+bhWL53
+    secure: GQsGsvPcJyxETZAKlYPbAz7WnNZvoBNdtRHXuez7Qp1By7QchpP2hjT1u0wmFOig
   CODECOV_TOKEN:
     secure: 2/6E5a1yzv5Wp1yRpHGDybeKyjdyJlO2xiRxuT4TBGBJcbSfjOrMRsFpMd/X334f
   NUGET_TOKEN:
