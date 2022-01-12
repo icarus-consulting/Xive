@@ -3,7 +3,7 @@
 #------------------------------------------------------------#
 version: "{build}"
 image:
-  - Visual Studio 2019
+  - Visual Studio 2017
   - Ubuntu
 configuration: Release
 environment:
@@ -17,7 +17,7 @@ environment:
   APPVEYOR_TOKEN:
     secure: wVt1RgJAnhNTyIjtK9yFkQbEEM+fBk1TLUzo0j3pe2U=
 # Do not build feature branch with open Pull Requests
-skip_branch_with_pr: true
+# skip_branch_with_pr: true
 nuget:
   account_feed: true
 build_script:
