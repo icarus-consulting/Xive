@@ -20,8 +20,8 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using Xive.Cache;
 using Xive.Mnemonic.Content;
+using Xive.Props;
 
 namespace Xive.Mnemonic
 {
@@ -30,27 +30,24 @@ namespace Xive.Mnemonic
     /// </summary>
     public sealed class FileMnemonic : IMnemonic
     {
-        private readonly IMnemonic mem;
+        private readonly IContents contentsMem;
 
         /// <summary>
         /// Memories in Ram.
         /// </summary>
         public FileMnemonic(string root)
         {
-            this.mem =
-                new SimpleMnemonic(
-                    new FileContents(root, new LocalSyncPipe())
-                );
+            this.contentsMem = new FileContents(root, new LocalSyncPipe());
         }
 
         public IProps Props(string scope, string id)
         {
-            return this.mem.Props(scope, id);
+            return new FileProps(this.contentsMem, scope, id);
         }
 
         public IContents Contents()
         {
-            return this.mem.Contents();
+            return this.contentsMem;
         }
     }
 }
