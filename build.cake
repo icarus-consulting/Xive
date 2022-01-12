@@ -48,7 +48,7 @@ var appVeyorNuGetFeed       = "https://ci.appveyor.com/nuget/icarus/api/v2/packa
 var gitHubToken             = "";
 var nugetReleaseToken       = "";
 var appVeyorFeedToken       = "";
-var codeCovToken            = "";
+var codeCovToken            = ""; 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Version
