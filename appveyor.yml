@@ -5,9 +5,9 @@ version: "{build}"
 image:
   - Visual Studio 2019
   - Ubuntu
-configuration: Release
+APPVEYOR_YML_DISABLE_PS_LINUX: true
+# configuration: Release
 environment:
-  APPVEYOR_YML_DISABLE_PS_LINUX: true
   GITHUB_TOKEN:
     secure: o19fsTCbpIvyHbJfTaImgMr3OI6RHg2J+UdelQ1BIsc4o01+rCLuMc0lO+bhWL53
   CODECOV_TOKEN:
