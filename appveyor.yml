@@ -18,8 +18,6 @@ environment:
     secure: wVt1RgJAnhNTyIjtK9yFkQbEEM+fBk1TLUzo0j3pe2U=
 # Do not build feature branch with open Pull Requests
 # skip_branch_with_pr: true
-nuget:
-  account_feed: true
 build_script:
   - sh: nuget sources Add -Name "MyNuget" -Source https://api.nuget.org/v3/index.json
   - sh: chmod +x build.sh
