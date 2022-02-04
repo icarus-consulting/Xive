@@ -25,4 +25,4 @@ build_script:
   - sh: chmod +x build.sh
   - sh: ./build.sh
   - ps: .\build.ps1
-test: off
+test: off 
