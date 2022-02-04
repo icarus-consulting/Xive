@@ -27,6 +27,7 @@ using Xive.Xocument;
 using Yaapii.Atoms;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.Enumerable;
+using Yaapii.Atoms.Func;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Xambly;
 using Yaapii.Xml;
@@ -113,24 +114,23 @@ namespace Xive.Comb
         {
             var patch = new Directives().Add("items");
             var knowledge = this.memory.Contents().Knowledge(this.name.AsString());
-            new Each<string>(
-                (key) =>
-                    patch
-                        .Add("item")
-                        .Add("name")
-                        .Set(key.Substring((this.name.AsString() + "/").Length))
-                        .Up()
-                        .Add("size")
-                        .Set(
-                            new LengthOf(
-                                this.memory
-                                .Contents()
-                                .Bytes(key, () => new byte[0])
-                            ).Value()
-                        )
-                        .Up()
-                        .Up(),
-                knowledge
+            new Each<string>((key) =>
+                patch
+                    .Add("item")
+                    .Add("name")
+                    .Set(key.Substring((this.name.AsString() + "/").Length))
+                    .Up()
+                    .Add("size")
+                    .Set(
+                        new LengthOf(
+                            this.memory
+                            .Contents()
+                            .Bytes(key, () => new byte[0])
+                        ).Value()
+                    )
+                    .Up()
+                    .Up(),
+            knowledge
             ).Invoke();
             return patch;
         }
