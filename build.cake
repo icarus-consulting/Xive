@@ -229,7 +229,7 @@ Task("GenerateCoverage")
 Task("UploadCoverage")
 .IsDependentOn("GenerateCoverage")
 .IsDependentOn("Credentials")
-.WithCriteria(() => isAppVeyor)
+.WithCriteria(() => isAppVeyor && isWindows)
 .Does(() =>
 {
     Information(Figlet("Upload Coverage"));
@@ -320,7 +320,7 @@ Task("Credentials")
 // GitHub Release
 ///////////////////////////////////////////////////////////////////////////////
 Task("GitHubRelease")
-.WithCriteria(() => isAppVeyor && BuildSystem.AppVeyor.Environment.Repository.Tag.IsTag)
+.WithCriteria(() => isAppVeyor && BuildSystem.AppVeyor.Environment.Repository.Tag.IsTag && isWindows)
 .IsDependentOn("Version")
 .IsDependentOn("NuGet")
 .IsDependentOn("Credentials")
@@ -355,7 +355,7 @@ Task("GitHubRelease")
 // NuGet Feed
 ///////////////////////////////////////////////////////////////////////////////
 Task("NuGetFeed")
-.WithCriteria(() => isAppVeyor && BuildSystem.AppVeyor.Environment.Repository.Tag.IsTag)
+.WithCriteria(() => isAppVeyor && BuildSystem.AppVeyor.Environment.Repository.Tag.IsTag && isWindows)
 .IsDependentOn("NuGet")
 .IsDependentOn("Credentials")
 .Does(() => 
