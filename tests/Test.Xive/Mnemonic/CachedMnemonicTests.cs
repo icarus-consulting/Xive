@@ -89,6 +89,22 @@ namespace Xive.Mnemonic.Test
         }
 
         [Fact]
+        public void UpdatesProps()
+        {
+            var mem = new RamMnemonic();
+            var cache = new CachedMnemonic(mem);
+
+            cache.Props("scope", "id").Refined("key1", "cashy");
+            cache.Props("scope", "id").Refined("key2", "slashy");
+            cache.Props("scope", "id").Refined("key1", "cashySlashy");
+
+            Assert.Equal(
+                "cashySlashy",
+                mem.Props("scope", "id").Value("key1")
+            );
+        }
+
+        [Fact]
         public void CachesXmlOnRead()
         {
             var xml = (XNode)new XDocument(new XElement("root", new XText("potato")));
