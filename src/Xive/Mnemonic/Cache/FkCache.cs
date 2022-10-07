@@ -32,6 +32,18 @@ namespace Xive.Mnemonic.Cache
         private readonly Func<string, TData> acquire;
         private readonly Action<string, TData> update;
         private readonly Action<string> remove;
+        private readonly Action clear;
+
+        /// <summary>
+        /// A fake cache.
+        /// </summary>
+        public FkCache(Action clear) : this(
+            (name) => throw new InvalidOperationException($"Fake cache has not been setup to support getting content"),
+            (name, data) => throw new InvalidOperationException($"Fake cache has not been setup to support updates"),
+            (name) => throw new InvalidOperationException($"Fake cache has not been setup to support removal"),
+            clear
+        )
+        { }
 
         /// <summary>
         /// A fake cache.
@@ -39,7 +51,8 @@ namespace Xive.Mnemonic.Cache
         public FkCache(Action<string> remove) : this(
             (name) => throw new InvalidOperationException($"Fake cache has not been setup to support getting content"),
             (name, data) => throw new InvalidOperationException($"Fake cache has not been setup to support updates"),
-            remove
+            remove,
+            () => throw new InvalidOperationException($"Fake cache has not been setup to support clear")
         )
         { }
 
@@ -49,7 +62,8 @@ namespace Xive.Mnemonic.Cache
         public FkCache(Action<string, TData> update) : this(
             (name) => throw new InvalidOperationException($"Fake cache has not been setup to support getting content"),
             update,
-            (name) => throw new InvalidOperationException($"Fake cache has not been setup to support removal")
+            (name) => throw new InvalidOperationException($"Fake cache has not been setup to support removal"),
+            () => throw new InvalidOperationException($"Fake cache has not been setup to support clear")
         )
         { }
 
@@ -59,18 +73,25 @@ namespace Xive.Mnemonic.Cache
         public FkCache(Func<string, TData> acquire) : this(
             acquire,
             (name, data) => throw new InvalidOperationException($"Fake cache has not been setup to support updates"),
-            (name) => throw new InvalidOperationException($"Fake cache has not been setup to support removal")
+            (name) => throw new InvalidOperationException($"Fake cache has not been setup to support removal"),
+            () => throw new InvalidOperationException($"Fake cache has not been setup to support clear")
         )
         { }
 
         /// <summary>
         /// A fake cache.
         /// </summary>
-        public FkCache(Func<string, TData> acquire, Action<string, TData> update, Action<string> remove)
+        public FkCache(Func<string, TData> acquire, Action<string, TData> update, Action<string> remove, Action clear)
         {
             this.acquire = acquire;
             this.update = update;
             this.remove = remove;
+            this.clear = clear;
+        }
+
+        public void Clear()
+        {
+            this.clear();
         }
 
         public TData Content(string name, Func<TData> ifAbsent)

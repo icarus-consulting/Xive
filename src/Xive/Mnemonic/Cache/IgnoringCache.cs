@@ -35,7 +35,6 @@ namespace Xive.Mnemonic.Cache
     public sealed class IgnoringCache<TData> : ICache<TData>
     {
         private readonly ScalarOf<string[]> patterns;
-        private readonly BiFuncOf<string, TData, bool> skip;
         private readonly ICache<TData> origin;
 
         /// <summary>
@@ -56,6 +55,11 @@ namespace Xive.Mnemonic.Cache
                 });
 
             this.origin = origin;
+        }
+
+        public void Clear()
+        {
+            this.origin.Clear();
         }
 
         public TData Content(string name, Func<TData> ifAbsent)
@@ -92,7 +96,7 @@ namespace Xive.Mnemonic.Cache
         {
             var result = false;
             var patterns = this.patterns.Value();
-            for (var i = 0; i < this.patterns.Value().Length; i++)
+            for (var i = 0; i < patterns.Length; i++)
             {
                 if (Regex.IsMatch(name, patterns[i]))
                 {

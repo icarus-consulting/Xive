@@ -22,67 +22,56 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Xml.Linq;
-using Yaapii.Atoms.Enumerable;
 
 namespace Xive.Mnemonic.Cache
 {
     /// <summary>
-    /// A cache for xml.
+    /// Cached props
     /// </summary>
-    public sealed class XmlCache : ICache<XNode>
+    public sealed class PropsCache : ICache<ConcurrentDictionary<string, string[]>>
     {
-        ConcurrentDictionary<string, XNode> memory;
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>> propsMem;
 
         /// <summary>
-        /// A cache for xml.
+        /// Cached props
         /// </summary>
-        public XmlCache(params KeyValuePair<string, XNode>[] contents) : this(new ManyOf<KeyValuePair<string, XNode>>(contents))
-        { }
-
-        /// <summary>
-        /// A cache for xml.
-        /// </summary>
-        public XmlCache(IEnumerable<KeyValuePair<string, XNode>> contents)
+        public PropsCache()
         {
-            this.memory = new ConcurrentDictionary<string, XNode>(contents);
+            this.propsMem = new ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>>();
         }
 
         public void Clear()
         {
-            lock (this.memory)
+            lock (this.propsMem)
             {
-                this.memory.Clear();
+                this.propsMem.Clear();
             }
         }
 
-        public XNode Content(string name, Func<XNode> ifAbsent)
+        public ConcurrentDictionary<string, string[]> Content(string name, Func<ConcurrentDictionary<string, string[]>> ifAbsent)
         {
-            lock (this.memory)
+            lock (this.propsMem)
             {
-                return
-                    this.memory
-                        .GetOrAdd(name, (n) => ifAbsent());
+                return this.propsMem.GetOrAdd(
+                       name,
+                       (key) => ifAbsent()
+                   );
             }
         }
 
         public void Remove(string name)
         {
-            XNode unused;
-            this.memory.TryRemove(name, out unused);
+            lock (this.propsMem)
+            {
+                this.propsMem.TryRemove(name, out ConcurrentDictionary<string, string[]> props);
+            }
         }
 
-        public void Update(string name, Func<XNode> ifAbsent, Func<XNode> ifExisting)
+        public void Update(string name, Func<ConcurrentDictionary<string, string[]>> ifAbsent, Func<ConcurrentDictionary<string, string[]>> ifExists)
         {
-            lock (this.memory)
+            lock (this.propsMem)
             {
-                this.memory
-                    .AddOrUpdate(
-                       name,
-                       (n) => ifAbsent(),
-                       (n, existing) => ifExisting()
-                    );
+                this.propsMem.AddOrUpdate(name, (key) => ifAbsent(), (key, old) => ifExists());
             }
         }
     }
