@@ -62,6 +62,14 @@ namespace Xive.Mnemonic.Cache
             this.maxSize = maxSize;
         }
 
+        public void Clear()
+        {
+            lock (this.memory)
+            {
+                this.memory.Clear();
+            }
+        }
+
         public byte[] Content(string name, Func<byte[]> ifAbsent)
         {
             byte[] result;

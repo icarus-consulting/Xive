@@ -49,6 +49,14 @@ namespace Xive.Mnemonic.Cache
             this.memory = new ConcurrentDictionary<string, XNode>(contents);
         }
 
+        public void Clear()
+        {
+            lock (this.memory)
+            {
+                this.memory.Clear();
+            }
+        }
+
         public XNode Content(string name, Func<XNode> ifAbsent)
         {
             lock (this.memory)
