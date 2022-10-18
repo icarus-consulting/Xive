@@ -25,6 +25,8 @@ using Xive.Hive;
 using Xive.Mnemonic;
 using Yaapii.Atoms.Scalar;
 
+namespace Xive.Hive;
+
 /// <summary>
 /// A hive which stores contents in RAM.
 /// </summary>

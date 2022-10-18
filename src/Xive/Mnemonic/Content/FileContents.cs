@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Xive.Mnemonic.Sync;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
@@ -78,7 +80,7 @@ namespace Xive.Mnemonic.Content
             var directory = new Normalized(System.IO.Path.Combine(this.root, filter)).AsString();
 
             IList<string> result = new ListOf<string>();
-            if(Directory.Exists(directory))
+            if (Directory.Exists(directory))
             {
                 result =
                     new Mapped<string, string>(
@@ -164,9 +166,15 @@ namespace Xive.Mnemonic.Content
                 {
                     this.sync.Flush(name, () =>
                     {
-                        if (File.Exists(path))
+                        var fileInfo = new FileInfo(path);
+                        if (fileInfo.Exists)
                         {
-                            File.Delete(path);
+                            fileInfo.Delete();
+                            // if there are no more files or subdirectory in the directory... delete if
+                            if (fileInfo.Directory.GetFiles().Count() == 0 && fileInfo.Directory.GetDirectories().Count() == 0)
+                            {
+                                fileInfo.Directory.Delete();
+                            }
                         }
                     });
                 }

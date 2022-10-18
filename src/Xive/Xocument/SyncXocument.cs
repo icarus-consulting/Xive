@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using Xive.Mnemonic;
 using Yaapii.Xambly;
 using Yaapii.Xml;
 

@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Xive
+namespace Xive.Mnemonic.Sync
 {
     /// <summary>
     /// A sync pipe which is realized using exclusive functions.

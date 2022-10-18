@@ -24,6 +24,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Test.Yaapii.Xive;
+using Xive.Mnemonic.Sync;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;

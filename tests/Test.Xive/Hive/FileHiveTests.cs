@@ -483,5 +483,26 @@ namespace Xive.Hive.Test
                 );
             }
         }
+
+        [Fact]
+        public void DeletesFolder()
+        {
+            using (var dir = new TempDirectory())
+            {
+                IHive hive = new FileHive(dir.Value().FullName, "product");
+
+                hive.Comb("an id").Cell("aFile.txt").Update(new InputOf("test"));
+                hive.Catalog().Remove("an id");
+                Assert.False(
+                    Directory.Exists(
+                        Path.Combine(
+                            dir.Value().FullName,
+                            "product",
+                            "an id"
+                        )
+                    )
+                );
+            }
+        }
     }
 }

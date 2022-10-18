@@ -34,7 +34,6 @@ namespace Xive.Cell.Test
     public sealed class FileCellTests
     {
         [Theory]
-        [InlineData("UTF-7")]
         [InlineData("UTF-8")]
         [InlineData("UTF-16")]
         [InlineData("UTF-32")]

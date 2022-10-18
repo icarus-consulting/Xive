@@ -25,6 +25,10 @@ using Xive.Hive;
 using Xive.Mnemonic;
 using Yaapii.Atoms.Scalar;
 
+namespace Xive.Hive;
+/// <summary>
+/// A hive whose contents are stored in files.
+/// </summary>
 public sealed class FileHive : HiveEnvelope
 {
     /// <summary>
