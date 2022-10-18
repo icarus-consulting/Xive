@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Xive.Mnemonic.Sync;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
@@ -78,7 +79,7 @@ namespace Xive.Mnemonic.Content
             var directory = new Normalized(System.IO.Path.Combine(this.root, filter)).AsString();
 
             IList<string> result = new ListOf<string>();
-            if(Directory.Exists(directory))
+            if (Directory.Exists(directory))
             {
                 result =
                     new Mapped<string, string>(

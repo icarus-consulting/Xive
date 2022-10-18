@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <DocumentationFile>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\Xive.xml</DocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

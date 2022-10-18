@@ -21,6 +21,8 @@
 //SOFTWARE.
 
 using Xive.Cell;
+using Xive.Mnemonic;
+using Xive.Mnemonic.Sync;
 using Xive.Xocument;
 
 namespace Xive.Comb

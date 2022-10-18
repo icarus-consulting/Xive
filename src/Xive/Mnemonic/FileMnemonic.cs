@@ -21,6 +21,7 @@
 //SOFTWARE.
 
 using Xive.Mnemonic.Content;
+using Xive.Mnemonic.Sync;
 using Xive.Props;
 
 namespace Xive.Mnemonic

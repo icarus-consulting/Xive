@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xive
+namespace Xive.Mnemonic
 {
     public interface ISyncPipe
     {

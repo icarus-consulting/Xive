@@ -22,6 +22,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Xive.Mnemonic.Sync;
 using Xunit;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Text;
