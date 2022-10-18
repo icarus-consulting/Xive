@@ -1,3 +1,5 @@
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AppVeyor;
@@ -127,10 +129,9 @@ class Build : NukeBuild
         .OnlyWhenDynamic(() => IsServerBuild && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         .Executes(() =>
         {
-            Codecov(s => s
-              .SetFiles(CoverageFile)
-              .SetToken(CODECOV_TOKEN)
-            );
+            var codecov = ToolPathResolver.GetPackageExecutable("CodecovUploader", "codecov.exe");
+            var proc = ProcessTasks.StartProcess(codecov, $"-f {CoverageFile} -t {CODECOV_TOKEN}");
+            proc.WaitForExit();
         });
 
 
