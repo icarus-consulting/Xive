@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -165,9 +166,15 @@ namespace Xive.Mnemonic.Content
                 {
                     this.sync.Flush(name, () =>
                     {
-                        if (File.Exists(path))
+                        var fileInfo = new FileInfo(path);
+                        if (fileInfo.Exists)
                         {
-                            File.Delete(path);
+                            fileInfo.Delete();
+                            // if there are no more files or subdirectory in the directory... delete if
+                            if (fileInfo.Directory.GetFiles().Count() == 0 && fileInfo.Directory.GetDirectories().Count() == 0)
+                            {
+                                fileInfo.Directory.Delete();
+                            }
                         }
                     });
                 }
