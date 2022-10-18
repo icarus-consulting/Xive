@@ -20,6 +20,5 @@ build_script:
   - sh: nuget sources Add -Name "MyNuget" -Source https://api.nuget.org/v3/index.json
   - sh: chmod +x build.sh
   - sh: ./build.sh
-  - ps: [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
-  - ps: .\build.ps1
+  - ps: (& cmd /c); [console]::OutputEncoding = New-Object System.Text.UTF8Encoding; & .\build.ps1
 test: off 
