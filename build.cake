@@ -386,7 +386,6 @@ Task("Default")
 .IsDependentOn("GenerateCoverage")
 .IsDependentOn("UploadCoverage")
 .IsDependentOn("NuGet")
-.IsDependentOn("GitHubRelease")
 .IsDependentOn("NuGetFeed");
 
 RunTarget(target);
