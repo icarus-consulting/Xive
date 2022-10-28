@@ -20,9 +20,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Yaapii.Atoms" Version="2.6.0" />
-    <PackageReference Include="Yaapii.Xambly" Version="1.2.0" />
-    <PackageReference Include="Yaapii.Xml" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
