@@ -18,8 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Yaapii.Atoms" Version="3.0.0" />
-    <PackageReference Include="Yaapii.Xambly" Version="2.0.0" />
-    <PackageReference Include="Yaapii.Xml" Version="2.0.0" />
+    <PackageReference Include="Yaapii.Xml" Version="2.0.2" />
   </ItemGroup>
 
 </Project>
