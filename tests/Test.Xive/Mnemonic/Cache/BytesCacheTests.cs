@@ -89,5 +89,26 @@ namespace Xive.Test.Mnemonic.Cache
 
             Assert.Equal(64, reads);
         }
+
+
+        [Fact]
+        public void RemovesOldValueOnExceedingMax()
+        {
+            var cache = new BytesCache(maxSize: 110);
+
+            cache.Update("test",
+                () => new byte[80],
+                () => new byte[80]
+            );
+            cache.Update("test",
+                () => new byte[220],
+                () => new byte[220]
+            );
+
+            Assert.Equal(
+                10,
+                cache.Content("test", ()=>new byte[10]).Length
+            );
+        }
     }
 }

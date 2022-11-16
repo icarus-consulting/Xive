@@ -111,6 +111,10 @@ namespace Xive.Mnemonic.Cache
                     {
                         this.memory[name] = data;
                     }
+                    else
+                    {
+                        Remove(name);
+                    }
                 }
             }
         }
