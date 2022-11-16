@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net6</TargetFramework>
     <RootNamespace>Xive.Test</RootNamespace>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\sgKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +20,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Yaapii.Atoms" Version="2.6.0" />
-    <PackageReference Include="Yaapii.Xambly" Version="1.2.0" />
-    <PackageReference Include="Yaapii.Xml" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

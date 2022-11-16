@@ -24,6 +24,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
+using Xive.Mnemonic.Cache;
 using Xive.Mnemonic.Content;
 using Xive.Props;
 using Yaapii.Atoms;
@@ -38,34 +40,42 @@ namespace Xive.Mnemonic
     public sealed class CachedMnemonic : IMnemonic
     {
         private readonly IScalar<IContents> contents;
-        private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>> props;
+        private readonly ICache<ConcurrentDictionary<string, string[]>> props;
         private readonly IMnemonic origin;
 
         /// <summary>
         /// A cached mnemonic which caches bytes and parsed XML.
         /// </summary>
-        public CachedMnemonic(IMnemonic origin, long maxSize) : this(origin, new ManyOf<string>(), maxSize)
+        public CachedMnemonic(IMnemonic origin, long maxSize) : this(origin, new ManyOf<string>(), maxSize, new PropsCache())
         { }
 
         /// <summary>
         /// A cached mnemonic which caches bytes and parsed XML.
         /// </summary>
-        public CachedMnemonic(IMnemonic origin, params string[] ignored) : this(origin, new ManyOf<string>(ignored), Int64.MaxValue)
+        public CachedMnemonic(IMnemonic origin, params string[] ignored) : this(origin, new ManyOf<string>(ignored), Int64.MaxValue, new PropsCache())
         { }
 
         /// <summary>
         /// A cached mnemonic which caches bytes and parsed XML.
         /// </summary>
-        public CachedMnemonic(IMnemonic origin) : this(origin, new ManyOf<string>(), Int64.MaxValue)
+        public CachedMnemonic(IMnemonic origin) : this(origin, new ManyOf<string>(), Int64.MaxValue, new PropsCache())
+        { }
+
+        public CachedMnemonic(IMnemonic origin, IEnumerable<string> ignored, long maxSize, ICache<ConcurrentDictionary<string, string[]>> propsCache) : this(
+            origin, new ScalarOf<IContents>(() => new CachedContents(origin.Contents(), ignored, maxSize)), propsCache)
+        { }
+
+        public CachedMnemonic(IMnemonic origin, ICache<byte[]> byteCache, ICache<XNode> xmlCache, ICache<ConcurrentDictionary<string, string[]>> propsCache) : this(
+            origin, new ScalarOf<IContents>(() => new CachedContents(origin.Contents(), byteCache, xmlCache)), propsCache)
         { }
 
         /// <summary>
         /// A cached mnemonic which caches bytes and parsed XML.
         /// </summary>
-        public CachedMnemonic(IMnemonic origin, IEnumerable<string> ignored, long maxSize)
+        private CachedMnemonic(IMnemonic origin, IScalar<IContents> contents, ICache<ConcurrentDictionary<string, string[]>> propsCache)
         {
-            this.props = new ConcurrentDictionary<string, ConcurrentDictionary<string, string[]>>();
-            this.contents = new ScalarOf<IContents>(() => new CachedContents(origin.Contents(), ignored, maxSize));
+            this.props = propsCache;
+            this.contents = contents;
             this.origin = origin;
         }
 
@@ -83,7 +93,7 @@ namespace Xive.Mnemonic
                 return
                     new CachedProps(
                         originProps,
-                        this.props.GetOrAdd(key, k =>
+                        this.props.Content(key, () =>
                         {
                             var result = new ConcurrentDictionary<string, string[]>();
                             foreach (var name in originProps.Names())

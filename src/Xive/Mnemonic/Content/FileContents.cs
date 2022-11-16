@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Xive.Mnemonic.Sync;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.List;
@@ -52,14 +54,22 @@ namespace Xive.Mnemonic.Content
             var result = new byte[0];
             this.sync.Flush(name, () =>
             {
-                if (!File.Exists(Path(name)))
+                var path = Path(name);
+                if (!File.Exists(path))
                 {
                     result = ifAbsent();
                     UpdateBytes(name, result);
                 }
                 else
                 {
-                    result = File.ReadAllBytes(Path(name));
+                    try
+                    {
+                        result = File.ReadAllBytes(path);
+                    }
+                    catch (IOException ex)
+                    {
+                        throw ExceptionWithFileName(ex, path);
+                    }
                 }
             });
             return result;
@@ -70,7 +80,7 @@ namespace Xive.Mnemonic.Content
             var directory = new Normalized(System.IO.Path.Combine(this.root, filter)).AsString();
 
             IList<string> result = new ListOf<string>();
-            if(Directory.Exists(directory))
+            if (Directory.Exists(directory))
             {
                 result =
                     new Mapped<string, string>(
@@ -124,7 +134,7 @@ namespace Xive.Mnemonic.Content
             }
             else
             {
-                result = Parsed(name, Bytes(name, () => throw new ApplicationException($"Internal error, assumend to never access ifAbsent() method here.")));
+                result = Parsed(name, Bytes(name, () => throw new ApplicationException($"Internal error, assumed to never access ifAbsent() method here.")));
             }
             return result;
         }
@@ -132,33 +142,46 @@ namespace Xive.Mnemonic.Content
         private void Save(string name, byte[] content)
         {
             var path = Path(name);
-            var dir = System.IO.Path.GetDirectoryName(path);
-            if (!Directory.Exists(dir))
+            try
             {
-                Directory.CreateDirectory(dir);
-            }
+                var dir = System.IO.Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
 
-            if (content.Length > 0)
-            {
-                this.sync.Flush(name, () =>
+                if (content.Length > 0)
                 {
-                    using (FileStream f = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                    this.sync.Flush(name, () =>
                     {
-                        f.Seek(0, SeekOrigin.Begin);
-                        f.SetLength(content.Length);
-                        f.Write(content, 0, content.Length);
-                    }
-                });
+                        using (FileStream f = File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                        {
+                            f.Seek(0, SeekOrigin.Begin);
+                            f.SetLength(content.Length);
+                            f.Write(content, 0, content.Length);
+                        }
+                    });
+                }
+                else
+                {
+                    this.sync.Flush(name, () =>
+                    {
+                        var fileInfo = new FileInfo(path);
+                        if (fileInfo.Exists)
+                        {
+                            fileInfo.Delete();
+                            // if there are no more files or subdirectory in the directory... delete if
+                            if (fileInfo.Directory.GetFiles().Count() == 0 && fileInfo.Directory.GetDirectories().Count() == 0)
+                            {
+                                fileInfo.Directory.Delete();
+                            }
+                        }
+                    });
+                }
             }
-            else
+            catch (IOException ex)
             {
-                this.sync.Flush(name, () =>
-                {
-                    if (File.Exists(path))
-                    {
-                        File.Delete(path);
-                    }
-                });
+                throw ExceptionWithFileName(ex, path);
             }
         }
 
@@ -203,7 +226,16 @@ namespace Xive.Mnemonic.Content
 
         private string Path(string name)
         {
-            return new Normalized(System.IO.Path.Combine(root, name)).AsString();
+            return new Normalized(System.IO.Path.Combine(this.root, name)).AsString();
+        }
+
+        private InvalidOperationException ExceptionWithFileName(Exception inner, string fileName)
+        {
+            return
+                new InvalidOperationException(
+                    $"Failed to access file '{fileName}'. {inner.Message}",
+                    inner
+                );
         }
     }
 }

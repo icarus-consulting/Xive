@@ -3,17 +3,15 @@
 #------------------------------------------------------------#
 version: "{build}"
 image:
-  - Visual Studio 2017
+  - Visual Studio 2022
   - Ubuntu
 configuration: Release
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
-  GITHUB_TOKEN:
-    secure: o19fsTCbpIvyHbJfTaImgMr3OI6RHg2J+UdelQ1BIsc4o01+rCLuMc0lO+bhWL53
   CODECOV_TOKEN:
     secure: 2/6E5a1yzv5Wp1yRpHGDybeKyjdyJlO2xiRxuT4TBGBJcbSfjOrMRsFpMd/X334f
   NUGET_TOKEN:
-    secure: ZDvc2hL3H+4ubTi1cibTM+XeOJVXEzhuMCnDxOL8Hs2e9unfRUHrCwYC52IVjXjh
+    secure: DHxuIMmzi8M7i/bk8xm4Wc1U8kc0p+zqzKirKfKJjVNHHbivfFcUilM6PjCHgcTj
   APPVEYOR_TOKEN:
     secure: wVt1RgJAnhNTyIjtK9yFkQbEEM+fBk1TLUzo0j3pe2U=
 # Do not build feature branch with open Pull Requests
@@ -22,5 +20,5 @@ build_script:
   - sh: nuget sources Add -Name "MyNuget" -Source https://api.nuget.org/v3/index.json
   - sh: chmod +x build.sh
   - sh: ./build.sh
-  - ps: .\build.ps1
+  - ps: (& cmd /c); [console]::OutputEncoding = New-Object System.Text.UTF8Encoding; & .\build.ps1
 test: off 

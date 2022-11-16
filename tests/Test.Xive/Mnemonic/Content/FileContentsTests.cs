@@ -1,10 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Xml.Linq;
+using Xive.Mnemonic.Sync;
 using Xunit;
 using Yaapii.Atoms.Bytes;
 using Yaapii.Atoms.IO;
 using Yaapii.Atoms.Scalar;
 using Yaapii.Atoms.Text;
+using Yaapii.Xml;
 
 namespace Xive.Mnemonic.Content.Test
 {
@@ -169,6 +172,90 @@ namespace Xive.Mnemonic.Content.Test
                 Assert.Equal(
                     "BIG/subdir/file",
                     new FirstOf<string>(mem.Knowledge()).Value()
+                );
+            }
+        }
+
+        [Fact]
+        public void ReadBytesLongPathExceptionIncludesFileName()
+        {
+            var fileName = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.txt";
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var mem = new FileContents(root, new LocalSyncPipe());
+
+                Assert.StartsWith(
+                    $"Failed to access file '{new Normalized(Path.Combine(root, fileName)).AsString()}'.",
+                    Assert.Throws<InvalidOperationException>(() =>
+                        mem.Bytes(
+                            fileName,
+                            () => new byte[] { }
+                        )
+                    ).Message
+                );
+            }
+        }
+
+        [Fact]
+        public void WriteBytesLongPathExceptionIncludesFileName()
+        {
+            var fileName = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.txt";
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var mem = new FileContents(root, new LocalSyncPipe());
+
+                Assert.StartsWith(
+                    $"Failed to access file '{new Normalized(Path.Combine(root, fileName)).AsString()}'.",
+                    Assert.Throws<InvalidOperationException>(() =>
+                        mem.UpdateBytes(
+                            fileName,
+                            new BytesOf("test").AsBytes()
+                        )
+                    ).Message
+                );
+            }
+        }
+
+        [Fact]
+        public void ReadXmlLongPathExceptionIncludesFileName()
+        {
+            var fileName = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.txt";
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var mem = new FileContents(root, new LocalSyncPipe());
+
+                Assert.StartsWith(
+                    $"Failed to access file '{new Normalized(Path.Combine(root, fileName)).AsString()}'.",
+                    Assert.Throws<InvalidOperationException>(() =>
+                        mem.Xml(
+                            fileName,
+                            () => new XMLCursor("<test/>").AsNode()
+                        )
+                    ).Message
+                );
+            }
+        }
+
+        [Fact]
+        public void WriteXmlLongPathExceptionIncludesFileName()
+        {
+            var fileName = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz/abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz.txt";
+            using (var dir = new TempDirectory())
+            {
+                var root = dir.Value().FullName;
+                var mem = new FileContents(root, new LocalSyncPipe());
+
+                Assert.StartsWith(
+                    $"Failed to access file '{new Normalized(Path.Combine(root, fileName)).AsString()}'.",
+                    Assert.Throws<InvalidOperationException>(() =>
+                        mem.UpdateXml(
+                            fileName,
+                            new XMLCursor("<test/>").AsNode()
+                        )
+                    ).Message
                 );
             }
         }

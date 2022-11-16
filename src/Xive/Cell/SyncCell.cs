@@ -20,6 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+using Xive.Mnemonic;
 using Yaapii.Atoms;
 
 namespace Xive.Cell

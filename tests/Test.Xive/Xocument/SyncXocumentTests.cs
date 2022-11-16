@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xive.Mnemonic;
+using Xive.Mnemonic.Sync;
 using Xive.Test;
 using Xunit;
 using Yaapii.Xambly;

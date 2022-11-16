@@ -21,19 +21,20 @@
 //SOFTWARE.
 
 using Xive.Mnemonic.Content;
+using Xive.Mnemonic.Sync;
 using Xive.Props;
 
 namespace Xive.Mnemonic
 {
     /// <summary>
-    /// Memories in Ram.
+    /// Memories in file.
     /// </summary>
     public sealed class FileMnemonic : IMnemonic
     {
         private readonly IContents contentsMem;
 
         /// <summary>
-        /// Memories in Ram.
+        /// Memories in file.
         /// </summary>
         public FileMnemonic(string root)
         {
