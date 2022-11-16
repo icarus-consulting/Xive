@@ -483,5 +483,5 @@ namespace Xive.Hive.Test
                 );
             }
         }
-    }
+            }
 }
