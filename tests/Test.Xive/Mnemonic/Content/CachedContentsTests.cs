@@ -327,5 +327,24 @@ namespace Xive.Mnemonic.Content.Test
                 mem.Knowledge()
             );
         }
+
+        [Fact]
+        public void WorksWithExceedingBytes()
+        {
+            var mem =
+                new CachedContents(
+                    new RamContents(),
+                    new ManyOf<string>(),
+                    maxSize: 110
+                );
+
+            mem.UpdateBytes("x", new byte[80]);
+            mem.UpdateBytes("x", new byte[220]);
+
+            Assert.Equal(
+                220,
+                mem.Bytes("x", ()=>new byte[0]).Length
+            );
+        }
     }
 }
