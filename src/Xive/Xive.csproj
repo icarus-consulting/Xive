@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>6.0.3</Version>
+    <Version>6.0.4</Version>
     <DocumentationFile>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\Xive.xml</DocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <LangVersion>10</LangVersion>
-    <SignAssembly>True</SignAssembly> 
+    <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\sgKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
