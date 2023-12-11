@@ -34,7 +34,7 @@ using Yaapii.Atoms.Text;
 namespace Xive.Props
 {
     /// <summary>
-    /// Props which are read into memory from internal xml document _catalog.xml in the given comb.
+    /// Props which are read into memory from internal document props.cat in the given comb.
     /// Props are read from memory.
     /// Props are updated into the comb.
     /// </summary>
@@ -46,7 +46,7 @@ namespace Xive.Props
         private readonly string scope;
 
         /// <summary>
-        /// Props which are read into memory from internal xml document props.cat in the given comb.
+        /// Props which are read into memory from internal document props.cat in the given comb.
         /// Props are read from memory.
         /// Props are updated into the comb.
         /// </summary>
@@ -70,12 +70,12 @@ namespace Xive.Props
                     ).AsString();
 
                 var cachedProps = new RamProps();
-                Parallel.ForEach(stringProps.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries), (stringProp) =>
+                foreach (var line in stringProps.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var parts = stringProp.Split(':');
+                    var parts = line.Split(':');
                     if (parts.Length != 2)
                     {
-                        throw new ApplicationException($"A property of {scope}/{id} has an invalid format: {stringProp}");
+                        throw new ApplicationException($"A property of {scope}/{id} has an invalid format: {line}");
                     }
                     var name = XmlConvert.DecodeName(parts[0].Trim());
                     var values = parts[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -84,7 +84,7 @@ namespace Xive.Props
                         values[i] = XmlConvert.DecodeName(values[i]);
                     }
                     cachedProps.Refined(name, values);
-                });
+                }
                 return cachedProps;
             });
         }
