@@ -84,6 +84,16 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
+        public void RejectsEmptyScope()
+        {
+            var mem = new RamMnemonic();
+            var hive = new MemorizedHive("", mem);
+            Assert.Throws<ArgumentException>(()=>
+                hive.Catalog()
+            );
+        }
+
+        [Fact]
         public void DistinguishesScope()
         {
             var mem = new RamMnemonic();
