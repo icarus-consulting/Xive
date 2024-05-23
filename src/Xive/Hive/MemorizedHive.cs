@@ -24,6 +24,9 @@ using System;
 using System.Collections.Concurrent;
 using Xive.Comb;
 using Xive.Mnemonic;
+using Yaapii.Atoms;
+using Yaapii.Atoms.Error;
+using Yaapii.Atoms.Text;
 
 namespace Xive.Hive
 {
@@ -32,7 +35,7 @@ namespace Xive.Hive
     /// </summary>
     public sealed class MemorizedHive : IHive
     {
-        private readonly string scope;
+        private readonly IText scope;
         private readonly ConcurrentDictionary<string, IIndex> indices;
         private readonly IMnemonic mem;
 
@@ -47,14 +50,22 @@ namespace Xive.Hive
         /// </summary>
         public MemorizedHive(string scope, IMnemonic memories, ConcurrentDictionary<string, IIndex> indices)
         {
-            this.scope = scope;
+            this.scope = 
+                new TextOf(()=>
+                {
+                    new FailWhen(
+                        string.IsNullOrEmpty(scope),
+                        new ArgumentException($"Unable to shift memory, because empty scopes are not allowed.")
+                    ).Go();
+                    return scope;
+                });
             this.mem = memories;
             this.indices = indices;
         }
 
         public IIndex Catalog()
         {
-            return this.indices.GetOrAdd(scope, new TextIndex(scope, this.mem));
+            return this.indices.GetOrAdd(scope.AsString(), new TextIndex(scope.AsString(), this.mem));
         }
 
         public IHoneyComb Comb(string id, bool createIfAbsent = true)
@@ -70,17 +81,17 @@ namespace Xive.Hive
                     throw new ArgumentException($"Cannot access a non existing comb with id '{id}'");
                 }
             }
-            return new MemorizedComb(new Normalized($"{this.scope}/{id}").AsString(), this.mem);
+            return new MemorizedComb(new Normalized($"{this.scope.AsString()}/{id}").AsString(), this.mem);
         }
 
         public IHoneyComb HQ()
         {
-            return new MemorizedComb(new Normalized($"{this.scope}/hq").AsString(), this.mem);
+            return new MemorizedComb(new Normalized($"{this.scope.AsString()}/hq").AsString(), this.mem);
         }
 
         public string Scope()
         {
-            return this.scope;
+            return this.scope.AsString();
         }
 
         public IHive Shifted(string scope)

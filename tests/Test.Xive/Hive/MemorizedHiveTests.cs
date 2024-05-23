@@ -84,6 +84,17 @@ namespace Xive.Hive.Test
         }
 
         [Fact]
+        public void RejectsEmptyScope()
+        {
+            var mem = new RamMnemonic();
+            var hive = new MemorizedHive("", mem);
+            AssertException.MessageMatches<ArgumentException>(
+                "Unable to shift memory, because empty scopes are not allowed.",
+                () => hive.Catalog()
+            );
+        }
+
+        [Fact]
         public void DistinguishesScope()
         {
             var mem = new RamMnemonic();
