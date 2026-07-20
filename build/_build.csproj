@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodecovUploader" Version="0.3.2" />
-    <PackageReference Include="Nuke.Common" Version="6.3.0" />
+    <PackageReference Include="Nuke.Common" Version="8.0.0" />
     <PackageReference Include="OpenCover" Version="4.7.1221" />
   </ItemGroup>
 
