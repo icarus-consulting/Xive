@@ -11,7 +11,7 @@ environment:
   CODECOV_TOKEN:
     secure: 2/6E5a1yzv5Wp1yRpHGDybeKyjdyJlO2xiRxuT4TBGBJcbSfjOrMRsFpMd/X334f
   NUGET_TOKEN:
-    secure: eyoadyfbm9PMBJEXogTwbGeHrPYvUVpdPmZfaR7lRO1snJVT6Fz2nFx6vS9FemLP
+    secure: kyYqe93Ol1bIzYYOaYjtb/rsX9FYsT/cS4WUuAdYa0djPSpT3dXV0rhVM0CDcrZP
   APPVEYOR_TOKEN:
     secure: wVt1RgJAnhNTyIjtK9yFkQbEEM+fBk1TLUzo0j3pe2U=
 # Do not build feature branch with open Pull Requests
