@@ -122,7 +122,8 @@ class Build : NukeBuild
     Target CodeCove => _ => _
         .DependsOn(CreateCoverageReport)
         .OnlyWhenDynamic(() => IsServerBuild
-            && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            && !string.IsNullOrWhiteSpace(CODECOV_TOKEN))
         .Executes(() =>
         {
             Console.WriteLine($"CoverageFile is Empty = {string.IsNullOrEmpty(CoverageFile)}");
