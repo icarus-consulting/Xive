@@ -7,6 +7,7 @@
     <LangVersion>10</LangVersion>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\sgKey.snk</AssemblyOriginatorKeyFile>
+    <UseProjectReferences>False</UseProjectReferences>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="..\..\LICENSE">
@@ -16,7 +17,7 @@
   </ItemGroup>
   <ItemGroup></ItemGroup>
   <Choose>
-    <When Condition="'$(Configuration)'=='Release'">
+    <When Condition="'$(UseProjectReferences)'=='True'">
       <ItemGroup>
         <ProjectReference Include="..\..\..\Yaapii.Xml\src\Yaapii.Xml\Yaapii.Xml.csproj" />
       </ItemGroup>
