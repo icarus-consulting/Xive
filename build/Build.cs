@@ -1,26 +1,19 @@
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using Nuke.Common;
 using Nuke.Common.CI;
 using Nuke.Common.CI.AppVeyor;
-using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools.Codecov;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.OpenCover;
 using Nuke.Common.Utilities.Collections;
 using System;
 using System.Runtime.InteropServices;
 using static Nuke.Common.IO.FileSystemTasks;
-using static Nuke.Common.IO.PathConstruction;
-using static Nuke.Common.Tools.Codecov.CodecovTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.OpenCover.OpenCoverTasks;
 
-[CheckBuildProjectConfigurations]
 [ShutdownDotNetAfterServerBuild]
 class Build : NukeBuild
 {
@@ -35,9 +28,11 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
+    [NuGetPackage("CodecovUploader", "codecov.exe")]
+    readonly Tool CodecovUploader;
+
     [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
-
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
@@ -126,12 +121,15 @@ class Build : NukeBuild
 
     Target CodeCove => _ => _
         .DependsOn(CreateCoverageReport)
-        .OnlyWhenDynamic(() => IsServerBuild && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        .OnlyWhenDynamic(() => IsServerBuild
+            && RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            && !string.IsNullOrWhiteSpace(CODECOV_TOKEN))
         .Executes(() =>
         {
-            var codecov = ToolPathResolver.GetPackageExecutable("CodecovUploader", "codecov.exe");
-            var proc = ProcessTasks.StartProcess(codecov, $"-f {CoverageFile} -t {CODECOV_TOKEN}");
-            proc.WaitForExit();
+            Console.WriteLine($"CoverageFile is Empty = {string.IsNullOrEmpty(CoverageFile)}");
+            Console.WriteLine($"CODECOV_TOKEN is Empty = {string.IsNullOrEmpty(CODECOV_TOKEN)}");
+
+            CodecovUploader($"-f {CoverageFile} -t {CODECOV_TOKEN}");
         });
 
 
@@ -159,7 +157,7 @@ class Build : NukeBuild
             DotNetNuGetPush(s => s
                 .SetSource(NuGetFeed)
                 .SetApiKey(NUGET_TOKEN)
-                .CombineWith(GlobFiles(ArtifactsDirectory, "*.nupkg", "*.snupkg"), (_, v) => _
+                .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg", "*.snupkg"), (_, v) => _
                     .SetTargetPath(v)
                 ),
                 degreeOfParallelism: 2,

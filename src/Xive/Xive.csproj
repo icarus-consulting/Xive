@@ -15,7 +15,6 @@
       <Visible>false</Visible>
     </Content>
   </ItemGroup>
-  <ItemGroup></ItemGroup>
   <Choose>
     <When Condition="'$(UseProjectReferences)'=='True'">
       <ItemGroup>
@@ -24,7 +23,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="Yaapii.Xml" Version="3.0.0" />
+        <PackageReference Include="Yaapii.Xml" Version="3.0.1" />
       </ItemGroup>
     </Otherwise>
   </Choose>
