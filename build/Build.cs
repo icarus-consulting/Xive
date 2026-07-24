@@ -10,6 +10,7 @@ using Nuke.Common.Tools.OpenCover;
 using Nuke.Common.Utilities.Collections;
 using System;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.OpenCover.OpenCoverTasks;
@@ -31,11 +32,14 @@ class Build : NukeBuild
     [NuGetPackage("CodecovUploader", "codecov.exe")]
     readonly Tool CodecovUploader;
 
-    [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
-    AbsolutePath SourceDirectory => RootDirectory / "src";
-    AbsolutePath TestsDirectory => RootDirectory / "tests";
-    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    AbsolutePath RepositoryDirectory => BuildProjectDirectory / "..";
+    AbsolutePath SourceDirectory => RepositoryDirectory / "src";
+    AbsolutePath TestsDirectory => RepositoryDirectory / "tests";
+    AbsolutePath ArtifactsDirectory => RepositoryDirectory / "artifacts";
+    AbsolutePath SolutionFile => RepositoryDirectory / "Xive.sln";
+    AbsolutePath XiveProjectFile => RepositoryDirectory / "src" / "Xive" / "Xive.csproj";
+    AbsolutePath TestProjectFile => RepositoryDirectory / "tests" / "Test.Xive" / "Test.Xive.csproj";
 
     private string NuGetFeed => "https://api.nuget.org/v3/index.json";
     private string NUGET_TOKEN = Environment.GetEnvironmentVariable("NUGET_TOKEN");
@@ -58,14 +62,14 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetRestore(s => s
-                .SetProjectFile(Solution));
+                .SetProjectFile(SolutionFile));
         });
 
     Target DefaultVersion => _ => _
        .Executes(() =>
        {
-           ProjectModelTasks.Initialize();
-           Version = Version.Parse(Solution.GetProject("Xive").GetProperty("Version"));
+           var document = XDocument.Load(XiveProjectFile);
+           Version = Version.Parse(document.Root?.Element("PropertyGroup")?.Element("Version")?.Value ?? throw new InvalidOperationException("Version property missing in Xive.csproj"));
        });
 
 
@@ -84,7 +88,7 @@ class Build : NukeBuild
         {
             Console.WriteLine($"Using Version '{Version}'");
             DotNetBuild(s => s
-                .SetProjectFile(Solution)
+                .SetProjectFile(SolutionFile)
                 .SetConfiguration(Configuration)
                 .SetVersion(Version.ToString())
                 .EnableNoRestore());
@@ -95,7 +99,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetTest(s => s
-                .SetProjectFile(Solution.GetProject("Test.Xive"))
+                .SetProjectFile(TestProjectFile)
                 .SetNoBuild(true)
                 .SetNoRestore(true)
                 .SetConfiguration(Configuration)
@@ -110,7 +114,7 @@ class Build : NukeBuild
                 .SetOutput(CoverageFile)
                 .SetTargetSettings(
                     new DotNetTestSettings()
-                        .SetProjectFile(Solution.GetProject("Test.Xive"))
+                        .SetProjectFile(TestProjectFile)
                         .SetConfiguration("Debug")
                 )
                 .SetFilters("+[Xive]*")
@@ -139,7 +143,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetPack(s => s
-                .SetProject(Solution.GetProject("Xive"))
+                .SetProject(XiveProjectFile)
                 .SetConfiguration(Configuration)
                 .SetNoBuild(true)
                 .SetVersion(Version.ToString())
