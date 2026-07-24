@@ -1,24 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>7.0.0</Version>
     <DocumentationFile>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)\Xive.xml</DocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <LangVersion>10</LangVersion>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\sgKey.snk</AssemblyOriginatorKeyFile>
+    <UseProjectReferences>False</UseProjectReferences>
   </PropertyGroup>
-
   <ItemGroup>
     <Content Include="..\..\LICENSE">
       <PackagePath></PackagePath>
       <Visible>false</Visible>
     </Content>
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Yaapii.Xml" Version="3.0.1" />
-  </ItemGroup>
-
+  <ItemGroup></ItemGroup>
+  <Choose>
+    <When Condition="'$(UseProjectReferences)'=='True'">
+      <ItemGroup>
+        <ProjectReference Include="..\..\..\Yaapii.Xml\src\Yaapii.Xml\Yaapii.Xml.csproj" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="Yaapii.Xml" Version="3.0.1" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 </Project>

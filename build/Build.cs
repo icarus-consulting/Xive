@@ -61,16 +61,9 @@ class Build : NukeBuild
                 .SetProjectFile(Solution));
         });
 
-    Target DefaultVersion => _ => _
-       .Executes(() =>
-       {
-           ProjectModelTasks.Initialize();
-           Version = Version.Parse(Solution.GetProject("Xive").GetProperty("Version"));
-       });
 
 
     Target VersionFromTag => _ => _
-        .DependsOn(DefaultVersion)
         .OnlyWhenDynamic(() => IsServerBuild && AppVeyor.Instance.RepositoryTag)
         .Executes(() =>
         {
@@ -82,11 +75,9 @@ class Build : NukeBuild
         .DependsOn(VersionFromTag)
         .Executes(() =>
         {
-            Console.WriteLine($"Using Version '{Version}'");
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetVersion(Version.ToString())
                 .EnableNoRestore());
         });
 
@@ -136,6 +127,7 @@ class Build : NukeBuild
     Target Pack => _ => _
         .DependsOn(Compile)
         .DependsOn(VersionFromTag)
+        .OnlyWhenDynamic(() => IsServerBuild && AppVeyor.Instance.RepositoryTag && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         .Executes(() =>
         {
             DotNetPack(s => s
