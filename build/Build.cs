@@ -75,11 +75,9 @@ class Build : NukeBuild
         .DependsOn(VersionFromTag)
         .Executes(() =>
         {
-            Console.WriteLine($"Using Version '{Version}'");
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
                 .SetConfiguration(Configuration)
-                .SetVersion(Version.ToString())
                 .EnableNoRestore());
         });
 
