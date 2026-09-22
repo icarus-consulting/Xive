@@ -122,6 +122,7 @@ class Build : NukeBuild
 
     Target FullBuild => _ => _
         .DependsOn(Compile)
+        .DependsOn(Test)
         .DependsOn(CodeCove)
         .Executes(() =>
         {
