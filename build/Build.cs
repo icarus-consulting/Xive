@@ -92,6 +92,7 @@ class Build : NukeBuild
 
 
     Target CreateCoverageReport => _ => _
+        .DependsOn(Test)
         .Executes(() =>
         {
             OpenCover(s => s
