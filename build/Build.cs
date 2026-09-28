@@ -37,9 +37,6 @@ class Build : NukeBuild
     AbsolutePath TestsDirectory => RootDirectory / "tests";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 
-    private string NuGetFeed => "https://api.nuget.org/v3/index.json";
-    private string NUGET_TOKEN = Environment.GetEnvironmentVariable("NUGET_TOKEN");
-
     private AbsolutePath CoverageFile => ArtifactsDirectory / "coverage.xml";
     private string CODECOV_TOKEN = Environment.GetEnvironmentVariable("CODECOV_TOKEN");
 
@@ -50,7 +47,7 @@ class Build : NukeBuild
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-            EnsureCleanDirectory(ArtifactsDirectory);
+            ArtifactsDirectory.CreateOrCleanDirectory();
         });
 
     Target Restore => _ => _
@@ -95,6 +92,7 @@ class Build : NukeBuild
 
 
     Target CreateCoverageReport => _ => _
+        .DependsOn(Test)
         .Executes(() =>
         {
             OpenCover(s => s
@@ -123,44 +121,10 @@ class Build : NukeBuild
             CodecovUploader($"-f {CoverageFile} -t {CODECOV_TOKEN}");
         });
 
-
-    Target Pack => _ => _
-        .DependsOn(Compile)
-        .DependsOn(VersionFromTag)
-        .OnlyWhenDynamic(() => IsServerBuild && AppVeyor.Instance.RepositoryTag && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        .Executes(() =>
-        {
-            DotNetPack(s => s
-                .SetProject(Solution.GetProject("Xive"))
-                .SetConfiguration(Configuration)
-                .SetNoBuild(true)
-                .SetVersion(Version.ToString())
-                .EnableIncludeSymbols()
-                .SetOutputDirectory(ArtifactsDirectory)
-                .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg)
-            );
-        });
-
-    Target PushPackage => _ => _
-        .OnlyWhenDynamic(() => IsServerBuild && AppVeyor.Instance.RepositoryTag && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        .DependsOn(Pack)
-        .Executes(() =>
-        {
-            DotNetNuGetPush(s => s
-                .SetSource(NuGetFeed)
-                .SetApiKey(NUGET_TOKEN)
-                .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg", "*.snupkg"), (_, v) => _
-                    .SetTargetPath(v)
-                ),
-                degreeOfParallelism: 2,
-                completeOnFailure: false
-            );
-        });
-
     Target FullBuild => _ => _
         .DependsOn(Compile)
+        .DependsOn(Test)
         .DependsOn(CodeCove)
-        .DependsOn(PushPackage)
         .Executes(() =>
         {
 
