@@ -23,7 +23,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="Yaapii.Xml" Version="3.0.1" />
+        <PackageReference Include="Yaapii.Xml" Version="21.5.3" />
       </ItemGroup>
     </Otherwise>
   </Choose>
